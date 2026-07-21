@@ -1,360 +1,342 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Секретный TG</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    
-    html, body {
-      width: 100%;
-      height: 100%;
-      position: fixed;
-      overflow: hidden;
-      background: #0e1621;
-      color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chat</title>
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    #login-screen { 
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: #0e1621;
-      z-index: 100;
-    }
-    .login-card {
-      padding: 30px 20px; text-align: center; width: 90%; max-width: 350px; background: #17212b; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    select, button { width: 100%; padding: 14px; margin-top: 12px; border-radius: 10px; border: none; font-size: 16px; outline: none; }
-    select { background: #242f3d; color: #fff; appearance: none; }
-    .btn-primary { background: #5288c1; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-primary:active { background: #4272a3; transform: scale(0.98); }
-    
-    #chat-screen { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-    header { background: #17212b; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #242f3d; flex-shrink: 0; }
-    header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
-    .online-status { font-size: 11px; color: #4fae4e; margin-top: 2px; }
-    
-    #messages { 
-      flex: 1; 
-      overflow-y: auto; 
-      padding: 15px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 8px; 
-      background: #0e1621; 
-      -webkit-overflow-scrolling: touch;
-    }
-    .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; font-size: 15px; line-height: 1.4; animation: slideUp 0.3s ease forwards; position: relative; word-break: break-word; }
-    .msg.my { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 4px; }
-    .msg.other { align-self: flex-start; background: #182533; border-bottom-left-radius: 4px; }
-    .author { font-size: 12px; color: #64b5f6; font-weight: bold; margin-bottom: 4px; }
-    .time { font-size: 10px; color: #7f91a4; float: right; margin: 6px 0 -4px 10px; }
-    
-    .msg img { max-width: 100%; border-radius: 8px; margin-top: 4px; display: block; cursor: pointer; }
-    .msg audio { width: 220px; height: 36px; margin-top: 4px; outline: none; }
-    
-    .msg video {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-top: 4px;
-      display: block;
-      cursor: pointer;
-      border: 2px solid #5288c1;
-    }
-
-    .file-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(0,0,0,0.2);
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-top: 4px;
-      text-decoration: none;
-      color: #fff;
-    }
-    .file-box span { font-size: 24px; }
-
-    #emoji-bar { background: #17212b; padding: 8px 15px; display: flex; gap: 12px; overflow-x: auto; border-top: 1px solid #242f3d; flex-shrink: 0; }
-    .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; transition: 0.1s; flex-shrink: 0; }
-    .emoji-btn:active { transform: scale(1.3); }
-
-    footer { background: #17212b; padding: 10px 15px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .icon-btn { background: none; border: none; font-size: 22px; color: #7f91a4; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
-    #msg-input { flex: 1; background: #242f3d; color: #fff; border: none; padding: 12px 15px; border-radius: 20px; font-size: 16px; outline: none; }
-    
-    .action-btn { background: #5288c1; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
-    .action-btn.recording { background: #e53935; animation: pulse 1s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
-  </style>
+    <style>
+        :root { --bg: #0f172a; --chat-bg: #1e293b; --my-msg: #3b82f6; --other-msg: #334155; --text: #f8fafc; --accent: #10b981; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100dvh; width: 100vw; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; }
+        
+        /* Auth Screen */
+        #auth-screen { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+        .auth-btn { background: var(--my-msg); color: white; border: none; padding: 15px 30px; border-radius: 20px; font-size: 18px; cursor: pointer; width: 200px; font-weight: bold; }
+        
+        /* Chat Layout */
+        #chat-screen { display: none; flex-direction: column; height: 100%; max-width: 800px; margin: 0 auto; background: var(--chat-bg); position: relative; }
+        header { background: #0b1120; padding: 10px 15px; display: flex; flex-direction: column; align-items: center; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .status-bar { font-size: 12px; color: #94a3b8; margin-top: 2px; height: 15px; }
+        
+        /* Messages Area */
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; cursor: pointer; }
+        .msg-wrapper.me { align-self: flex-end; align-items: flex-end; }
+        .msg-wrapper.other { align-self: flex-start; align-items: flex-start; }
+        
+        .msg-sender { font-size: 11px; color: #94a3b8; margin-bottom: 3px; margin-left: 5px; }
+        .msg { padding: 10px 14px; border-radius: 18px; position: relative; word-break: break-word; line-height: 1.4; }
+        .me .msg { background: var(--my-msg); border-bottom-right-radius: 4px; }
+        .other .msg { background: var(--other-msg); border-bottom-left-radius: 4px; }
+        .bot-msg .msg { background: #7c3aed; }
+        
+        /* Media in Messages */
+        .msg img, .msg video { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+        .msg-video-circle { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .msg-audio { width: 220px; height: 40px; outline: none; }
+        
+        /* Reply UI */
+        .reply-box { background: rgba(0,0,0,0.2); border-left: 3px solid var(--accent); padding: 5px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 5px; opacity: 0.9; }
+        #reply-preview { display: none; background: #0f172a; padding: 10px; border-top: 1px solid #334155; font-size: 13px; align-items: center; justify-content: space-between; }
+        #reply-close { background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
+        
+        /* Input Area */
+        #input-area { background: #0b1120; padding: 10px; display: flex; gap: 8px; align-items: center; z-index: 10; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+        #emoji-btn, #attach-btn, .action-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
+        #msg-input { flex: 1; background: #1e293b; border: none; color: white; padding: 12px 15px; border-radius: 20px; font-size: 16px; outline: none; max-height: 100px; resize: none; overflow-y: auto; }
+        .action-btn { background: var(--my-msg); color: white; border-radius: 50%; }
+        .action-btn.recording { animation: pulse 1s infinite alternate; background: #ef4444; }
+        
+        /* Emoji Panel */
+        #emoji-panel { display: none; background: #1e293b; border-top: 1px solid #334155; padding: 10px; flex-wrap: wrap; gap: 10px; max-height: 200px; overflow-y: auto; }
+        .emoji { font-size: 24px; cursor: pointer; user-select: none; }
+        
+        /* System & Uploads */
+        .system-msg { align-self: center; font-size: 12px; color: #94a3b8; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 10px; margin: 5px 0; }
+        #progress-bar { height: 3px; background: var(--accent); width: 0%; transition: width 0.3s; position: absolute; top: 0; left: 0; }
+        
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); box-shadow: 0 0 15px #ef4444; } }
+        
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
 </head>
 <body>
 
-  <div id="login-screen">
-    <div class="login-card">
-      <div style="font-size: 40px; margin-bottom: 10px;">✈️</div>
-      <h2>Вход в чат</h2>
-      <select id="user-select">
-        <option value="Ты">Ты</option>
-        <option value="Друг 1">Друг 1</option>
-        <option value="Друг 2">Друг 2</option>
-        <option value="Друг 3">Друг 3</option>
-      </select>
-      <button class="btn-primary" onclick="enterChat()">Войти</button>
-    </div>
-  </div>
-
-  <div id="chat-screen">
-    <header>
-      <div>
-        <h2>Squad Chat</h2>
-        <div class="online-status" id="online-users">подключение...</div>
-      </div>
-    </header>
-
-    <div id="messages"></div>
-
-    <div id="emoji-bar">
-      <button class="emoji-btn" onclick="addEmoji('👍')">👍</button>
-      <button class="emoji-btn" onclick="addEmoji('❤️')">❤️</button>
-      <button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
-      <button class="emoji-btn" onclick="addEmoji('😂')">😂</button>
-      <button class="emoji-btn" onclick="addEmoji('🥰')">🥰</button>
-      <button class="emoji-btn" onclick="addEmoji('😎')">😎</button>
-      <button class="emoji-btn" onclick="addEmoji('😢')">😢</button>
-      <button class="emoji-btn" onclick="addEmoji('😡')">😡</button>
-      <button class="emoji-btn" onclick="addEmoji('🎉')">🎉</button>
-      <button class="emoji-btn" onclick="addEmoji('🤔')">🤔</button>
-      <button class="emoji-btn" onclick="addEmoji('👍')">👍</button>
-      <button class="emoji-btn" onclick="addEmoji('🗿')">🗿</button>
-      <button class="emoji-btn" onclick="addEmoji('💯')">💯</button>
-      <button class="emoji-btn" onclick="addEmoji('🙏')">🙏</button>
+    <!-- Auth Screen -->
+    <div id="auth-screen">
+        <h2>Кто ты сегодня?</h2>
+        <button class="auth-btn" onclick="login('Я (Владелец)')">Я (Владелец)</button>
+        <button class="auth-btn" onclick="login('Друг 1')">Друг 1</button>
+        <button class="auth-btn" onclick="login('Друг 2')">Друг 2</button>
     </div>
 
-    <footer>
-      <label class="icon-btn" title="Файл или фото">
-        📎
-        <input type="file" style="display: none;" onchange="uploadFile(event)">
-      </label>
-      
-      <input type="text" id="msg-input" placeholder="Сообщение..." oninput="checkInput()" onkeypress="if(event.key==='Enter') sendText()">
-      
-      <button class="action-btn" id="video-btn" title="Кружок" onclick="toggleVideoMode()" style="background: #242f3d; font-size: 16px;">📹</button>
-      
-      <button class="action-btn" id="mic-btn" onmousedown="startAudio()" onmouseup="stopAudio()" ontouchstart="startAudio()" ontouchend="stopAudio()">🎤</button>
-    </footer>
-  </div>
+    <!-- Chat Screen -->
+    <div id="chat-screen">
+        <div id="progress-bar"></div>
+        <header>
+            <div id="header-title">Чат 🚀</div>
+            <div class="status-bar" id="typing-status">В сети: 1</div>
+        </header>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+        <div id="messages"></div>
 
-  <script>
-    const firebaseConfig = { 
-      apiKey: "AIzaSyCJY8vOoQDk9R2w_AEG0iddY2sEFhh9OWw", 
-      authDomain: "telespam-141ed.firebaseapp.com", 
-      projectId: "telespam-141ed", 
-      storageBucket: "telespam-141ed.firebasestorage.app", 
-      messagingSenderId: "207543173024", 
-      appId: "1:207543173024:web:50881a0f2aa674a7652ec5", 
-      measurementId: "G-17J19TZ775" 
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const storage = firebase.storage();
-    let currentUser = "";
-    let isVideoMode = false;
+        <div id="emoji-panel"></div>
 
-    function enterChat() {
-      currentUser = document.getElementById("user-select").value;
-      document.getElementById("login-screen").style.display = "none";
-      document.getElementById("chat-screen").style.display = "flex";
+        <div id="reply-preview">
+            <div><b id="reply-name"></b>: <span id="reply-text"></span></div>
+            <button id="reply-close" onclick="cancelReply()">×</button>
+        </div>
 
-      const myRef = db.ref('presence/' + currentUser);
-      myRef.set(true);
-      myRef.onDisconnect().remove();
+        <div id="input-area">
+            <button id="emoji-btn" onclick="toggleEmoji()">😀</button>
+            <input type="file" id="file-input" hidden onchange="handleFileUpload(event)">
+            <button id="attach-btn" onclick="document.getElementById('file-input').click()">📎</button>
+            <input type="text" id="msg-input" placeholder="Сообщение..." autocomplete="off">
+            <button class="action-btn" id="send-btn" onclick="handleMainAction()">🎤</button>
+        </div>
+    </div>
 
-      db.ref('presence').on('value', snap => {
-        const users = snap.val() ? Object.keys(snap.val()) : [];
-        document.getElementById("online-users").innerText = "В сети: " + users.join(", ");
-      });
-
-      db.ref('messages').limitToLast(50).on('child_added', snap => {
-        addMessageToUI(snap.val());
-      });
-    }
-
-    function addEmoji(emoji) {
-      document.getElementById("msg-input").value += emoji;
-      checkInput();
-    }
-
-    function checkInput() {
-      const val = document.getElementById("msg-input").value.trim();
-      const btn = document.getElementById("mic-btn");
-      if (val.length > 0) {
-        btn.innerHTML = "➤"; 
-        btn.style.background = "#5288c1";
-        btn.onclick = sendText;
-        btn.onmousedown = null; btn.onmouseup = null; btn.ontouchstart = null; btn.ontouchend = null;
-      } else {
-        btn.innerHTML = isVideoMode ? "🔴" : "🎤"; 
-        btn.style.background = isVideoMode ? "#e53935" : "#5288c1";
-        btn.onclick = null;
-        btn.onmousedown = startAudio; btn.onmouseup = stopAudio; btn.ontouchstart = startAudio; btn.ontouchend = stopAudio;
-      }
-    }
-
-    function toggleVideoMode() {
-      isVideoMode = !isVideoMode;
-      const vBtn = document.getElementById("video-btn");
-      const mBtn = document.getElementById("mic-btn");
-      if (isVideoMode) {
-        vBtn.style.background = "#5288c1";
-        mBtn.innerHTML = "🔴";
-        mBtn.style.background = "#e53935";
-        mBtn.onmousedown = startVideoRecord; mBtn.onmouseup = stopVideoRecord; 
-        mBtn.ontouchstart = startVideoRecord; mBtn.ontouchend = stopVideoRecord;
-      } else {
-        vBtn.style.background = "#242f3d";
-        mBtn.innerHTML = "🎤";
-        mBtn.style.background = "#5288c1";
-        mBtn.onmousedown = startAudio; mBtn.onmouseup = stopAudio; 
-        mBtn.ontouchstart = startAudio; mBtn.ontouchend = stopAudio;
-      }
-    }
-
-    function sendText() {
-      const input = document.getElementById("msg-input");
-      if (!input.value.trim()) return;
-      db.ref('messages').push({ user: currentUser, type: "text", content: input.value.trim(), time: getTime() });
-      input.value = ""; 
-      checkInput();
-    }
-
-    async function uploadFile(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const isImg = file.type.startsWith('image/');
-      const ref = storage.ref((isImg ? 'images/' : 'files/') + Date.now() + "_" + file.name);
-      const tempId = Date.now();
-      
-      addMessageToUI({ user: currentUser, type: "text", content: "⏳ Загрузка файла...", time: getTime(), id: tempId });
-      try {
-        const snap = await ref.put(file);
-        const url = await snap.ref.getDownloadURL();
-        document.getElementById('msg-'+tempId)?.remove();
+    <script>
+        // Конфиг Firebase
+        const firebaseConfig = { 
+          apiKey: "AIzaSyCJY8vOoQDkR2rW_AEG0iddY2sEFhh9OWw", 
+          authDomain: "telespam-141ed.firebaseapp.com", 
+          databaseURL: "https://telespam-141ed-default-rtdb.firebaseio.com",
+          projectId: "telespam-141ed", 
+          storageBucket: "telespam-141ed.firebasestorage.app", 
+          messagingSenderId: "207543173024", 
+          appId: "1:207543173024:web:50881a0f2aa674a7652ec5", 
+          measurementId: "G-17J19TZ775" 
+        };
         
-        db.ref('messages').push({ 
-          user: currentUser, 
-          type: isImg ? "image" : "file", 
-          content: url, 
-          name: file.name,
-          time: getTime() 
-        });
-      } catch(err) { alert("Ошибка загрузки"); }
-    }
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const storage = firebase.storage();
 
-    let recorder, chunks = [];
-    async function startAudio() {
-      if (isVideoMode) return;
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        recorder = new MediaRecorder(stream);
-        chunks = [];
-        recorder.start();
-        document.getElementById("mic-btn").classList.add("recording");
-        recorder.ondataavailable = e => chunks.push(e.data);
-        recorder.onstop = async () => {
-          const blob = new Blob(chunks, { type: 'audio/webm' });
-          const ref = storage.ref('audio/' + Date.now() + ".webm");
-          const tempId = Date.now();
-          addMessageToUI({ user: currentUser, type: "text", content: "🎤 Отправка войса...", time: getTime(), id: tempId });
-          const snap = await ref.put(blob);
-          const url = await snap.ref.getDownloadURL();
-          document.getElementById('msg-'+tempId)?.remove();
-          db.ref('messages').push({ user: currentUser, type: "audio", content: url, time: getTime() });
-        };
-      } catch(e) { alert("Нет доступа к микрофону"); }
-    }
-    function stopAudio() {
-      if (!isVideoMode && recorder && recorder.state === "recording") {
-        recorder.stop();
-        document.getElementById("mic-btn").classList.remove("recording");
-      }
-    }
+        // State variables
+        let currentUser = localStorage.getItem('chatUser') || null;
+        let replyingTo = null;
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordMode = 'audio';
+        let typingTimeout;
+        const emojis = ["😂","🥺","😍","🔥","👍","😎","🗿","🤡","🤬","🎉","❤️","💀","👀","🤷‍♂️","🤦‍♂️"];
 
-    let videoRecorder, videoChunks = [];
-    async function startVideoRecord() {
-      if (!isVideoMode) return;
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 320 }, audio: true });
-        videoRecorder = new MediaRecorder(stream);
-        videoChunks = [];
-        videoRecorder.start();
-        document.getElementById("mic-btn").classList.add("recording");
-        videoRecorder.ondataavailable = e => videoChunks.push(e.data);
-        videoRecorder.onstop = async () => {
-          stream.getTracks().forEach(track => track.stop());
-          const blob = new Blob(videoChunks, { type: 'video/webm' });
-          const ref = storage.ref('video_notes/' + Date.now() + ".webm");
-          const tempId = Date.now();
-          addMessageToUI({ user: currentUser, type: "text", content: "📹 Создание кружка...", time: getTime(), id: tempId });
-          const snap = await ref.put(blob);
-          const url = await snap.ref.getDownloadURL();
-          document.getElementById('msg-'+tempId)?.remove();
-          db.ref('messages').push({ user: currentUser, type: "video", content: url, time: getTime() });
-        };
-      } catch(e) { alert("Нет доступа к камере"); }
-    }
-    function stopVideoRecord() {
-      if (isVideoMode && videoRecorder && videoRecorder.state === "recording") {
-        videoRecorder.stop();
-        document.getElementById("mic-btn").classList.remove("recording");
-      }
-    }
+        // UI Elements
+        const authScreen = document.getElementById('auth-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const messagesDiv = document.getElementById('messages');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingStatus = document.getElementById('typing-status');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Звуки (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if(type === 'send') { osc.frequency.setValueAtTime(300, audioCtx.currentTime); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); }
+            else { osc.frequency.setValueAtTime(500, audioCtx.currentTime); gain.gain.setValueAtTime(0.05, audioCtx.currentTime); }
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        }
 
-    function getTime() {
-      const d = new Date();
-      return d.getHours().toString().padStart(2, '0') + ":" + d.getMinutes().toString().padStart(2, '0');
-    }
+        // Init
+        if (currentUser) initChat();
 
-    function addMessageToUI(data) {
-      const box = document.getElementById("messages");
-      const isMy = data.user === currentUser;
-      const div = document.createElement("div");
-      div.className = "msg " + (isMy ? "my" : "other");
-      if (data.id) div.id = 'msg-' + data.id;
+        function login(name) {
+            currentUser = name;
+            localStorage.setItem('chatUser', name);
+            initChat();
+        }
 
-      let html = "";
-      if (data.type === "text") html = `<div>${escape(data.content)}</div>`;
-      else if (data.type === "image") html = `<img src="${data.content}" onclick="window.open(this.src)">`;
-      else if (data.type === "audio") html = `<audio controls src="${data.content}"></audio>`;
-      else if (data.type === "video") html = `<video src="${data.content}" onclick="this.paused ? this.play() : this.pause()" loop playsinline></video>`;
-      else if (data.type === "file") html = `<a href="${data.content}" target="_blank" class="file-box"><span>📁</span><div><b>Файл</b><br><small>${data.name || 'Скачать'}</small></div></a>`;
+        function initChat() {
+            authScreen.style.display = 'none';
+            chatScreen.style.display = 'flex';
+            
+            document.getElementById('emoji-panel').innerHTML = emojis.map(e => `<span class="emoji" onclick="addEmoji('${e}')">${e}</span>`).join('');
 
-      div.innerHTML = `${!isMy ? `<div class="author">${data.user}</div>` : ''}${html}<span class="time">${data.time}</span>`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
+            const myStatusRef = db.ref('presence/' + currentUser);
+            db.ref('.info/connected').on('value', snap => {
+                if(snap.val()) {
+                    myStatusRef.set(true);
+                    myStatusRef.onDisconnect().remove();
+                }
+            });
 
-    function escape(str) { 
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); 
-    }
-  </script>
+            db.ref('messages').limitToLast(50).on('child_added', snapshot => renderMessage(snapshot.key, snapshot.val()));
+            db.ref('typing').on('value', snap => {
+                const typers = [];
+                snap.forEach(child => { if(child.key !== currentUser && child.val()) typers.push(child.key); });
+                typingStatus.innerText = typers.length ? `${typers.join(', ')} печатает...` : 'В сети';
+            });
+
+            msgInput.addEventListener('input', () => {
+                const val = msgInput.value.trim();
+                db.ref('typing/' + currentUser).set(val.length > 0);
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => db.ref('typing/' + currentUser).set(false), 2000);
+                
+                if(val.length > 0) { sendBtn.innerText = '➤'; sendBtn.style.background = 'var(--my-msg)'; recordMode = 'text'; }
+                else if(recordMode === 'text') { toggleRecordMode('audio'); }
+            });
+        }
+
+        function handleMainAction() {
+            const text = msgInput.value.trim();
+            if (text.length > 0) {
+                sendMessage({ type: 'text', text: text, sender: currentUser, replyTo: replyingTo });
+                msgInput.value = '';
+                db.ref('typing/' + currentUser).set(false);
+                toggleRecordMode('audio');
+                cancelReply();
+                checkTrollBot(text);
+            } else {
+                if(!isRecording) toggleRecordMode(recordMode === 'audio' ? 'video' : 'audio');
+                toggleRecording();
+            }
+        }
+
+        function toggleRecordMode(mode) {
+            recordMode = mode;
+            sendBtn.innerText = mode === 'audio' ? '🎤' : mode === 'video' ? '⭕' : '➤';
+            sendBtn.style.background = mode === 'video' ? '#8b5cf6' : 'var(--my-msg)';
+        }
+
+        function toggleEmoji() {
+            const p = document.getElementById('emoji-panel');
+            p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function addEmoji(e) { msgInput.value += e; }
+
+        function sendMessage(data) {
+            data.timestamp = Date.now();
+            db.ref('messages').push(data);
+            playSound('send');
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const type = file.type.startsWith('image/') ? 'image' : 'file';
+            uploadToStorage(file, type);
+        }
+
+        function uploadToStorage(blob, type) {
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}`;
+            const task = storage.ref(`chat_media/${fileName}`).put(blob);
+            
+            task.on('state_changed', 
+                snap => progressBar.style.width = `${(snap.bytesTransferred / snap.totalBytes) * 100}%`,
+                err => { progressBar.style.width = '0'; alert('Ошибка загрузки!'); },
+                async () => {
+                    progressBar.style.width = '0';
+                    const url = await task.snapshot.ref.getDownloadURL();
+                    sendMessage({ type, url, sender: currentUser, replyTo: replyingTo });
+                    cancelReply();
+                }
+            );
+        }
+
+        async function toggleRecording() {
+            if (isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                sendBtn.classList.remove('recording');
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: true, 
+                    video: recordMode === 'video' ? { facingMode: 'user', aspectRatio: 1 } : false 
+                });
+                
+                audioChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: recordMode === 'video' ? 'video/webm' : 'audio/webm' });
+                    uploadToStorage(blob, recordMode);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                sendBtn.classList.add('recording');
+            } catch (err) {
+                alert('Нет доступа к камере или микрофону');
+            }
+        }
+
+        const trollJokes = ["А минусы будут? 🗿", "Лол, ну ты выдал 😂", "Сам понял что сказал?", "Осуждаю.", "Ахахахах", "🤖 Бип-боп, я слежу за тобой."];
+        function checkTrollBot(text) {
+            const t = text.toLowerCase();
+            const shouldReply = Math.random() < 0.1 || t.includes('бот') || t.includes('тупой') || t.includes('помоги');
+            if(shouldReply) {
+                setTimeout(() => {
+                    db.ref('messages').push({
+                        sender: '🤖 Бот-Шутник',
+                        type: 'text',
+                        text: trollJokes[Math.floor(Math.random() * trollJokes.length)],
+                        timestamp: Date.now()
+                    });
+                    playSound('receive');
+                }, 1500 + Math.random() * 1000);
+            }
+        }
+
+        function renderMessage(key, msg) {
+            const isMe = msg.sender === currentUser;
+            if(!isMe && msg.sender !== '🤖 Бот-Шутник' && Date.now() - msg.timestamp < 5000) playSound('receive');
+            
+            const wrap = document.createElement('div');
+            wrap.className = `msg-wrapper ${isMe ? 'me' : 'other'} ${msg.sender.includes('Бот') ? 'bot-msg' : ''}`;
+            wrap.onclick = () => setReply(msg, key);
+            
+            let contentHtml = '';
+            const safeText = document.createElement('span');
+            safeText.innerText = msg.text || '';
+
+            if(msg.replyTo) {
+                contentHtml += `<div class="reply-box"><b>${msg.replyTo.sender}</b>: ${msg.replyTo.text || 'Медиа'}</div>`;
+            }
+
+            if(msg.type === 'image') contentHtml += `<img src="${msg.url}" loading="lazy">`;
+            else if(msg.type === 'audio') contentHtml += `<audio src="${msg.url}" controls class="msg-audio"></audio>`;
+            else if(msg.type === 'video') contentHtml += `<video src="${msg.url}" autoplay loop muted class="msg-video-circle" onclick="this.muted=!this.muted"></video>`;
+            
+            wrap.innerHTML = `<div class="msg-sender">${msg.sender}</div><div class="msg">${contentHtml}</div>`;
+            
+            if(msg.type === 'text' || msg.text) {
+                wrap.querySelector('.msg').appendChild(safeText);
+            }
+            
+            messagesDiv.appendChild(wrap);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function setReply(msg, key) {
+            replyingTo = { id: key, sender: msg.sender, text: msg.text ? msg.text.substring(0, 30) : 'Медиа сообщение' };
+            document.getElementById('reply-preview').style.display = 'flex';
+            document.getElementById('reply-name').innerText = replyingTo.sender;
+            document.getElementById('reply-text').innerText = replyingTo.text;
+            msgInput.focus();
+        }
+
+        function cancelReply() {
+            replyingTo = null;
+            document.getElementById('reply-preview').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
