@@ -6,26 +6,56 @@
   <title>Секретный TG</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: #0e1621; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     
+    html, body {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      overflow: hidden;
+      background: #0e1621;
+      color: #fff;
+    }
+
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    #login-screen { padding: 30px 20px; text-align: center; margin: auto; width: 90%; max-width: 350px; background: #17212b; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    #login-screen { 
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: #0e1621;
+      z-index: 100;
+    }
+    .login-card {
+      padding: 30px 20px; text-align: center; width: 90%; max-width: 350px; background: #17212b; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
     select, button { width: 100%; padding: 14px; margin-top: 12px; border-radius: 10px; border: none; font-size: 16px; outline: none; }
     select { background: #242f3d; color: #fff; appearance: none; }
     .btn-primary { background: #5288c1; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-primary:active { background: #4272a3; transform: scale(0.98); }
     
-    #chat-screen { display: none; flex-direction: column; height: 100%; }
-    header { background: #17212b; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #242f3d; z-index: 10; }
+    #chat-screen { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+    header { background: #17212b; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #242f3d; flex-shrink: 0; }
     header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
     .online-status { font-size: 11px; color: #4fae4e; margin-top: 2px; }
     
-    #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background: #0e1621; scroll-behavior: smooth; }
-    .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; font-size: 15px; line-height: 1.4; animation: slideUp 0.3s ease forwards; position: relative; }
+    #messages { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 15px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      background: #0e1621; 
+      -webkit-overflow-scrolling: touch;
+    }
+    .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; font-size: 15px; line-height: 1.4; animation: slideUp 0.3s ease forwards; position: relative; word-break: break-word; }
     .msg.my { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 4px; }
     .msg.other { align-self: flex-start; background: #182533; border-bottom-left-radius: 4px; }
     .author { font-size: 12px; color: #64b5f6; font-weight: bold; margin-bottom: 4px; }
@@ -34,7 +64,6 @@
     .msg img { max-width: 100%; border-radius: 8px; margin-top: 4px; display: block; cursor: pointer; }
     .msg audio { width: 220px; height: 36px; margin-top: 4px; outline: none; }
     
-    /* Стили для видео-кружков */
     .msg video {
       width: 180px;
       height: 180px;
@@ -46,7 +75,6 @@
       border: 2px solid #5288c1;
     }
 
-    /* Файловый блок */
     .file-box {
       display: flex;
       align-items: center;
@@ -60,11 +88,11 @@
     }
     .file-box span { font-size: 24px; }
 
-    #emoji-bar { background: #17212b; padding: 8px 15px; display: flex; gap: 12px; overflow-x: auto; border-top: 1px solid #242f3d; }
+    #emoji-bar { background: #17212b; padding: 8px 15px; display: flex; gap: 12px; overflow-x: auto; border-top: 1px solid #242f3d; flex-shrink: 0; }
     .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; transition: 0.1s; flex-shrink: 0; }
     .emoji-btn:active { transform: scale(1.3); }
 
-    footer { background: #17212b; padding: 10px 15px 15px; display: flex; align-items: center; gap: 8px; }
+    footer { background: #17212b; padding: 10px 15px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .icon-btn { background: none; border: none; font-size: 22px; color: #7f91a4; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
     #msg-input { flex: 1; background: #242f3d; color: #fff; border: none; padding: 12px 15px; border-radius: 20px; font-size: 16px; outline: none; }
     
@@ -76,15 +104,17 @@
 <body>
 
   <div id="login-screen">
-    <div style="font-size: 40px; margin-bottom: 10px;">✈️</div>
-    <h2>Вход в чат</h2>
-    <select id="user-select">
-      <option value="Ты">Ты</option>
-      <option value="Друг 1">Друг 1</option>
-      <option value="Друг 2">Друг 2</option>
-      <option value="Друг 3">Друг 3</option>
-    </select>
-    <button class="btn-primary" onclick="enterChat()">Войти</button>
+    <div class="login-card">
+      <div style="font-size: 40px; margin-bottom: 10px;">✈️</div>
+      <h2>Вход в чат</h2>
+      <select id="user-select">
+        <option value="Ты">Ты</option>
+        <option value="Друг 1">Друг 1</option>
+        <option value="Друг 2">Друг 2</option>
+        <option value="Друг 3">Друг 3</option>
+      </select>
+      <button class="btn-primary" onclick="enterChat()">Войти</button>
+    </div>
   </div>
 
   <div id="chat-screen">
@@ -103,17 +133,18 @@
       <button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
       <button class="emoji-btn" onclick="addEmoji('😂')">😂</button>
       <button class="emoji-btn" onclick="addEmoji('🥰')">🥰</button>
-      <button class="emoji-btn" onclick="addEmoji('ivant')">😎</button>
+      <button class="emoji-btn" onclick="addEmoji('😎')">😎</button>
       <button class="emoji-btn" onclick="addEmoji('😢')">😢</button>
       <button class="emoji-btn" onclick="addEmoji('😡')">😡</button>
       <button class="emoji-btn" onclick="addEmoji('🎉')">🎉</button>
       <button class="emoji-btn" onclick="addEmoji('🤔')">🤔</button>
-      <button class="emoji-btn" onclick="addEmoji('💩')">💩</button>
+      <button class="emoji-btn" onclick="addEmoji('👍')">👍</button>
       <button class="emoji-btn" onclick="addEmoji('🗿')">🗿</button>
+      <button class="emoji-btn" onclick="addEmoji('💯')">💯</button>
+      <button class="emoji-btn" onclick="addEmoji('🙏')">🙏</button>
     </div>
 
     <footer>
-      <!-- Отправка файлов/фото -->
       <label class="icon-btn" title="Файл или фото">
         📎
         <input type="file" style="display: none;" onchange="uploadFile(event)">
@@ -121,10 +152,8 @@
       
       <input type="text" id="msg-input" placeholder="Сообщение..." oninput="checkInput()" onkeypress="if(event.key==='Enter') sendText()">
       
-      <!-- Кнопка видео-кружка -->
       <button class="action-btn" id="video-btn" title="Кружок" onclick="toggleVideoMode()" style="background: #242f3d; font-size: 16px;">📹</button>
       
-      <!-- Кнопка микрофона / отправки -->
       <button class="action-btn" id="mic-btn" onmousedown="startAudio()" onmouseup="stopAudio()" ontouchstart="startAudio()" ontouchend="stopAudio()">🎤</button>
     </footer>
   </div>
@@ -170,7 +199,7 @@
     }
 
     function addEmoji(emoji) {
-      document.getElementById("msg-input").value += (emoji === 'ivant' ? '😎' : emoji);
+      document.getElementById("msg-input").value += emoji;
       checkInput();
     }
 
