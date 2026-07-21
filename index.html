@@ -7,36 +7,74 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: #0e1621; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     #login-screen { padding: 30px 20px; text-align: center; margin: auto; width: 90%; max-width: 350px; background: #17212b; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
     select, button { width: 100%; padding: 14px; margin-top: 12px; border-radius: 10px; border: none; font-size: 16px; outline: none; }
     select { background: #242f3d; color: #fff; appearance: none; }
     .btn-primary { background: #5288c1; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-primary:active { background: #4272a3; transform: scale(0.98); }
+    
     #chat-screen { display: none; flex-direction: column; height: 100%; }
     header { background: #17212b; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #242f3d; z-index: 10; }
     header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
     .online-status { font-size: 11px; color: #4fae4e; margin-top: 2px; }
+    
     #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; background: #0e1621; scroll-behavior: smooth; }
     .msg { max-width: 85%; padding: 8px 12px; border-radius: 14px; font-size: 15px; line-height: 1.4; animation: slideUp 0.3s ease forwards; position: relative; }
     .msg.my { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 4px; }
     .msg.other { align-self: flex-start; background: #182533; border-bottom-left-radius: 4px; }
     .author { font-size: 12px; color: #64b5f6; font-weight: bold; margin-bottom: 4px; }
     .time { font-size: 10px; color: #7f91a4; float: right; margin: 6px 0 -4px 10px; }
-    .msg img { max-width: 100%; border-radius: 8px; margin-top: 4px; display: block; }
+    
+    .msg img { max-width: 100%; border-radius: 8px; margin-top: 4px; display: block; cursor: pointer; }
     .msg audio { width: 220px; height: 36px; margin-top: 4px; outline: none; }
-    #emoji-bar { background: #17212b; padding: 8px 15px; display: flex; gap: 15px; overflow-x: auto; border-top: 1px solid #242f3d; }
-    .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; transition: 0.1s; }
+    
+    /* Стили для видео-кружков */
+    .msg video {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-top: 4px;
+      display: block;
+      cursor: pointer;
+      border: 2px solid #5288c1;
+    }
+
+    /* Файловый блок */
+    .file-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 4px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .file-box span { font-size: 24px; }
+
+    #emoji-bar { background: #17212b; padding: 8px 15px; display: flex; gap: 12px; overflow-x: auto; border-top: 1px solid #242f3d; }
+    .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; transition: 0.1s; flex-shrink: 0; }
     .emoji-btn:active { transform: scale(1.3); }
-    footer { background: #17212b; padding: 10px 15px 15px; display: flex; align-items: center; gap: 10px; }
-    .icon-btn { background: none; border: none; font-size: 24px; color: #7f91a4; cursor: pointer; padding: 5px; }
+
+    footer { background: #17212b; padding: 10px 15px 15px; display: flex; align-items: center; gap: 8px; }
+    .icon-btn { background: none; border: none; font-size: 22px; color: #7f91a4; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; }
     #msg-input { flex: 1; background: #242f3d; color: #fff; border: none; padding: 12px 15px; border-radius: 20px; font-size: 16px; outline: none; }
-    #mic-btn { background: #5288c1; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-    #mic-btn.recording { background: #e53935; animation: pulse 1s infinite; }
+    
+    .action-btn { background: #5288c1; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+    .action-btn.recording { background: #e53935; animation: pulse 1s infinite; }
     @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
   </style>
 </head>
 <body>
+
   <div id="login-screen">
     <div style="font-size: 40px; margin-bottom: 10px;">✈️</div>
     <h2>Вход в чат</h2>
@@ -56,21 +94,38 @@
         <div class="online-status" id="online-users">подключение...</div>
       </div>
     </header>
+
     <div id="messages"></div>
+
     <div id="emoji-bar">
       <button class="emoji-btn" onclick="addEmoji('👍')">👍</button>
-      <button class="emoji-btn" onclick="addEmoji('😂')">😂</button>
-      <button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
       <button class="emoji-btn" onclick="addEmoji('❤️')">❤️</button>
-      <button class="emoji-btn" onclick="addEmoji('😎')">😎</button>
+      <button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+      <button class="emoji-btn" onclick="addEmoji('😂')">😂</button>
+      <button class="emoji-btn" onclick="addEmoji('🥰')">🥰</button>
+      <button class="emoji-btn" onclick="addEmoji('ivant')">😎</button>
+      <button class="emoji-btn" onclick="addEmoji('😢')">😢</button>
+      <button class="emoji-btn" onclick="addEmoji('😡')">😡</button>
+      <button class="emoji-btn" onclick="addEmoji('🎉')">🎉</button>
+      <button class="emoji-btn" onclick="addEmoji('🤔')">🤔</button>
+      <button class="emoji-btn" onclick="addEmoji('💩')">💩</button>
+      <button class="emoji-btn" onclick="addEmoji('🗿')">🗿</button>
     </div>
+
     <footer>
-      <label class="icon-btn">
+      <!-- Отправка файлов/фото -->
+      <label class="icon-btn" title="Файл или фото">
         📎
-        <input type="file" accept="image/*" style="display: none;" onchange="uploadImage(event)">
+        <input type="file" style="display: none;" onchange="uploadFile(event)">
       </label>
+      
       <input type="text" id="msg-input" placeholder="Сообщение..." oninput="checkInput()" onkeypress="if(event.key==='Enter') sendText()">
-      <button id="mic-btn" onmousedown="startRecording()" onmouseup="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()">🎤</button>
+      
+      <!-- Кнопка видео-кружка -->
+      <button class="action-btn" id="video-btn" title="Кружок" onclick="toggleVideoMode()" style="background: #242f3d; font-size: 16px;">📹</button>
+      
+      <!-- Кнопка микрофона / отправки -->
+      <button class="action-btn" id="mic-btn" onmousedown="startAudio()" onmouseup="stopAudio()" ontouchstart="startAudio()" ontouchend="stopAudio()">🎤</button>
     </footer>
   </div>
 
@@ -93,6 +148,7 @@
     const db = firebase.database();
     const storage = firebase.storage();
     let currentUser = "";
+    let isVideoMode = false;
 
     function enterChat() {
       currentUser = document.getElementById("user-select").value;
@@ -114,7 +170,7 @@
     }
 
     function addEmoji(emoji) {
-      document.getElementById("msg-input").value += emoji;
+      document.getElementById("msg-input").value += (emoji === 'ivant' ? '😎' : emoji);
       checkInput();
     }
 
@@ -127,10 +183,29 @@
         btn.onclick = sendText;
         btn.onmousedown = null; btn.onmouseup = null; btn.ontouchstart = null; btn.ontouchend = null;
       } else {
-        btn.innerHTML = "🎤"; 
-        btn.style.background = "#5288c1";
+        btn.innerHTML = isVideoMode ? "🔴" : "🎤"; 
+        btn.style.background = isVideoMode ? "#e53935" : "#5288c1";
         btn.onclick = null;
-        btn.onmousedown = startRecording; btn.onmouseup = stopRecording; btn.ontouchstart = startRecording; btn.ontouchend = stopRecording;
+        btn.onmousedown = startAudio; btn.onmouseup = stopAudio; btn.ontouchstart = startAudio; btn.ontouchend = stopAudio;
+      }
+    }
+
+    function toggleVideoMode() {
+      isVideoMode = !isVideoMode;
+      const vBtn = document.getElementById("video-btn");
+      const mBtn = document.getElementById("mic-btn");
+      if (isVideoMode) {
+        vBtn.style.background = "#5288c1";
+        mBtn.innerHTML = "🔴";
+        mBtn.style.background = "#e53935";
+        mBtn.onmousedown = startVideoRecord; mBtn.onmouseup = stopVideoRecord; 
+        mBtn.ontouchstart = startVideoRecord; mBtn.ontouchend = stopVideoRecord;
+      } else {
+        vBtn.style.background = "#242f3d";
+        mBtn.innerHTML = "🎤";
+        mBtn.style.background = "#5288c1";
+        mBtn.onmousedown = startAudio; mBtn.onmouseup = stopAudio; 
+        mBtn.ontouchstart = startAudio; mBtn.ontouchend = stopAudio;
       }
     }
 
@@ -142,61 +217,86 @@
       checkInput();
     }
 
-    async function uploadImage(e) {
+    async function uploadFile(e) {
       const file = e.target.files[0];
       if (!file) return;
-      const ref = storage.ref('images/' + Date.now() + "_" + file.name);
+      const isImg = file.type.startsWith('image/');
+      const ref = storage.ref((isImg ? 'images/' : 'files/') + Date.now() + "_" + file.name);
       const tempId = Date.now();
-      addMessageToUI({ user: currentUser, type: "text", content: "📎 Загрузка фото...", time: getTime(), id: tempId }, true);
+      
+      addMessageToUI({ user: currentUser, type: "text", content: "⏳ Загрузка файла...", time: getTime(), id: tempId });
       try {
         const snap = await ref.put(file);
         const url = await snap.ref.getDownloadURL();
-        const tempEl = document.getElementById('msg-'+tempId);
-        if(tempEl) tempEl.remove();
-        db.ref('messages').push({ user: currentUser, type: "image", content: url, time: getTime() });
-      } catch(err) { alert("Ошибка загрузки фото"); }
+        document.getElementById('msg-'+tempId)?.remove();
+        
+        db.ref('messages').push({ 
+          user: currentUser, 
+          type: isImg ? "image" : "file", 
+          content: url, 
+          name: file.name,
+          time: getTime() 
+        });
+      } catch(err) { alert("Ошибка загрузки"); }
     }
 
-    let recorder, chunks = [], recording = false;
-    async function startRecording() {
-      if (recording) return;
+    let recorder, chunks = [];
+    async function startAudio() {
+      if (isVideoMode) return;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         recorder = new MediaRecorder(stream);
-        recorder.start(); 
-        recording = true;
-        const btn = document.getElementById("mic-btn");
-        btn.classList.add("recording"); 
-        btn.innerHTML = "⏹";
-        
         chunks = [];
+        recorder.start();
+        document.getElementById("mic-btn").classList.add("recording");
         recorder.ondataavailable = e => chunks.push(e.data);
         recorder.onstop = async () => {
-          const blob = new Blob(chunks, { type: 'audio/webm' }); 
-          chunks = [];
+          const blob = new Blob(chunks, { type: 'audio/webm' });
           const ref = storage.ref('audio/' + Date.now() + ".webm");
           const tempId = Date.now();
-          addMessageToUI({ user: currentUser, type: "text", content: "🎤 Отправка войса...", time: getTime(), id: tempId }, true);
-          try {
-            const snap = await ref.put(blob);
-            const url = await snap.ref.getDownloadURL();
-            const tempEl = document.getElementById('msg-'+tempId);
-            if(tempEl) tempEl.remove();
-            db.ref('messages').push({ user: currentUser, type: "audio", content: url, time: getTime() });
-          } catch(e) { alert("Ошибка отправки голосового"); }
+          addMessageToUI({ user: currentUser, type: "text", content: "🎤 Отправка войса...", time: getTime(), id: tempId });
+          const snap = await ref.put(blob);
+          const url = await snap.ref.getDownloadURL();
+          document.getElementById('msg-'+tempId)?.remove();
+          db.ref('messages').push({ user: currentUser, type: "audio", content: url, time: getTime() });
         };
-      } catch(e) { 
-        alert("Нет доступа к микрофону!"); 
+      } catch(e) { alert("Нет доступа к микрофону"); }
+    }
+    function stopAudio() {
+      if (!isVideoMode && recorder && recorder.state === "recording") {
+        recorder.stop();
+        document.getElementById("mic-btn").classList.remove("recording");
       }
     }
-    
-    function stopRecording() {
-      if (!recording) return;
-      recorder.stop(); 
-      recording = false;
-      const btn = document.getElementById("mic-btn");
-      btn.classList.remove("recording"); 
-      btn.innerHTML = "🎤";
+
+    let videoRecorder, videoChunks = [];
+    async function startVideoRecord() {
+      if (!isVideoMode) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 320 }, audio: true });
+        videoRecorder = new MediaRecorder(stream);
+        videoChunks = [];
+        videoRecorder.start();
+        document.getElementById("mic-btn").classList.add("recording");
+        videoRecorder.ondataavailable = e => videoChunks.push(e.data);
+        videoRecorder.onstop = async () => {
+          stream.getTracks().forEach(track => track.stop());
+          const blob = new Blob(videoChunks, { type: 'video/webm' });
+          const ref = storage.ref('video_notes/' + Date.now() + ".webm");
+          const tempId = Date.now();
+          addMessageToUI({ user: currentUser, type: "text", content: "📹 Создание кружка...", time: getTime(), id: tempId });
+          const snap = await ref.put(blob);
+          const url = await snap.ref.getDownloadURL();
+          document.getElementById('msg-'+tempId)?.remove();
+          db.ref('messages').push({ user: currentUser, type: "video", content: url, time: getTime() });
+        };
+      } catch(e) { alert("Нет доступа к камере"); }
+    }
+    function stopVideoRecord() {
+      if (isVideoMode && videoRecorder && videoRecorder.state === "recording") {
+        videoRecorder.stop();
+        document.getElementById("mic-btn").classList.remove("recording");
+      }
     }
 
     function getTime() {
@@ -215,6 +315,8 @@
       if (data.type === "text") html = `<div>${escape(data.content)}</div>`;
       else if (data.type === "image") html = `<img src="${data.content}" onclick="window.open(this.src)">`;
       else if (data.type === "audio") html = `<audio controls src="${data.content}"></audio>`;
+      else if (data.type === "video") html = `<video src="${data.content}" onclick="this.paused ? this.play() : this.pause()" loop playsinline></video>`;
+      else if (data.type === "file") html = `<a href="${data.content}" target="_blank" class="file-box"><span>📁</span><div><b>Файл</b><br><small>${data.name || 'Скачать'}</small></div></a>`;
 
       div.innerHTML = `${!isMy ? `<div class="author">${data.user}</div>` : ''}${html}<span class="time">${data.time}</span>`;
       box.appendChild(div);
