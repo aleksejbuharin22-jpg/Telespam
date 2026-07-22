@@ -366,13 +366,17 @@
         </div>
       </div>
 
-      <!-- 10. ПРОФИЛЬ -->
+      <!-- 10. ПРОФИЛЬ (ЗДЕСЬ БЫЛ БАГ - ВЕРНУЛ SHOP-GRID) -->
       <div id="profileScreen" class="app-screen">
         <div class="profile-header-card">
           <div class="prof-avatar" id="prof-avatar-ui">😎</div>
           <h2 class="prof-name" id="prof-name-ui">Загрузка...</h2>
           <div class="prof-balance">Баланс: <span class="stars-val">0</span> ⭐</div>
         </div>
+        
+        <h3 style="margin-bottom: 15px;">Магазин подарков:</h3>
+        <div class="gifts-grid" id="shop-grid"></div>
+        
         <h3 style="margin: 20px 0 15px;">Мои трофеи:</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="my-gifts-ui"></div>
       </div>
@@ -484,7 +488,7 @@
       }
     };
 
-    /* ================= БОТ НЕЙРОХАМ (ИЗ СТАРОГО КОДА) ================= */
+    /* ================= БОТ НЕЙРОХАМ ================= */
     const BOT = {
       name: "🤖 Нейрохам",
       triggers: ["бот", "помоги", "тупой", "че", "как"],
@@ -541,13 +545,11 @@
         currentUser = userInput.trim();
         currentDisplayName = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
         
-        // Включаем звук
         state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if(state.audioCtx.state === 'suspended') state.audioCtx.resume();
 
         state.load(); state.save(); state.updateBalance();
 
-        // Формируем список чатов
         const list = [{ id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', type: 'groups' }];
         ALL_USERS.forEach(u => {
           if (u !== currentUser) {
@@ -561,7 +563,10 @@
         this.chatsData = list;
         
         document.getElementById('callContactSelect').innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option>${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
+        
+        // ВОТ ЗДЕСЬ БЫЛ БАГ: Вызывался рендер магазина, а блока в HTML не было
         shop.render();
+        
         document.getElementById('prof-name-ui').innerText = currentDisplayName;
         document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎';
 
@@ -587,7 +592,7 @@
       filterByFolder(f) { ui.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', 'Папка: ' + f); this.renderChats(f === 'all' ? this.chatsData : this.chatsData.filter(c => c.type === f)); }
     };
 
-    /* ================= ОСНОВНОЙ МОДУЛЬ ЧАТА (ПРЯМОЙ ДОСТУП В БД) ================= */
+    /* ================= ЧАТ ================= */
     const chat = {
       currentId: null,
       listener: null,
@@ -613,7 +618,6 @@
           document.getElementById('media-controls').style.display = 'flex';
         }
 
-        // ЖЕЛЕЗОБЕТОННЫЙ СЛУШАТЕЛЬ КАК В СТАРОМ КОДЕ
         this.listener = db.ref('chats/' + id + '/messages').limitToLast(100).on('child_added', snap => {
           const data = snap.val();
           this.renderMsg(snap.key, data);
@@ -727,7 +731,7 @@
       }
     };
 
-    /* ================= ЗАГРУЗКА МЕДИА В STORAGE (ИЗ СТАРОГО КОДА) ================= */
+    /* ================= ЗАГРУЗКА МЕДИА ================= */
     const media = {
       isVideo: false, recorder: null, chunks: [],
       toggleVideoMode() { this.isVideo = !this.isVideo; chat.checkInput(); },
@@ -780,7 +784,7 @@
       }
     };
 
-    /* ================= ОСТАЛЬНЫЕ МОДУЛИ (ИЗ НОВОГО КОДА) ================= */
+    /* ================= МАГАЗИН И ПРИЛОЖЕНИЯ ================= */
     const shop = {
       items: [
         { i:"🍭", n:"Чупа-чупс", p:1 }, { i:"🧢", n:"Кепка", p:2 }, { i:"🍺", n:"Пиво", p:3 },
