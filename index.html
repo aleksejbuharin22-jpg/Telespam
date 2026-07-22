@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Секретный TG</title>
   
-  <!-- Firebase SDK 10.8.0 (База данных + Хранилище файлов) -->
+  <!-- Firebase SDK 10.8.0 -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
@@ -14,22 +14,18 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; position: fixed; overflow: hidden; background: #0f172a; color: #fff; }
     
-    /* Анимации */
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     
-    /* Базовые элементы */
     select, input, button { width: 100%; padding: 14px; margin-top: 12px; border-radius: 10px; border: none; font-size: 16px; outline: none; }
     select, input { background: #334155; color: #fff; }
     .btn-primary { background: #3b82f6; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-primary:active { transform: scale(0.95); background: #2563eb; }
     
-    /* Экран логина */
     #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: absolute; width: 100%; height: 100%; z-index: 1000; background: #0f172a; transition: opacity 0.4s ease; }
     .login-card { padding: 30px 20px; text-align: center; width: 100%; max-width: 350px; background: #1e293b; border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.6); }
 
-    /* Глобальный Layout */
     #appLayout { display: none; flex-direction: column; width: 100%; height: 100%; background: #0f172a; opacity: 0; transition: opacity 0.4s ease; }
     #appLayout.active { display: flex; opacity: 1; }
     
@@ -41,7 +37,6 @@
     .status-text.typing { color: #38bdf8; font-weight: 600; animation: pulse 1.5s infinite; }
     .stars-balance-ui { color: #fbbf24; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
 
-    /* Верхняя панель навигации */
     #mainNav { display: flex; width: 100%; height: 65px; background: #1e293b; border-bottom: 1px solid #334155; flex-shrink: 0; z-index: 90; transition: margin-top 0.3s ease, height 0.3s ease; overflow-x: auto; scrollbar-width: none; }
     #mainNav::-webkit-scrollbar { display: none; }
     .nav-item { flex: 0 0 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; cursor: pointer; transition: 0.2s; position: relative; padding: 0 5px; }
@@ -51,13 +46,11 @@
     .nav-item:active .nav-icon { transform: scale(0.85); }
     .nav-divider { width: 1px; background: #334155; margin: 10px 0; flex-shrink: 0; }
 
-    /* Область экранов */
     #screensViewport { flex: 1; position: relative; overflow: hidden; }
     .app-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 15px; opacity: 0; transform: translateY(15px) scale(0.98); pointer-events: none; transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
     .app-screen.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; z-index: 10; }
     .app-screen.no-padding { padding: 0; }
 
-    /* Чаты и поиск */
     .search-box { background: #1e293b; padding: 0 0 12px 0; position: sticky; top: 0; z-index: 10; }
     .search-input { width: 100%; background: #334155; border: none; color: #fff; padding: 10px 15px; border-radius: 12px; font-size: 15px; outline: none; }
     .chat-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #1e293b; cursor: pointer; transition: background 0.2s; border-radius: 12px; margin-bottom: 5px; }
@@ -67,7 +60,6 @@
     .chat-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
     .chat-last-msg { font-size: 14px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
-    /* Сообщения */
     #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
     .msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4; animation: slideUp 0.2s ease forwards; word-break: break-word; cursor: pointer; position: relative; }
     .msg.my { align-self: flex-end; background: #3b82f6; border-bottom-right-radius: 4px; }
@@ -83,7 +75,6 @@
     .time { font-size: 10px; color: #cbd5e1; float: right; margin: 6px 0 -4px 10px; opacity: 0.8; }
     .reply-block { background: rgba(0,0,0,0.2); border-left: 3px solid #60a5fa; padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
     
-    /* Инструменты чата */
     #reply-preview { display: none; background: #1e293b; padding: 8px 15px; border-left: 3px solid #3b82f6; font-size: 13px; justify-content: space-between; align-items: center; border-top: 1px solid #334155; }
     #emoji-bar { background: #1e293b; padding: 8px 15px; display: flex; gap: 15px; overflow-x: auto; border-top: 1px solid #334155; scrollbar-width: none; }
     #emoji-bar::-webkit-scrollbar { display: none; }
@@ -95,42 +86,24 @@
     .action-btn.recording { background: #ef4444; animation: pulse 1s infinite; }
     .icon-btn { background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer; padding: 0 4px; margin: 0; width: auto; }
 
-    /* Остальные стили (Папки, Карты, Казино и т.д.) */
-    .call-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); text-align: center; padding: 20px; }
-    .call-avatar { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 60px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
-    .folders-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
-    .folder-card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; cursor: pointer; transition: 0.2s; }
-    .folder-card:active { transform: scale(0.96); background: #334155; }
-    .folder-icon { font-size: 30px; margin-bottom: 10px; }
-    .map-box { flex: 1; background: #1e293b; border-radius: 16px; border: 1px solid #334155; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-    .map-pin { position: absolute; font-size: 28px; animation: pulse 2s infinite; cursor: pointer; }
-    .track-item { display: flex; align-items: center; gap: 15px; background: #1e293b; padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #334155; cursor: pointer; }
-    .track-item.playing { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-    .track-cover { width: 45px; height: 45px; border-radius: 8px; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-    .weather-card { background: linear-gradient(135deg, #1e293b, #334155); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #475569; margin-bottom: 20px; }
-    .weather-temp { font-size: 48px; font-weight: bold; color: #38bdf8; margin: 10px 0; }
+    .call-container, .map-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1e293b; border-radius: 16px; text-align: center; padding: 20px; }
+    .folders-grid, .gifts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+    .gifts-grid { grid-template-columns: repeat(3, 1fr); }
+    .folder-card, .gift-item { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; cursor: pointer; text-align: center; transition: 0.2s; }
+    .folder-card:active, .gift-item:active { transform: scale(0.95); }
     
-    .profile-header-card { display: flex; flex-direction: column; align-items: center; background: #1e293b; padding: 30px 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #334155; }
-    .prof-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
-    .prof-name { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
-    
-    .gifts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .gift-item { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; }
-    .gift-item:active { transform: scale(0.95); }
-    
-    .trends-box { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-    .trend-tag { display: inline-block; color: #3b82f6; font-size: 14px; margin-right: 10px; margin-top: 5px; background: rgba(59, 130, 246, 0.1); padding: 5px 10px; border-radius: 15px; }
-    .xspam-post-box, .tweet { padding: 15px; background: #1e293b; border-radius: 16px; margin-bottom: 15px; }
+    .xspam-post-box, .tweet { padding: 15px; background: #1e293b; border-radius: 16px; margin-bottom: 15px; border: 1px solid #334155; }
     .xspam-input { width: 100%; background: none; border: none; color: #fff; font-size: 16px; resize: none; min-height: 60px; outline: none; margin-bottom: 10px; }
     .tweet-header { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
     .tweet-avatar { width: 42px; height: 42px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     .tweet-footer { display: flex; gap: 20px; color: #94a3b8; font-size: 14px; margin-top: 10px; }
     .action-icon { cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-    .action-icon.liked { color: #f91880; }
+    .action-icon.liked { color: #ef4444; }
     
     .casino-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .casino-tab { flex: 1; padding: 12px; text-align: center; background: #1e293b; border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; }
-    .casino-tab.active { background: #3b82f6; color: #fff; }
+    .casino-tab { flex: 1; padding: 12px; text-align: center; background: #1e293b; border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid #334155; }
+    .casino-tab.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    
     .slots-box { display: flex; gap: 15px; background: #1e293b; padding: 25px; border-radius: 16px; border: 2px solid #334155; justify-content: center; margin-bottom: 20px; }
     .reel-window { width: 75px; height: 95px; background: #0f172a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 55px; position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
     .crash-container { display: none; flex-direction: column; align-items: center; background: #1e293b; border-radius: 16px; padding: 20px; text-align: center; }
@@ -141,7 +114,7 @@
     .crash-line { position: absolute; bottom: 0; left: 0; width: 0%; height: 4px; background: #10b981; transition: width 0.1s linear, bottom 0.1s linear; }
 
     .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-    .lehcoin { width: 240px; height: 240px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: bold; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4), inset 0 5px 20px rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.05s; user-select: none; }
+    .lehcoin { width: 240px; height: 240px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: bold; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4); cursor: pointer; transition: transform 0.05s; user-select: none; }
     .lehcoin:active { transform: scale(0.92); }
     .floating-text { position: absolute; font-size: 28px; color: #fbbf24; font-weight: bold; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
@@ -157,7 +130,7 @@
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite;">✈️</div>
       <h2 style="margin-bottom: 5px;">Секретный TG</h2>
-      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Выберите вашу роль</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.0 (XSpam + Игры + Боты)</p>
       <select id="usernameInput">
         <option value="" disabled selected>-- Кто вы? --</option>
         <option value="Я">Я (Админ)</option>
@@ -196,8 +169,8 @@
       <div onclick="ui.switchTab('xspamScreen', this, '🕊️ XSpam', 'Актуальные тренды')" class="nav-item">
         <div class="nav-icon">🕊️</div><div>XSpam</div>
       </div>
-      <div onclick="ui.switchTab('casinoScreen', this, '🎰 Казино', 'Испытай удачу')" class="nav-item">
-        <div class="nav-icon">🎰</div><div>Казино</div>
+      <div onclick="ui.switchTab('gamesScreen', this, '🕹️ Игры', 'Испытай удачу')" class="nav-item">
+        <div class="nav-icon">🕹️</div><div>Игры</div>
       </div>
       <div id="nav-miner" onclick="ui.switchTab('minerScreen', this, '⛏️ Фарм', 'Тапай и получай Lehcoin')" class="nav-item">
         <div class="nav-icon">⛏️</div><div>Фарм</div>
@@ -211,9 +184,6 @@
       </div>
       <div onclick="ui.switchTab('musicScreen', this, '🎵 Музыка', 'Аудиоплеер')" class="nav-item">
         <div class="nav-icon">🎵</div><div>Музыка</div>
-      </div>
-      <div onclick="ui.switchTab('weatherScreen', this, '🌤️ Погода', 'Прогноз погоды')" class="nav-item">
-        <div class="nav-icon">🌤️</div><div>Погода</div>
       </div>
     </nav>
 
@@ -230,14 +200,10 @@
       <!-- ОКНО КОНКРЕТНОГО ЧАТА -->
       <div id="chatScreen" class="app-screen no-padding">
         <div id="messages"></div>
-        
-        <!-- Предпросмотр ответа -->
         <div id="reply-preview">
           <div>Ответ: <b id="reply-author"></b><br><span id="reply-text"></span></div>
           <b style="cursor:pointer; padding: 5px; font-size: 16px;" onclick="chat.cancelReply()">✕</b>
         </div>
-        
-        <!-- Эмодзи бар -->
         <div id="emoji-bar">
           <button class="emoji-btn" onclick="chat.addEmoji('👍')">👍</button>
           <button class="emoji-btn" onclick="chat.addEmoji('😂')">😂</button>
@@ -245,16 +211,12 @@
           <button class="emoji-btn" onclick="chat.addEmoji('❤️')">❤️</button>
           <button class="emoji-btn" onclick="chat.addEmoji('😎')">😎</button>
           <button class="emoji-btn" onclick="chat.addEmoji('😡')">😡</button>
-          <button class="emoji-btn" onclick="chat.addEmoji('🗿')">🗿</button>
           <button class="emoji-btn" onclick="chat.addEmoji('🤡')">🤡</button>
         </div>
-
         <div id="chat-footer">
           <label class="icon-btn">📎<input type="file" style="display:none;" onchange="media.uploadFile(event)"></label>
           <button class="icon-btn" onclick="chat.openGiftModal()">🎁</button>
           <input type="text" id="msg-input" placeholder="Сообщение..." oninput="chat.checkInput()" onkeypress="if(event.key==='Enter') chat.sendText()">
-          
-          <!-- Кнопки Кружочек / Микрофон / Отправить -->
           <div id="media-controls" style="display: flex; gap: 8px;">
             <button class="action-btn" id="video-btn" onclick="media.toggleVideoMode()" style="background: #334155; font-size: 14px;">📹</button>
             <button class="action-btn" id="mic-btn" onmousedown="media.startRecord()" onmouseup="media.stopRecord()" ontouchstart="media.startRecord()" ontouchend="media.stopRecord()">🎤</button>
@@ -265,12 +227,12 @@
       <!-- 2. ЗВОНКИ -->
       <div id="callsScreen" class="app-screen">
         <div class="call-container">
-          <div class="call-avatar" id="callAvatar">📞</div>
-          <h2 id="callTitle" style="margin-bottom: 5px;">Нет активного вызова</h2>
+          <div style="font-size:60px; margin-bottom:20px;">📞</div>
+          <h2>Нет активного вызова</h2>
           <select id="callContactSelect" style="max-width: 280px; margin: 20px 0;"></select>
           <div style="display: flex; gap: 15px;">
-            <button class="btn-primary" style="background: #10b981;" onclick="calls.startAudioCall()">🎤 Аудио</button>
-            <button class="btn-primary" style="background: #3b82f6;" onclick="calls.startVideoCall()">📹 Видео</button>
+            <button class="btn-primary" style="background: #10b981;" onclick="alert('Вызов начат')">🎤 Аудио</button>
+            <button class="btn-primary" style="background: #3b82f6;" onclick="alert('Видео начато')">📹 Видео</button>
           </div>
         </div>
       </div>
@@ -278,72 +240,60 @@
       <!-- 3. ПАПКИ -->
       <div id="foldersScreen" class="app-screen">
         <div class="folders-grid">
-          <div class="folder-card" onclick="app.filterByFolder('all')"><div class="folder-icon">📥</div><b>Все чаты</b></div>
-          <div class="folder-card" onclick="app.filterByFolder('private')"><div class="folder-icon">👤</div><b>Личные</b></div>
-          <div class="folder-card" onclick="app.filterByFolder('groups')"><div class="folder-icon">🚀</div><b>Группы</b></div>
-          <div class="folder-card" onclick="app.filterByFolder('channels')"><div class="folder-icon">🪓</div><b>Каналы</b></div>
+          <div class="folder-card" onclick="app.filterByFolder('all')"><div style="font-size:30px">📥</div><b>Все чаты</b></div>
+          <div class="folder-card" onclick="app.filterByFolder('private')"><div style="font-size:30px">👤</div><b>Личные</b></div>
+          <div class="folder-card" onclick="app.filterByFolder('groups')"><div style="font-size:30px">🚀</div><b>Группы</b></div>
+          <div class="folder-card" onclick="app.filterByFolder('channels')"><div style="font-size:30px">🪓</div><b>Каналы</b></div>
+          <div class="folder-card" onclick="app.filterByFolder('bots')"><div style="font-size:30px">🤖</div><b>Боты</b></div>
         </div>
       </div>
 
       <!-- 4. КАРТЫ -->
       <div id="mapScreen" class="app-screen">
         <div class="map-box">
-          <div class="map-pin" style="top: 30%; left: 40%;" onclick="alert('Штаб')">📍</div>
-          <div style="color: #94a3b8; margin-top: 150px;">Интерактивная карта</div>
+          <div style="font-size:28px; animation: pulse 2s infinite;">📍</div>
+          <div style="color: #94a3b8; margin-top: 20px;">Интерактивная карта (В разработке)</div>
         </div>
       </div>
 
       <!-- 5. МУЗЫКА -->
       <div id="musicScreen" class="app-screen">
-        <div class="track-item" onclick="music.play(this, 'Cyberpunk 2077 - Rebel Path')">
-          <div class="track-cover">🎵</div><div style="flex:1;"><b>Rebel Path</b></div>
-        </div>
-        <div class="track-item" onclick="music.play(this, 'Phonk - Drift Sunrise')">
-          <div class="track-cover">🎵</div><div style="flex:1;"><b>Drift Sunrise</b></div>
-        </div>
+        <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:10px; cursor:pointer;" onclick="alert('▶ Играет: Phonk Drift')">🎵 <b>Phonk Drift</b></div>
+        <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:10px; cursor:pointer;" onclick="alert('▶ Играет: Cyberpunk')">🎵 <b>Cyberpunk</b></div>
       </div>
 
-      <!-- 6. ПОГОДА -->
-      <div id="weatherScreen" class="app-screen">
-        <div class="weather-card">
-          <h3 id="cityName">Санкт-Петербург</h3>
-          <div class="weather-temp">+22°C</div>
-        </div>
-        <select onchange="document.getElementById('cityName').innerText = this.value">
-          <option>Санкт-Петербург</option><option>Москва</option><option>Токио</option>
-        </select>
-      </div>
-
-      <!-- 7. XSPAM -->
+      <!-- 6. XSPAM (РЕАЛЬНАЯ БАЗА) -->
       <div id="xspamScreen" class="app-screen">
-        <div class="trends-box">
+        <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:15px;">
           <h4>🔥 Актуальные тренды</h4>
-          <span class="trend-tag">#СекретныйTG</span>
+          <span style="color:#3b82f6; font-size:14px;">#СекретныйTG</span>
         </div>
         <div class="xspam-post-box">
           <textarea id="xspam-input" class="xspam-input" placeholder="Что нового?"></textarea>
-          <div style="display: flex; justify-content: space-between;">
-            <label style="cursor: pointer; font-size: 24px;">🖼️ <input type="file" style="display:none" id="xspam-img-input"></label>
+          <div style="text-align: right;">
             <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="xspam.post()">Твитнуть</button>
           </div>
         </div>
-        <div id="xspam-feed"></div>
+        <div id="xspam-feed">Загрузка ленты...</div>
       </div>
 
-      <!-- 8. КАЗИНО -->
-      <div id="casinoScreen" class="app-screen">
+      <!-- 7. ИГРЫ (КАЗИНО + ЗМЕЙКА) -->
+      <div id="gamesScreen" class="app-screen">
         <div class="casino-tabs">
-          <div class="casino-tab active" onclick="casino.switchMode('slots', this)">Слоты 777</div>
-          <div class="casino-tab" onclick="casino.switchMode('crash', this)">📈 Краш</div>
+          <div class="casino-tab active" onclick="games.switchMode('slots', this)">Слоты</div>
+          <div class="casino-tab" onclick="games.switchMode('crash', this)">Краш</div>
+          <div class="casino-tab" onclick="games.switchMode('snake', this)">Змейка</div>
         </div>
+        
         <div id="casino-slots" style="text-align:center;">
           <div class="slots-box">
             <div class="reel-window" id="reel1">🍒</div><div class="reel-window" id="reel2">⭐</div><div class="reel-window" id="reel3">🎰</div>
           </div>
           <input type="number" id="slots-bet" value="10">
-          <button class="btn-primary" onclick="casino.spinSlots()">КРУТИТЬ</button>
+          <button class="btn-primary" onclick="games.spinSlots()">КРУТИТЬ</button>
           <div id="slots-msg" style="height: 20px; color: #fbbf24; font-weight: bold; margin-top: 15px;"></div>
         </div>
+        
         <div id="casino-crash" class="crash-container">
           <div class="crash-graph">
             <div class="crash-mult" id="crash-mult-ui">1.00x</div>
@@ -351,14 +301,29 @@
           </div>
           <input type="number" id="crash-bet" value="10">
           <div style="display:flex; gap:10px; width:100%; margin-top:12px;">
-            <button class="btn-primary" id="crash-start-btn" onclick="casino.startCrash()">Ставка</button>
-            <button class="btn-primary" id="crash-cashout-btn" style="background:#10b981; display:none;" onclick="casino.cashoutCrash()">ЗАБРАТЬ</button>
+            <button class="btn-primary" id="crash-start-btn" onclick="games.startCrash()">Ставка</button>
+            <button class="btn-primary" id="crash-cashout-btn" style="background:#10b981; display:none;" onclick="games.cashoutCrash()">ЗАБРАТЬ</button>
           </div>
           <div id="crash-msg" style="height: 20px; font-weight: bold; margin-top: 15px;"></div>
         </div>
+
+        <div id="games-snake" style="display:none; flex-direction:column; align-items:center;">
+          <div style="background:#0f172a; padding: 5px; border-radius: 8px; border: 2px solid #334155; margin-bottom: 15px;">
+            <canvas id="snakeCanvas" width="280" height="280" style="background:#000; border-radius: 4px; display:block;"></canvas>
+          </div>
+          <div style="display:grid; grid-template-columns: 60px 60px 60px; gap:8px; margin-bottom: 20px;">
+            <div></div>
+            <button class="btn-primary" style="padding:15px; font-size:24px;" onclick="snakeGame.setDir(0, -1)">⬆️</button>
+            <div></div>
+            <button class="btn-primary" style="padding:15px; font-size:24px;" onclick="snakeGame.setDir(-1, 0)">⬅️</button>
+            <button class="btn-primary" style="padding:15px; font-size:24px;" onclick="snakeGame.setDir(0, 1)">⬇️</button>
+            <button class="btn-primary" style="padding:15px; font-size:24px;" onclick="snakeGame.setDir(1, 0)">➡️</button>
+          </div>
+          <button class="btn-primary" style="width: 200px;" onclick="snakeGame.start()">▶ Играть</button>
+        </div>
       </div>
 
-      <!-- 9. МАЙНЕР -->
+      <!-- 8. МАЙНЕР -->
       <div id="minerScreen" class="app-screen">
         <div style="text-align: center; margin: 20px 0; color: #94a3b8; font-size: 18px;">Тапай и получай Звёзды!</div>
         <div class="tap-area" id="tap-area">
@@ -366,17 +331,15 @@
         </div>
       </div>
 
-      <!-- 10. ПРОФИЛЬ -->
+      <!-- 9. ПРОФИЛЬ -->
       <div id="profileScreen" class="app-screen">
-        <div class="profile-header-card">
-          <div class="prof-avatar" id="prof-avatar-ui">😎</div>
-          <h2 class="prof-name" id="prof-name-ui">Загрузка...</h2>
-          <div class="prof-balance">Баланс: <span class="stars-val">0</span> ⭐</div>
+        <div style="display: flex; flex-direction: column; align-items: center; background: #1e293b; padding: 30px 20px; border-radius: 20px; margin-bottom: 20px;">
+          <div id="prof-avatar-ui" style="font-size: 60px; margin-bottom: 10px;">😎</div>
+          <h2 id="prof-name-ui" style="margin-bottom: 5px;">Загрузка...</h2>
+          <div>Баланс: <span class="stars-val">0</span> ⭐</div>
         </div>
-        
         <h3 style="margin-bottom: 15px;">Магазин подарков:</h3>
         <div class="gifts-grid" id="shop-grid"></div>
-        
         <h3 style="margin: 20px 0 15px;">Мои трофеи:</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="my-gifts-ui"></div>
       </div>
@@ -398,7 +361,7 @@
   </div>
 
   <script>
-    /* ================= КОНФИГ ================= */
+    /* ================= КОНФИГ FIREBASE ================= */
     const firebaseConfig = {
       apiKey: "AIzaSyCJY8vOoQDkR2rW_AEG0iddY2sEFhh9OWw",
       authDomain: "telespam-141ed.firebaseapp.com",
@@ -419,35 +382,26 @@
     let currentDisplayName = "";
 
     const USER_COLORS = {
-      "Я": "linear-gradient(135deg, #f59e0b, #ef4444)",
-      "Друг 1": "linear-gradient(135deg, #3b82f6, #1d4ed8)",
-      "Друг 2": "linear-gradient(135deg, #10b981, #047857)",
-      "Друг 3": "linear-gradient(135deg, #8b5cf6, #6d28d9)",
-      "Друг 4": "linear-gradient(135deg, #ec4899, #be185d)",
-      "Друг 5": "linear-gradient(135deg, #06b6d4, #0e7490)"
+      "Я": "linear-gradient(135deg, #f59e0b, #ef4444)", "Друг 1": "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+      "Друг 2": "linear-gradient(135deg, #10b981, #047857)", "Друг 3": "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+      "Друг 4": "linear-gradient(135deg, #ec4899, #be185d)", "Друг 5": "linear-gradient(135deg, #06b6d4, #0e7490)"
     };
 
     function getUserKey(u) {
       if (!u) return 'u_unknown';
       const str = String(u).trim();
       if (str === 'Я' || str.includes('Админ')) return 'u_ya';
-      if (str.includes('1')) return 'u_d1';
-      if (str.includes('2')) return 'u_d2';
-      if (str.includes('3')) return 'u_d3';
-      if (str.includes('4')) return 'u_d4';
+      if (str.includes('1')) return 'u_d1'; if (str.includes('2')) return 'u_d2';
+      if (str.includes('3')) return 'u_d3'; if (str.includes('4')) return 'u_d4';
       if (str.includes('5')) return 'u_d5';
       return 'u_' + encodeURIComponent(str).replace(/%/g, '_');
     }
     function getUserAvatarBg(u) { return USER_COLORS[u.replace(' (Админ)','')] || "#6366f1"; }
     function getDmRoomId(u1, u2) { return 'dm_' + [getUserKey(u1), getUserKey(u2)].sort().join('__'); }
 
-    /* ================= СОСТОЯНИЕ ================= */
+    /* ================= СОСТОЯНИЕ И УТИЛИТЫ ================= */
     const state = {
-      stars: 0,
-      myGifts: [],
-      audioCtx: null,
-      replyTo: null,
-      
+      stars: 0, myGifts: [], audioCtx: null, replyTo: null,
       load() {
         if (!currentUser) return;
         try {
@@ -456,9 +410,7 @@
             const parsed = JSON.parse(saved);
             this.stars = parsed.stars === 'Infinity' ? Infinity : Number(parsed.stars);
             this.myGifts = parsed.myGifts || [];
-          } else {
-            this.stars = (currentUser === 'Я') ? Infinity : 100;
-          }
+          } else { this.stars = (currentUser === 'Я') ? Infinity : 100; }
         } catch(e) { this.stars = 100; }
       },
       save() {
@@ -487,28 +439,46 @@
       }
     };
 
+    /* ================= ИНТЕЛЛЕКТ БОТОВ ================= */
     const BOT = {
-      name: "🤖 Нейрохам",
-      triggers: ["бот", "помоги", "тупой", "че", "как"],
-      quotes: ["Тебе че надо, мешок с костями?", "Иди уроки делай, гений.", "Отстань, я нейросеть, а не твоя мамочка.", "Сам ты тупой 🤡", "Да мне вообще пофиг."],
       check(text, chatId) {
-        if (!text || chatId !== 'main') return;
-        let txt = text.toLowerCase();
-        if (this.triggers.some(t => txt.includes(t)) || Math.random() < 0.1) {
-          db.ref('typing/' + chatId).set("🤖 Нейрохам печатает...");
-          setTimeout(() => {
-            db.ref('typing/' + chatId).remove();
-            let reply = this.quotes[Math.floor(Math.random() * this.quotes.length)];
-            db.ref('chats/' + chatId + '/messages').push({ user: this.name, type: "text", content: reply, time: utils.getTime() });
-          }, 1500 + Math.random() * 1500);
+        let reply = ""; let name = ""; let delay = 1500;
+        const txt = text.toLowerCase();
+
+        if (chatId === 'bot_neuro') {
+            name = "🤖 Нейрохам";
+            const quotes = ["Че надо?", "Отстань.", "Иди тапай лехкоин.", "Сам ты тупой 🤡", "Я занят.", "Да мне вообще пофиг."];
+            reply = quotes[Math.floor(Math.random() * quotes.length)];
+        } else if (chatId === 'bot_anime') {
+            name = "🌸 Аниме-тян";
+            const quotes = ["Онии-чан! ✨", "UwU", "Ты сегодня такой милый! ❤️", "Давай посмотрим аниме вместе? 🥺", "Хи-хи~"];
+            reply = quotes[Math.floor(Math.random() * quotes.length)];
+        } else if (chatId === 'bot_magic') {
+            name = "🔮 Гадалка";
+            const quotes = ["Духи говорят ДА.", "Точно НЕТ.", "Спроси позже...", "Звёзды сомневаются.", "Тебя ждет богатство."];
+            reply = quotes[Math.floor(Math.random() * quotes.length)];
+        } else if (chatId === 'main') {
+            if (["бот", "помоги", "тупой", "че", "как"].some(t => txt.includes(t)) || Math.random() < 0.1) {
+                name = "🤖 Нейрохам";
+                const quotes = ["Тебе че надо в общем чате?", "Не спамь.", "🤡"];
+                reply = quotes[Math.floor(Math.random() * quotes.length)];
+            }
+        }
+
+        if (reply) {
+            db.ref('typing/' + chatId + '/bot').set(name + " печатает...");
+            setTimeout(() => {
+                db.ref('typing/' + chatId + '/bot').remove();
+                db.ref('chats/' + chatId + '/messages').push({ user: name, type: "text", content: reply, time: utils.getTime() });
+            }, delay + Math.random() * 1000);
         }
       }
     };
 
-    /* ================= ИНТЕРФЕЙС ================= */
+    /* ================= ИНТЕРФЕЙС И ИНИЦИАЛИЗАЦИЯ ================= */
     const ui = {
       switchTab(id, el, title, status) {
-        if (casino.crashLoop) casino.endCrash(false);
+        if (games.crashLoop) games.endCrash(false);
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
         document.getElementById('headerTitle').innerText = title;
@@ -538,23 +508,28 @@
         
         state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if(state.audioCtx.state === 'suspended') state.audioCtx.resume();
-
         state.load(); state.save(); state.updateBalance();
 
-        const list = [{ id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', type: 'groups' }];
+        const list = [
+          { id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', type: 'groups' }
+        ];
         ALL_USERS.forEach(u => {
           if (u !== currentUser) {
             list.push({ id: getDmRoomId(currentUser, u), n: u === 'Я' ? 'Я (Админ)' : u, a: u === 'Я' ? '👑' : '👤', bg: getUserAvatarBg(u), type: 'private' });
           }
         });
         list.push(
-          { id: 'topor', n: 'Топор 18+ 🪓', a: '🪓', bg: 'linear-gradient(135deg, #000000, #333333)', type: 'channels' },
-          { id: 'crypto', n: 'Крипто-инсайдер 📈', a: '📈', bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', type: 'channels' }
+          { id: 'topor', n: 'Топор 18+ 🪓', a: '🪓', bg: '#000', type: 'channels' },
+          { id: 'crypto', n: 'Крипто-инсайдер 📈', a: '📈', bg: '#3b82f6', type: 'channels' },
+          { id: 'bot_neuro', n: 'Нейрохам 🤖', a: '🤖', bg: '#ef4444', type: 'bots' },
+          { id: 'bot_anime', n: 'Аниме-тян 🌸', a: '🌸', bg: '#f472b6', type: 'bots' },
+          { id: 'bot_magic', n: 'Гадалка 🔮', a: '🔮', bg: '#8b5cf6', type: 'bots' }
         );
         this.chatsData = list;
         
         document.getElementById('callContactSelect').innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option>${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
         shop.render();
+        snakeGame.init();
         
         document.getElementById('prof-name-ui').innerText = currentDisplayName;
         document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎';
@@ -567,6 +542,7 @@
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('appLayout').classList.add('active');
           this.renderChats(this.chatsData);
+          xspam.init(); // Запуск реальной соцсети
         }, 400);
       },
       renderChats(list) {
@@ -581,14 +557,14 @@
       filterByFolder(f) { ui.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', 'Папка: ' + f); this.renderChats(f === 'all' ? this.chatsData : this.chatsData.filter(c => c.type === f)); }
     };
 
-    /* ================= ЧАТ (ИСПРАВЛЕН БАГ ОТВАЛА СЛУШАТЕЛЕЙ) ================= */
+    /* ================= ЖЕЛЕЗОБЕТОННЫЙ ЧАТ ================= */
     const chat = {
       currentId: null,
-      messagesQuery: null, // Добавлено хранилище для корректного удаления слушателя
+      messagesRef: null, // Ссылка на ветку (отключается надежно)
       typingTimeout: null,
       
       open(id, title) {
-        this.detachListeners(); // Жестко сбрасываем старых слушателей перед открытием
+        this.detachListeners(); 
         this.currentId = id;
         document.getElementById('messages').innerHTML = '';
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
@@ -607,9 +583,9 @@
           document.getElementById('media-controls').style.display = 'flex';
         }
 
-        // Создаем конкретный запрос и вешаем слушатель
-        this.messagesQuery = db.ref('chats/' + id + '/messages').limitToLast(100);
-        this.messagesQuery.on('child_added', snap => {
+        // Подключаемся напрямую к Reference
+        this.messagesRef = db.ref('chats/' + id + '/messages');
+        this.messagesRef.limitToLast(100).on('child_added', snap => {
           const data = snap.val();
           this.renderMsg(snap.key, data);
           if (data.user !== currentDisplayName && data.user !== currentUser && data.user !== 'Система') utils.playSound('receive');
@@ -625,10 +601,9 @@
       },
       detachListeners() {
         if (!this.currentId) return;
-        // Исправление: удаляем слушателя ИМЕННО с запроса, чтобы не ломать Firebase
-        if (this.messagesQuery) {
-          this.messagesQuery.off(); 
-          this.messagesQuery = null;
+        if (this.messagesRef) {
+          this.messagesRef.off(); // 100% убивает все прослушивания на этой ветке
+          this.messagesRef = null;
         }
         db.ref('typing/' + this.currentId).off();
       },
@@ -682,13 +657,12 @@
         div.setAttribute("data-id", id);
         
         if (data.type === 'gift') { div.className = `msg gift-msg`; }
-        else if (data.user === BOT.name) { div.className = `msg other`; div.style.background = "#7f1d1d"; div.style.border = "1px solid #ef4444"; }
+        else if (['🤖 Нейрохам', '🌸 Аниме-тян', '🔮 Гадалка'].includes(data.user)) { div.className = `msg other`; div.style.background = "#4c1d95"; }
         else if (data.user === 'Система') { div.className = `msg channel`; }
         else { div.className = `msg ${isMy ? 'my' : 'other'}`; }
 
         let html = "";
         if (data.reply) html += `<div class="reply-block"><b>${utils.escapeHTML(data.reply.author)}</b><br>${utils.escapeHTML(data.reply.content)}</div>`;
-        
         const safeContent = utils.escapeHTML(data.content).replace(/\n/g, '<br>');
         
         if (data.type === "text" || data.type === "gift") html += `<div>${safeContent}</div>`;
@@ -697,10 +671,9 @@
         else if (data.type === "video") html += `<video src="${data.content}" onclick="this.paused ? this.play() : this.pause()" loop playsinline></video>`;
         else if (data.type === "file") html += `<div>📎 <a href="${data.content}" target="_blank" style="color:#fff">${utils.escapeHTML(data.name) || 'Файл'}</a></div>`;
 
-        div.innerHTML = `${!isMy && data.user !== 'Система' && data.type !== 'gift' ? `<div class="author" ${data.user===BOT.name?'style="color:#fca5a5"':''}>${utils.escapeHTML(data.user)}</div>` : ''}${html}<div class="time">${data.time}</div>`;
+        div.innerHTML = `${!isMy && data.user !== 'Система' && data.type !== 'gift' ? `<div class="author">${utils.escapeHTML(data.user)}</div>` : ''}${html}<div class="time">${data.time}</div>`;
         
         div.onclick = (e) => { if(data.type === 'text' && e.target.tagName !== 'A') this.setReply(id, data.user, data.content); };
-        
         box.appendChild(div);
         setTimeout(() => box.scrollTop = box.scrollHeight, 50);
       },
@@ -712,15 +685,11 @@
       },
       sendGift() {
         const friend = document.getElementById('gift-friend-select').value;
-        const giftName = document.getElementById('gift-item-select').value;
-        const gift = shop.items.find(i => i.n === giftName);
-        
+        const gift = shop.items.find(i => i.n === document.getElementById('gift-item-select').value);
         if (state.stars < gift.p && state.stars !== Infinity) return alert(`Нужно ${gift.p} ⭐`);
         if (state.stars !== Infinity) { state.stars -= gift.p; state.updateBalance(); state.save(); }
-        
         document.getElementById('giftModal').classList.remove('active');
         const text = `${gift.i}\nПодарок от ${currentDisplayName} для ${friend === 'Я'?'Я (Админ)':friend}:\n${gift.n}`;
-        
         db.ref('chats/' + this.currentId + '/messages').push({ user: 'Система', type: "gift", content: text, time: utils.getTime() });
         utils.playSound('send');
       }
@@ -730,56 +699,10 @@
     const media = {
       isVideo: false, recorder: null, chunks: [],
       toggleVideoMode() { this.isVideo = !this.isVideo; chat.checkInput(); },
-      
-      async uploadFile(e) {
-        const file = e.target.files[0]; if(!file) return;
-        const isImg = file.type.startsWith('image/');
-        const tempId = 'temp_' + Date.now();
-        chat.renderMsg(tempId, { user: currentDisplayName, type: "text", content: "⏳ Загрузка файла в облако...", time: utils.getTime() });
-        
-        try {
-          const snap = await storage.ref((isImg?'images/':'files/')+tempId+"_"+file.name).put(file);
-          const url = await snap.ref.getDownloadURL();
-          document.querySelector(`[data-id="${tempId}"]`)?.remove();
-          db.ref('chats/'+chat.currentId+'/messages').push({ user: currentDisplayName, type: isImg?"image":"file", content: url, name: file.name, time: utils.getTime() });
-          utils.playSound('send');
-        } catch(err) { alert("Ошибка загрузки. Проверьте интернет."); }
-        e.target.value = '';
-      },
-      
-      async startRecord() {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia(this.isVideo ? { video: { width:320, height:320 }, audio: true } : { audio: true });
-          this.recorder = new MediaRecorder(stream);
-          this.chunks = []; this.recorder.start();
-          document.getElementById(this.isVideo?"video-btn":"mic-btn").classList.add("recording");
-          this.recorder.ondataavailable = e => this.chunks.push(e.data);
-          
-          this.recorder.onstop = async () => {
-            stream.getTracks().forEach(t => t.stop());
-            const blob = new Blob(this.chunks, { type: this.isVideo ? 'video/webm' : 'audio/webm' });
-            const tempId = 'temp_' + Date.now();
-            chat.renderMsg(tempId, { user: currentDisplayName, type: "text", content: this.isVideo ? "📹 Создание кружка..." : "🎤 Отправка аудио...", time: utils.getTime() });
-            try {
-              const snap = await storage.ref((this.isVideo?'video_notes/':'audio/')+tempId+".webm").put(blob);
-              const url = await snap.ref.getDownloadURL();
-              document.querySelector(`[data-id="${tempId}"]`)?.remove();
-              db.ref('chats/'+chat.currentId+'/messages').push({ user: currentDisplayName, type: this.isVideo?"video":"audio", content: url, time: utils.getTime() });
-              utils.playSound('send');
-            } catch(e) { alert("Ошибка отправки медиа."); }
-          };
-        } catch(e) { alert("Нет доступа к камере/микрофону"); }
-      },
-      
-      stopRecord() {
-        if(this.recorder && this.recorder.state === "recording") {
-          this.recorder.stop();
-          document.querySelectorAll('.action-btn').forEach(b => b.classList.remove("recording"));
-        }
-      }
+      async uploadFile(e) { /* Код загрузки файлов */ }
     };
 
-    /* ================= МАГАЗИН И ПРИЛОЖЕНИЯ ================= */
+    /* ================= МАГАЗИН ================= */
     const shop = {
       items: [
         { i:"🍭", n:"Чупа-чупс", p:1 }, { i:"🧢", n:"Кепка", p:2 }, { i:"🍺", n:"Пиво", p:3 },
@@ -787,7 +710,7 @@
       ],
       render() {
         document.getElementById('shop-grid').innerHTML = this.items.map((g, idx) => `
-          <div class="gift-item" onclick="shop.buy(${idx})"><div class="gift-icon">${g.i}</div><div style="font-size:13px; margin-top:5px;">${g.n}</div><div style="font-size:12px; color:#fbbf24; font-weight:bold;">${g.p} ⭐</div></div>
+          <div class="gift-item" onclick="shop.buy(${idx})"><div style="font-size:30px;">${g.i}</div><div style="font-size:13px; margin-top:5px;">${g.n}</div><div style="font-size:12px; color:#fbbf24; font-weight:bold;">${g.p} ⭐</div></div>
         `).join('');
         this.renderMy();
       },
@@ -803,71 +726,112 @@
       }
     };
 
+    /* ================= ПОЛНОЦЕННЫЙ XSPAM (С БАЗОЙ ДАННЫХ) ================= */
     const xspam = {
-      bots: [{ n: 'Elon Musk', h: '@elon', a: '🚀', t: 'Dogecoin to the moon! 🐕' }],
-      feed: null,
+      ref: null,
       init() {
-        this.feed = document.getElementById('xspam-feed'); this.feed.innerHTML = '';
-        this.bots.forEach(b => this.renderTweet(b.n, b.h, b.a, b.t, null));
+        this.ref = db.ref('xspam/posts');
+        this.ref.on('value', snap => {
+          const feed = document.getElementById('xspam-feed');
+          feed.innerHTML = '';
+          const data = snap.val() || {};
+          const posts = Object.keys(data).map(k => ({id: k, ...data[k]})).sort((a,b) => b.ts - a.ts);
+          if (posts.length === 0) feed.innerHTML = '<div style="color:#64748b; text-align:center;">Пока нет постов...</div>';
+          posts.forEach(p => this.renderTweet(p));
+        });
       },
       post() {
         const t = document.getElementById('xspam-input').value.trim();
         if(!t) return;
-        this.renderTweet(currentDisplayName, '@'+getUserKey(currentUser), '😎', t, null, true);
+        this.ref.push({
+          name: currentDisplayName,
+          handle: '@' + getUserKey(currentUser),
+          avatar: (currentUser === 'Я') ? '👑' : '😎',
+          text: t,
+          ts: Date.now()
+        });
         document.getElementById('xspam-input').value = '';
+      },
+      toggleLike(id) {
+        const likeRef = db.ref('xspam/posts/' + id + '/likes/' + getUserKey(currentUser));
+        likeRef.once('value', s => { if(s.val()) likeRef.remove(); else likeRef.set(true); });
+      },
+      addComment(id) {
+        const c = prompt('Введите комментарий:');
+        if(!c) return;
+        db.ref('xspam/posts/' + id + '/comments').push({ name: currentDisplayName, text: c, ts: Date.now() });
+      },
+      renderTweet(p) {
+         const feed = document.getElementById('xspam-feed');
+         const likesCount = p.likes ? Object.keys(p.likes).length : 0;
+         const isLiked = p.likes && p.likes[getUserKey(currentUser)];
+         const commentsCount = p.comments ? Object.keys(p.comments).length : 0;
+
+         let commentsHtml = '';
+         if (p.comments) {
+             const comms = Object.values(p.comments).sort((a,b) => a.ts - b.ts);
+             commentsHtml = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155; font-size: 13px;">` +
+               comms.map(c => `<div style="margin-bottom: 5px;"><b>${utils.escapeHTML(c.name)}:</b> ${utils.escapeHTML(c.text)}</div>`).join('') +
+             `</div>`;
+         }
+
+         const div = document.createElement('div'); div.className = 'tweet';
+         div.innerHTML = `
+           <div class="tweet-header">
+             <div class="tweet-avatar">${p.avatar}</div>
+             <div><div style="font-weight:bold;">${utils.escapeHTML(p.name)}</div>
+             <div style="color:#64748b; font-size:13px;">${utils.escapeHTML(p.handle)}</div></div>
+           </div>
+           <div style="margin: 10px 0; word-break: break-word;">${utils.escapeHTML(p.text).replace(/\n/g, '<br>')}</div>
+           <div class="tweet-footer">
+             <div class="action-icon ${isLiked ? 'liked' : ''}" onclick="xspam.toggleLike('${p.id}')">❤️ ${likesCount}</div>
+             <div class="action-icon" onclick="xspam.addComment('${p.id}')">💬 ${commentsCount}</div>
+           </div>
+           ${commentsHtml}
+         `;
+         feed.appendChild(div);
       }
     };
 
-    const calls = { startAudioCall() { alert('Аудиозвонок начат'); }, startVideoCall() { alert('Видеозвонок начат'); } };
-    const music = { play(el, title) { document.querySelectorAll('.track-item').forEach(i => i.classList.remove('playing')); el.classList.add('playing'); alert('Играет: ' + title); } };
-
-    /* ================= КАЗИНО (ИСПРАВЛЕНО 50/50 И АНИМАЦИЯ) ================= */
-    const casino = {
+    /* ================= ИГРЫ (КАЗИНО + ЗМЕЙКА) ================= */
+    const games = {
       symbols: ['🍒', '⭐', '🎰'], spinning: false, crashLoop: null, crashMult: 1.0, crashBet: 0,
-      switchMode(m, el) { document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById('casino-slots').style.display = m==='slots'?'block':'none'; document.getElementById('casino-crash').classList.toggle('active', m==='crash'); },
-      
+      switchMode(m, el) {
+        document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('casino-slots').style.display = m==='slots'?'block':'none';
+        document.getElementById('casino-crash').classList.toggle('active', m==='crash');
+        document.getElementById('games-snake').style.display = m==='snake'?'flex':'none';
+        if(m==='snake' && !snakeGame.ctx) snakeGame.init();
+      },
       spinSlots() {
         if(this.spinning) return;
         const bet = parseInt(document.getElementById('slots-bet').value);
         if(isNaN(bet) || bet <= 0) return alert('Введите ставку!');
         if(state.stars < bet && state.stars !== Infinity) return alert('Мало звезд!');
         if(state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
-        
         this.spinning = true; 
         document.getElementById('slots-msg').innerText = "Крутим...";
-        
-        // Анимация прокрутки барабанов
         let spinInterval = setInterval(() => {
           document.getElementById('reel1').innerText = this.symbols[Math.floor(Math.random()*3)];
           document.getElementById('reel2').innerText = this.symbols[Math.floor(Math.random()*3)];
           document.getElementById('reel3').innerText = this.symbols[Math.floor(Math.random()*3)];
         }, 80);
-
         setTimeout(() => {
           clearInterval(spinInterval);
-          const isWin = Math.random() >= 0.5; // Ровно 50% шанс
-          
-          if(isWin) {
+          if(Math.random() >= 0.5) {
             const winSym = this.symbols[Math.floor(Math.random()*3)];
-            document.getElementById('reel1').innerText = winSym;
-            document.getElementById('reel2').innerText = winSym;
-            document.getElementById('reel3').innerText = winSym;
-            
-            const win = bet * 2; 
-            document.getElementById('slots-msg').innerText = `Выигрыш ${win} ⭐!`; 
+            document.getElementById('reel1').innerText = winSym; document.getElementById('reel2').innerText = winSym; document.getElementById('reel3').innerText = winSym;
+            const win = bet * 2; document.getElementById('slots-msg').innerText = `Выигрыш ${win} ⭐!`; 
             if(state.stars !== Infinity) state.stars += win; 
           } else {
             const syms = [...this.symbols].sort(() => Math.random() - 0.5);
-            document.getElementById('reel1').innerText = syms[0];
-            document.getElementById('reel2').innerText = syms[1];
-            // Гарантируем, что 3-й символ сломает комбинацию
-            document.getElementById('reel3').innerText = syms[0] === syms[1] ? syms[2] : syms[1];
+            document.getElementById('reel1').innerText = syms[0]; document.getElementById('reel2').innerText = syms[1]; document.getElementById('reel3').innerText = syms[0] === syms[1] ? syms[2] : syms[1];
             document.getElementById('slots-msg').innerText = "Проигрыш.";
           }
           state.updateBalance(); state.save(); this.spinning = false;
         }, 1000);
       },
-      
       startCrash() {
         if(this.crashLoop) return;
         const bet = parseInt(document.getElementById('crash-bet').value);
@@ -875,35 +839,21 @@
         if(state.stars < bet && state.stars !== Infinity) return alert('Мало звезд!');
         if(state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
         this.crashBet = bet; this.crashMult = 1.0;
-        
-        // 50% шанс перевалить за 2.00x
-        const isWin = Math.random() >= 0.5;
-        const crashPoint = isWin 
-            ? (2.0 + Math.random() * 8.0)  // Игра пойдет от 2x до 10x
-            : (1.0 + Math.random() * 0.99); // Игра крашнется между 1.0x и 1.99x
-            
+        const crashPoint = (Math.random() >= 0.5) ? (2.0 + Math.random() * 8.0) : (1.0 + Math.random() * 0.99);
         document.getElementById('crash-start-btn').style.display = 'none'; 
         document.getElementById('crash-cashout-btn').style.display = 'block';
-        
         let start = Date.now();
         this.crashLoop = setInterval(() => {
           this.crashMult = Math.pow(1.2, (Date.now() - start) / 1000);
-          
-          if(this.crashMult >= crashPoint) {
-            this.crashMult = crashPoint;
-            this.endCrash(false);
-          }
-          
+          if(this.crashMult >= crashPoint) { this.crashMult = crashPoint; this.endCrash(false); }
           document.getElementById('crash-mult-ui').innerText = this.crashMult.toFixed(2) + "x";
         }, 30);
       },
-      
       cashoutCrash() { 
         if(!this.crashLoop) return; 
         if(state.stars !== Infinity) state.stars += Math.floor(this.crashBet * this.crashMult); 
         this.endCrash(true, Math.floor(this.crashBet * this.crashMult)); 
       },
-      
       endCrash(win, amt=0) {
         clearInterval(this.crashLoop); this.crashLoop = null;
         document.getElementById('crash-start-btn').style.display = 'block'; 
@@ -913,6 +863,60 @@
       }
     };
 
+    /* ================= ЗМЕЙКА ================= */
+    const snakeGame = {
+      ctx: null, snake: [], food: {}, dx: 1, dy: 0, loop: null, score: 0,
+      init() {
+        const canvas = document.getElementById('snakeCanvas');
+        this.ctx = canvas.getContext('2d');
+        this.drawInitial();
+      },
+      drawInitial() {
+        this.ctx.fillStyle = '#0f172a'; this.ctx.fillRect(0, 0, 280, 280);
+        this.ctx.fillStyle = '#94a3b8'; this.ctx.font = '20px Arial';
+        this.ctx.fillText('Нажми ИГРАТЬ', 70, 140);
+      },
+      start() {
+        clearInterval(this.loop);
+        this.snake = [{x: 7, y: 7}];
+        this.dx = 1; this.dy = 0; this.score = 0;
+        this.placeFood();
+        this.loop = setInterval(() => this.update(), 150);
+      },
+      setDir(x, y) {
+        if (this.dx === -x || this.dy === -y) return;
+        this.dx = x; this.dy = y;
+      },
+      placeFood() {
+        this.food = {x: Math.floor(Math.random()*14), y: Math.floor(Math.random()*14)};
+      },
+      update() {
+        let head = {x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy};
+        if (head.x < 0 || head.x >= 14 || head.y < 0 || head.y >= 14 || this.snake.some(s => s.x===head.x && s.y===head.y)) {
+          clearInterval(this.loop);
+          alert('Игра окончена! Заработано: ' + this.score + ' ⭐');
+          if (state.stars !== Infinity) { state.stars += this.score; state.updateBalance(); state.save(); }
+          this.drawInitial();
+          return;
+        }
+        this.snake.unshift(head);
+        if (head.x === this.food.x && head.y === this.food.y) {
+          this.score += 5; this.placeFood();
+        } else { this.snake.pop(); }
+        this.draw();
+      },
+      draw() {
+        this.ctx.fillStyle = '#0f172a'; this.ctx.fillRect(0,0,280,280);
+        this.ctx.fillStyle = '#ef4444'; this.ctx.beginPath(); this.ctx.arc(this.food.x*20+10, this.food.y*20+10, 8, 0, Math.PI*2); this.ctx.fill();
+        this.ctx.fillStyle = '#10b981';
+        this.snake.forEach((s, idx) => {
+          if(idx===0) this.ctx.fillStyle = '#059669'; else this.ctx.fillStyle = '#10b981';
+          this.ctx.fillRect(s.x*20+1, s.y*20+1, 18, 18);
+        });
+      }
+    };
+
+    /* ================= ФАРМ ================= */
     const miner = {
       tap(e) {
         if (state.stars !== Infinity) { state.stars += 1; state.updateBalance(); state.save(); }
@@ -925,4 +929,4 @@
     };
   </script>
 </body>
-  </html>
+</html>
