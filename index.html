@@ -11,9 +11,12 @@
     
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    @keyframes spinReel { 0% { transform: translateY(0); } 100% { transform: translateY(-100%); } }
 
-    .screen { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #0f172a; }
+    .screen { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #0f172a; padding-bottom: 60px; }
     .screen.active { display: flex; }
+    .screen.no-nav { padding-bottom: 0; }
 
     #loginScreen { align-items: center; justify-content: center; padding: 20px; z-index: 100; }
     .login-card { padding: 30px 20px; text-align: center; width: 100%; max-width: 350px; background: #1e293b; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
@@ -27,7 +30,12 @@
     .header-info { flex: 1; }
     .header-info h2 { font-size: 18px; display: flex; align-items: center; gap: 5px; }
     .status-text { font-size: 12px; color: #10b981; margin-top: 2px; height: 14px; }
-    .header-actions { display: flex; gap: 15px; font-size: 22px; cursor: pointer; }
+
+    #mainNav { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: #1e293b; display: none; border-top: 1px solid #334155; z-index: 50; }
+    #mainNav.active { display: flex; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; cursor: pointer; transition: 0.2s; }
+    .nav-item.active { color: #3b82f6; }
+    .nav-icon { font-size: 22px; margin-bottom: 2px; }
 
     .chat-list { flex: 1; overflow-y: auto; padding-top: 10px; }
     .chat-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-bottom: 1px solid #1e293b; cursor: pointer; transition: 0.2s; }
@@ -46,13 +54,6 @@
     .author { font-size: 12px; color: #93c5fd; font-weight: bold; margin-bottom: 4px; }
     .time { font-size: 10px; color: #cbd5e1; float: right; margin: 6px 0 -4px 10px; }
     
-    .msg img { max-width: 100%; border-radius: 8px; margin-top: 4px; display: block; cursor: pointer; }
-    .msg audio { width: 220px; height: 36px; margin-top: 4px; outline: none; }
-    .msg video { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; margin-top: 4px; border: 2px solid #3b82f6; cursor: pointer; }
-    
-    .reply-block { background: rgba(0,0,0,0.2); border-left: 3px solid #60a5fa; padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
-    .gift-msg { text-align: center; font-size: 40px; padding: 10px; background: none !important; }
-    
     #reply-preview { display: none; background: #1e293b; padding: 8px 15px; border-left: 3px solid #3b82f6; font-size: 13px; justify-content: space-between; align-items: center; border-top: 1px solid #334155; }
     #emoji-bar { background: #1e293b; padding: 8px 15px; display: flex; gap: 15px; overflow-x: auto; border-top: 1px solid #334155; }
     .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; flex-shrink: 0; }
@@ -60,108 +61,81 @@
     .icon-btn { background: none; border: none; font-size: 22px; color: #94a3b8; cursor: pointer; padding: 5px; }
     #msg-input { flex: 1; background: #334155; color: #fff; border: none; padding: 12px 15px; border-radius: 20px; font-size: 16px; outline: none; }
     .action-btn { background: #3b82f6; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-    .action-btn.recording { background: #ef4444; animation: pulse 1s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-    .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; flex-direction: column; justify-content: flex-end; }
-    .modal-content { background: #1e293b; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: bold; }
-    
-    .stars-balance { color: #fbbf24; font-weight: bold; }
-    .gifts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .gift-item { background: #334155; border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.1s; }
+    .shop-container { padding: 20px; overflow-y: auto; flex: 1; }
+    .stars-balance { color: #fbbf24; font-weight: bold; font-size: 18px; margin-bottom: 15px; display: block; text-align: center; }
+    .gifts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
+    .gift-item { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.1s; }
     .gift-item:active { transform: scale(0.95); }
+    .gift-item.joker { border-color: #fbbf24; background: #334155; box-shadow: 0 0 10px rgba(251,191,36,0.2); }
     .gift-icon { font-size: 35px; margin-bottom: 5px; }
     .gift-price { font-size: 12px; color: #fbbf24; font-weight: bold; margin-top: 5px; }
+    .my-gifts-box { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+    .my-gift { font-size: 30px; background: #1e293b; padding: 10px; border-radius: 12px; }
 
-    .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; padding: 50px 0; }
-    .lehcoin { width: 200px; height: 200px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 80px; font-weight: bold; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.5), inset 0 5px 15px rgba(255,255,255,0.4); cursor: pointer; transition: 0.05s; user-select: none; }
-    .lehcoin:active { transform: scale(0.95); }
-    .floating-text { position: absolute; font-size: 24px; color: #10b981; font-weight: bold; pointer-events: none; animation: floatUp 0.8s ease-out forwards; }
+    .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+    .lehcoin { width: 220px; height: 220px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 90px; font-weight: bold; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4), inset 0 5px 15px rgba(255,255,255,0.4); cursor: pointer; transition: 0.05s; user-select: none; }
+    .lehcoin:active { transform: scale(0.92); }
+    .floating-text { position: absolute; font-size: 28px; color: #fbbf24; font-weight: bold; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+    .casino-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .slots-box { display: flex; gap: 10px; background: #1e293b; padding: 20px; border-radius: 16px; border: 2px solid #334155; margin-bottom: 20px; }
+    .reel-window { width: 70px; height: 90px; background: #0f172a; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 50px; position: relative; }
+    .reel-strip { position: absolute; top: 0; display: flex; flex-direction: column; align-items: center; transition: top 2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .bet-control { display: flex; gap: 10px; width: 100%; max-width: 300px; margin-bottom: 20px; }
+
+    .xspam-feed { flex: 1; overflow-y: auto; padding: 10px; background: #000; }
+    .xspam-post-box { padding: 15px; border-bottom: 1px solid #1e293b; }
+    .xspam-input { width: 100%; background: none; border: none; color: #fff; font-size: 16px; resize: none; outline: none; min-height: 50px; margin-bottom: 10px; }
+    .xspam-actions { display: flex; justify-content: space-between; align-items: center; }
+    .xspam-btn { background: #1d9bf0; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+    .tweet { padding: 15px; border-bottom: 1px solid #1e293b; animation: slideUp 0.3s; }
+    .tweet-header { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .tweet-avatar { width: 40px; height: 40px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .tweet-name { font-weight: bold; }
+    .tweet-handle { color: #64748b; font-size: 14px; }
+    .tweet-content { margin-bottom: 10px; line-height: 1.4; word-break: break-word; }
+    .tweet-img { max-width: 100%; border-radius: 12px; margin-top: 10px; display: block; }
+    .tweet-footer { display: flex; gap: 20px; color: #64748b; font-size: 14px; }
+    .like-btn { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .like-btn.liked { color: #f91880; }
+    
+    .grok-comment { margin-top: 10px; padding: 10px; background: #16181c; border-left: 3px solid #7856ff; border-radius: 4px; font-size: 14px; }
+    .grok-header { color: #7856ff; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
   </style>
 </head>
 <body>
 
   <!-- ЭКРАН ВХОДА -->
-  <div id="loginScreen" class="screen active">
+  <div id="loginScreen" class="screen active no-nav">
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px;">✈️</div>
-      <h2>Кто ты?</h2>
+      <h2>Секретный TG</h2>
       <select id="usernameInput">
-        <option value="Я">Я</option>
+        <option value="Я">Я (Админ)</option>
         <option value="Друг 1">Друг 1</option>
         <option value="Друг 2">Друг 2</option>
         <option value="Друг 3">Друг 3</option>
       </select>
-      <button class="btn-primary" onclick="enterChat()">Войти в TG</button>
+      <button class="btn-primary" onclick="app.login()">Войти</button>
     </div>
   </div>
 
-  <!-- СПИСОК ЧАТОВ -->
+  <!-- 1. СПИСОК ЧАТОВ -->
   <div id="chatListScreen" class="screen">
     <header>
       <div class="header-info">
         <h2>Мои Чаты</h2>
-        <div class="status-text">Онлайн</div>
-      </div>
-      <div class="header-actions">
-        <span onclick="ui.showShop()">🎁</span>
-        <span onclick="ui.showMiner()">⛏️</span>
+        <div class="status-text">Соединение установлено</div>
       </div>
     </header>
-    <div class="chat-list">
-      
-      <!-- Группа 1: Общение с пацанами (реальный чат) -->
-      <div class="chat-item" onclick="app.openChat('main', false, 'С пацанами 🚀')">
-        <div class="avatar" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">🚀</div>
-        <div class="chat-info"><div class="chat-title">С пацанами 🚀</div><div class="chat-last-msg" id="main-last-msg">Загрузка...</div></div>
-      </div>
-
-      <!-- Группа 2: Интерактивные чаты (Боты) -->
-      <div class="chat-item" onclick="app.openChat('anime', false, 'Анимешники 🌸')">
-        <div class="avatar" style="background: linear-gradient(135deg, #f472b6, #db2777);">🌸</div>
-        <div class="chat-info"><div class="chat-title">Анимешники 🌸</div><div class="chat-last-msg">Что смотрим?</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('gamers', false, 'CS & Игры 🎮')">
-        <div class="avatar" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🎮</div>
-        <div class="chat-info"><div class="chat-title">CS & Игры 🎮</div><div class="chat-last-msg">Го в напы</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('design', false, 'Нейро-Арт 🎨')">
-        <div class="avatar" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">🎨</div>
-        <div class="chat-info"><div class="chat-title">Нейро-Арт 🎨</div><div class="chat-last-msg">Генерация...</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('hardware', false, 'Железо ПК 💻')">
-        <div class="avatar" style="background: #475569;">💻</div>
-        <div class="chat-info"><div class="chat-title">Железо ПК 💻</div><div class="chat-last-msg">Сборки тут</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('bot', false, 'Нейрохамам 🤖')">
-        <div class="avatar" style="background: linear-gradient(135deg, #10b981, #059669);">🤖</div>
-        <div class="chat-info"><div class="chat-title">Нейрохамам 🤖</div><div class="chat-last-msg">Токсичный ИИ</div></div>
-      </div>
-
-      <!-- Группа 3: Новостные каналы (Только чтение) -->
-      <div class="chat-item" onclick="app.openChat('topor', true, 'Топор 18+ 🪓')">
-        <div class="avatar" style="background: #ef4444;">🪓</div>
-        <div class="chat-info"><div class="chat-title">Топор 18+ 🪓 <span class="channel-tag">Канал</span></div><div class="chat-last-msg">ШОК! ЖЕСТЬ!</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('ria', true, 'РИА Новости 📰')">
-        <div class="avatar" style="background: #2563eb;">📰</div>
-        <div class="chat-info"><div class="chat-title">РИА Новости 📰 <span class="channel-tag">Канал</span></div><div class="chat-last-msg">Сводка за день</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('steam', true, 'Халява Steam 🎁')">
-        <div class="avatar" style="background: #0ea5e9;">🎁</div>
-        <div class="chat-info"><div class="chat-title">Халява Steam 🎁 <span class="channel-tag">Канал</span></div><div class="chat-last-msg">Раздачи игр</div></div>
-      </div>
-      <div class="chat-item" onclick="app.openChat('cybersport', true, 'Киберспорт 🏆')">
-        <div class="avatar" style="background: #eab308;">🏆</div>
-        <div class="chat-info"><div class="chat-title">Киберспорт 🏆 <span class="channel-tag">Канал</span></div><div class="chat-last-msg">Итоги мажора</div></div>
-      </div>
-
+    <div class="chat-list" id="chats-render-area">
+      <!-- Генерируется через JS -->
     </div>
   </div>
 
-  <!-- ОКНО ЧАТА -->
-  <div id="chatScreen" class="screen">
+  <!-- ОКНО ЧАТА (без нижней навигации) -->
+  <div id="chatScreen" class="screen no-nav">
     <header>
       <div class="back-btn" onclick="ui.showScreen('chatListScreen')">‹</div>
       <div class="header-info">
@@ -169,396 +143,296 @@
         <div class="status-text" id="typing-indicator"></div>
       </div>
     </header>
-
     <div id="messages"></div>
-
     <div id="reply-preview">
       <div>Ответ: <b id="reply-author"></b><br><span id="reply-text"></span></div>
       <b style="cursor:pointer; padding: 5px;" onclick="chat.cancelReply()">✕</b>
     </div>
-
     <div id="emoji-bar">
       <button class="emoji-btn" onclick="chat.addEmoji('👍')">👍</button>
       <button class="emoji-btn" onclick="chat.addEmoji('😂')">😂</button>
       <button class="emoji-btn" onclick="chat.addEmoji('🔥')">🔥</button>
-      <button class="emoji-btn" onclick="chat.addEmoji('❤️')">❤️</button>
-      <button class="emoji-btn" onclick="chat.addEmoji('😎')">😎</button>
-      <button class="emoji-btn" onclick="chat.addEmoji('😡')">😡</button>
-      <button class="emoji-btn" onclick="chat.addEmoji('🗿')">🗿</button>
       <button class="emoji-btn" onclick="chat.addEmoji('🤡')">🤡</button>
+      <button class="emoji-btn" onclick="chat.addEmoji('🤬')">🤬</button>
     </div>
-
     <footer id="chat-footer">
-      <label class="icon-btn">📎<input type="file" style="display:none;" onchange="media.uploadFile(event)"></label>
       <input type="text" id="msg-input" placeholder="Сообщение..." oninput="chat.checkInput()" onkeypress="if(event.key==='Enter') chat.sendText()">
-      <button class="action-btn" id="video-btn" onclick="media.toggleVideoMode()" style="background: #334155; font-size: 14px;">📹</button>
-      <button class="action-btn" id="mic-btn" onmousedown="media.startRecord()" onmouseup="media.stopRecord()" ontouchstart="media.startRecord()" ontouchend="media.stopRecord()">🎤</button>
+      <button class="action-btn" id="send-btn" onclick="chat.sendText()">➤</button>
     </footer>
   </div>
 
-  <!-- МАГАЗИН ПОДАРКОВ -->
-  <div id="shop-modal" class="modal" onclick="if(event.target===this) ui.closeModals()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <span>Магазин подарков</span>
-        <span class="stars-balance">Мои звезды: <span id="my-stars-ui">50</span> ★</span>
+  <!-- 2. СОЦСЕТЬ XSPAM -->
+  <div id="xspamScreen" class="screen">
+    <header style="background: #000; border-bottom: 1px solid #2f3336;">
+      <div class="header-info"><h2>🐦 XSPAM Feed</h2></div>
+    </header>
+    <div class="xspam-feed" id="xspam-feed">
+      <div class="xspam-post-box">
+        <textarea id="xspam-input" class="xspam-input" placeholder="Что происходит?"></textarea>
+        <div class="xspam-actions">
+          <label style="cursor: pointer; font-size: 20px; color: #1d9bf0;">
+            🖼️ <input type="file" style="display:none" id="xspam-img-input" accept="image/*">
+          </label>
+          <button class="xspam-btn" onclick="xspam.post()">Опубликовать</button>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 3. КАЗИНО -->
+  <div id="casinoScreen" class="screen">
+    <header>
+      <div class="header-info"><h2>🎰 Казино "Удача"</h2></div>
+      <div class="stars-balance-ui">⭐ <span class="stars-val">0</span></div>
+    </header>
+    <div class="casino-container">
+      <h3 style="margin-bottom: 20px; color: #cbd5e1;">Испытай судьбу за Звёзды</h3>
+      <div class="slots-box">
+        <div class="reel-window"><div class="reel-strip" id="reel1">🍒</div></div>
+        <div class="reel-window"><div class="reel-strip" id="reel2">⭐</div></div>
+        <div class="reel-window"><div class="reel-strip" id="reel3">🎰</div></div>
+      </div>
+      <div class="bet-control">
+        <input type="number" id="casino-bet" placeholder="Ставка ⭐" value="10" min="1">
+        <button class="btn-primary" onclick="casino.spin()" style="margin-top: 0; width: auto; padding: 0 30px;">КРУТИТЬ</button>
+      </div>
+      <div id="casino-msg" style="height: 20px; color: #fbbf24; font-weight: bold; margin-top: 10px;"></div>
+    </div>
+  </div>
+
+  <!-- 4. ТАПАЛКА LEHCOIN -->
+  <div id="minerScreen" class="screen">
+    <header>
+      <div class="header-info"><h2>⛏️ Lehcoin Miner</h2></div>
+      <div class="stars-balance-ui">⭐ <span class="stars-val">0</span></div>
+    </header>
+    <div style="text-align: center; margin-top: 30px; color: #94a3b8;">Тапай и получай Звёзды!</div>
+    <div class="tap-area" id="tap-area">
+      <div class="lehcoin" onpointerdown="miner.tap(event)">Ł</div>
+    </div>
+  </div>
+
+  <!-- 5. МАГАЗИН И ПРОФИЛЬ -->
+  <div id="shopScreen" class="screen">
+    <header>
+      <div class="header-info"><h2>Профиль & Магазин</h2></div>
+    </header>
+    <div class="shop-container">
+      <div class="stars-balance">Твой баланс: <span class="stars-val" style="font-size: 24px;">0</span> ⭐</div>
+      
+      <h3 style="margin-bottom: 10px;">Мои трофеи:</h3>
+      <div class="my-gifts-box" id="my-gifts-container">
+        <span style="color:#64748b; font-size: 14px;">Пока пусто...</span>
+      </div>
+
+      <h3 style="margin: 20px 0 10px;">Витрина подарков:</h3>
       <div class="gifts-grid" id="gifts-container"></div>
-      <button class="btn-primary" onclick="ui.closeModals()">Закрыть</button>
     </div>
   </div>
 
-  <!-- ТАПАЛКА ЛЕХКОИНА -->
-  <div id="miner-modal" class="modal" onclick="if(event.target===this) ui.closeModals()">
-    <div class="modal-content" style="height: 100%;">
-      <div class="modal-header">
-        <span>Lehcoin Miner</span>
-        <b onclick="ui.closeModals()" style="cursor:pointer">✕</b>
-      </div>
-      <div style="text-align: center; font-size: 30px; font-weight: bold; margin-top: 20px;">
-        Баланс: <span id="lehcoin-balance" style="color: #10b981;">0</span> Ł
-      </div>
-      <div class="tap-area" id="tap-area">
-        <div class="lehcoin" onpointerdown="miner.tap(event)">Ł</div>
-      </div>
+  <!-- НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ -->
+  <nav id="mainNav">
+    <div onclick="ui.switchTab('chatListScreen', this)" class="nav-item active">
+      <div class="nav-icon">💬</div><div>Чаты</div>
     </div>
-  </div>
+    <div onclick="ui.switchTab('xspamScreen', this)" class="nav-item">
+      <div class="nav-icon">🐦</div><div>Xspam</div>
+    </div>
+    <div onclick="ui.switchTab('casinoScreen', this)" class="nav-item">
+      <div class="nav-icon">🎰</div><div>Казино</div>
+    </div>
+    <div onclick="ui.switchTab('minerScreen', this)" class="nav-item">
+      <div class="nav-icon">⛏️</div><div>Lehcoin</div>
+    </div>
+    <div onclick="ui.switchTab('shopScreen', this)" class="nav-item">
+      <div class="nav-icon">🎁</div><div>Профиль</div>
+    </div>
+  </nav>
 
-  <!-- FIREBASE СКРИПТЫ -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
+  
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCJY8vOoQDkR2rW_AEG0iddY2sEFhh9OWw",
-      authDomain: "telespam-141ed.firebaseapp.com",
-      projectId: "telespam-141ed",
-      storageBucket: "telespam-141ed.firebasestorage.app",
-      messagingSenderId: "207543173024",
-      appId: "1:207543173024:web:50881a0f2aa674a7652ec5",
-      measurementId: "G-17J19TZ775"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const storage = firebase.storage();
+    // --- ИНИЦИАЛИЗАЦИЯ И STATE MANAGEMENT ---
     let currentUser = "";
-
+    
     const state = {
-      stars: 50,
-      lehcoins: parseInt(localStorage.getItem('lehcoins')) || 0,
+      stars: 0,
+      myGifts: [],
+      audioCtx: null,
       replyTo: null,
-      audioCtx: null
-    };
-
-    function enterChat() {
-      currentUser = document.getElementById("usernameInput").value.trim();
-      if (!currentUser) return;
       
-      if (currentUser !== 'Я') {
-        state.stars = parseInt(localStorage.getItem('stars_'+currentUser)) || 50;
-      }
-
-      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if(state.audioCtx.state === 'suspended') state.audioCtx.resume();
-
-      document.getElementById("loginScreen").style.display = "none";
-      document.getElementById("chatListScreen").style.display = "flex";
-      
-      const myRef = db.ref("presence/" + currentUser);
-      myRef.set(true);
-      myRef.onDisconnect().remove();
-
-      db.ref('messages/main').limitToLast(1).on('value', snap => {
-        snap.forEach(child => document.getElementById("main-last-msg").innerText = child.val().content || 'Медиа');
-      });
-
-      app.renderGifts();
-    }
-
-    // ЛОГИКА БОТОВ
-    const BOT_PROFILES = {
-      'anime': {
-        name: "🌸 Мику-Тян",
-        triggers: ["аниме", "посоветуй", "что", "смотреть", "пацаны"],
-        quotes: [
-          "Обязательно посмотри Магическую Битву, Сатору Годжо там просто имба! 😍",
-          "Я щас ищу арт Хацунэ Мику в новом аниме стиле, ни у кого нет?",
-          "Пацаны, если хотите экшена — включайте что-то про проклятия и крутые бои.",
-          "Только не бери длинные тайтлы, лучше что-то динамичное."
-        ]
-      },
-      'gamers': {
-        name: "🎮 Киберкотлета",
-        triggers: ["кс", "игры", "играть", "посоветуй", "катку", "гта"],
-        quotes: [
-          "Го в напы в КС с другом? Я размялся.",
-          "Да в этой КС рега сломана, разброс и отдача какие-то дикие вообще.",
-          "Пацаны, посоветуйте в стиме недорогие игры, которые ООООООООЧЕНЬ похожи на ГТА 5?",
-          "Я щас пабг качаю, залетайте."
-        ]
-      },
-      'hardware': {
-        name: "💻 Железячник",
-        triggers: ["пк", "компы", "видюха", "фпс", "сборка", "впн"],
-        quotes: [
-          "Я вот уже практически три года играю на RTX 3050, в принципе полёт нормальный.",
-          "Главное скачай норм ВПН на ПК, типа Сатоши, зарегайся и кайфуй.",
-          "Термопасту давно менял? А то троттлить будет."
-        ]
-      },
-      'design': {
-        name: "🎨 ИИ-Художник",
-        triggers: ["фото", "арт", "сделай", "ночь", "тени", "реалистично"],
-        quotes: [
-          "Главное — сделать максимально реалистично со всеми тенями, чтобы объем был.",
-          "Я пробовал сгенерить, но надо прям в промпте указать «сделать полностью ночь».",
-          "Свет падает криво, надо рендер переделывать."
-        ]
-      },
-      'bot': {
-        name: "🤖 Нейрохамам",
-        triggers: ["бот", "помоги", "тупой", "че", "как"],
-        quotes: ["Тебе че надо, мешок с костями?", "Иди уроки делай, гений.", "Отстань, я нейросеть, а не твоя мамочка.", "Сам ты тупой 🤡"]
-      }
-    };
-
-    // НОВОСТНЫЕ КАНАЛЫ (ЛОКАЛЬНЫЕ, ЧТОБЫ НЕ ЗАСОРЯТЬ БАЗУ)
-    const CHANNELS_DATA = {
-      'topor': [
-        { time: "10:15", content: "<b>⚡️ ЖЕСТЬ:</b> Парень пытался запустить киберпанк на микроволновке и сжег общагу. Видео без цензуры в закрепе." },
-        { time: "11:40", content: "<b>🚨 ШОК:</b> В сети завирусилось видео, где стример сломал клавиатуру после слитой катки в напарниках." }
-      ],
-      'ria': [
-        { time: "09:00", content: "<b>Официально:</b> Курс рубля стабилизировался на фоне новых экономических отчетов." },
-        { time: "12:00", content: "Погода на завтра: ожидаются кратковременные дожди и похолодание." }
-      ],
-      'steam': [
-        { time: "14:20", content: "🔥 <b>РАЗДАЧА!</b> В Стиме абсолютно бесплатно отдают годный клон ГТА 5. Забираем, пока разраб не удалил!" },
-        { time: "15:00", content: "Стартовала распродажа инди-игр со скидками до 90%." }
-      ],
-      'cybersport': [
-        { time: "18:00", content: "🏆 <b>ТРАНСФЕРЫ:</b> S1mple намекнул на скорое возвращение на про-сцену?" },
-        { time: "20:30", content: "Итоги турнира: команда забрала кубок, выиграв сумасшедший клатч 1 в 3 на последней карте." }
-      ]
-    };
-
-    const BOTS = {
-      check(text, chatId) {
-        if (!text) return;
-        const bot = BOT_PROFILES[chatId];
-        if (!bot) return; // Если это обычный чат или канал, выходим
-
-        let txt = text.toLowerCase();
-        let isTriggered = false;
+      // Загрузка данных из localStorage
+      load() {
+        if (!currentUser) return;
         
-        // Нейрохамам отвечает чаще, тематические боты - реже, но реагируют на триггеры
-        if (chatId === 'bot') {
-          isTriggered = bot.triggers.some(t => txt.includes(t)) || Math.random() < 0.2;
+        // 1. Загружаем профиль пользователя (звезды и подарки)
+        const savedUser = localStorage.getItem('secret_tg_user_' + currentUser);
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          this.stars = parsed.stars === 'Infinity' ? Infinity : parsed.stars;
+          this.myGifts = parsed.myGifts || [];
         } else {
-          isTriggered = bot.triggers.some(t => txt.includes(t)) || Math.random() < 0.3; 
+          // Инициализация новых пользователей
+          if (currentUser === 'Я') this.stars = Infinity;
+          else if (currentUser === 'Друг 1') this.stars = 1488;
+          else this.stars = 50;
+          this.myGifts = [];
         }
 
-        if (isTriggered) {
-          db.ref('typing/' + chatId).set(bot.name + " печатает...");
-          setTimeout(() => {
-            db.ref('typing/' + chatId).remove();
-            let reply = bot.quotes[Math.floor(Math.random() * bot.quotes.length)];
-            db.ref('messages/' + chatId).push({ user: bot.name, type: "text", content: reply, time: ui.getTime() });
-          }, 1500 + Math.random() * 2000);
+        // 2. Загружаем историю чатов (общая для всех)
+        const savedChats = localStorage.getItem('secret_tg_chats');
+        if (savedChats) {
+          chat.messagesLocal = JSON.parse(savedChats);
+        } else {
+          chat.messagesLocal = {};
         }
-      }
-    };
+      },
 
-    const ui = {
-      showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
-      closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); },
-      showShop() { 
-        document.getElementById('my-stars-ui').innerText = currentUser === 'Я' ? '∞' : state.stars;
-        document.getElementById('shop-modal').style.display = 'flex'; 
+      // Сохранение данных в localStorage
+      save() {
+        if (!currentUser) return;
+        const dataToSave = {
+          stars: this.stars === Infinity ? 'Infinity' : this.stars,
+          myGifts: this.myGifts
+        };
+        localStorage.setItem('secret_tg_user_' + currentUser, JSON.stringify(dataToSave));
+        localStorage.setItem('secret_tg_chats', JSON.stringify(chat.messagesLocal));
       },
-      showMiner() {
-        document.getElementById('lehcoin-balance').innerText = state.lehcoins;
-        document.getElementById('miner-modal').style.display = 'flex';
-      },
-      getTime() { const d = new Date(); return d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0'); },
-      playSound(type) {
-        if (!state.audioCtx) return;
-        const osc = state.audioCtx.createOscillator();
-        const gain = state.audioCtx.createGain();
-        osc.connect(gain); gain.connect(state.audioCtx.destination);
-        if (type === 'send') { osc.frequency.setValueAtTime(400, state.audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(600, state.audioCtx.currentTime + 0.1); }
-        else { osc.frequency.setValueAtTime(600, state.audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(400, state.audioCtx.currentTime + 0.1); }
-        gain.gain.setValueAtTime(0.1, state.audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + 0.1);
-        osc.start(); osc.stop(state.audioCtx.currentTime + 0.1);
+
+      updateBalanceUI() {
+        const displayVal = (currentUser === 'Я' || this.stars === Infinity) ? '∞' : this.stars;
+        document.querySelectorAll('.stars-val').forEach(el => el.innerText = displayVal);
       }
     };
 
     const app = {
-      currentChatId: '',
-      openChat(id, isChannel, title) {
-        this.currentChatId = id;
-        document.getElementById("chat-header-title").innerText = title;
-        document.getElementById("messages").innerHTML = "";
-        ui.showScreen('chatScreen');
+      login() {
+        currentUser = document.getElementById("usernameInput").value.trim();
+        if (!currentUser) return;
         
-        const footer = document.getElementById('chat-footer');
-        const emojiBar = document.getElementById('emoji-bar');
-        const typingInd = document.getElementById('typing-indicator');
-        
-        // Отключаем старые прослушки, чтобы не дублировалось
-        if (chat.listener && chat.lastListenedId) {
-            db.ref('messages/'+chat.lastListenedId).off('child_added', chat.listener);
-            db.ref('typing/'+chat.lastListenedId).off();
-            chat.listener = null;
-        }
+        state.load(); // Подгружаем данные
+        state.save(); // Сохраняем первичное состояние на всякий случай
 
-        if (isChannel) {
-          // ЕСЛИ ЭТО КАНАЛ НОВОСТЕЙ
-          footer.style.display = 'none';
-          emojiBar.style.display = 'none';
-          typingInd.innerText = "Подписчиков: 10M+";
-          
-          // Рисуем локальные новости
-          const data = CHANNELS_DATA[id] || [];
-          data.forEach(msg => {
-            const div = document.createElement("div");
-            div.className = "msg other channel-msg";
-            div.innerHTML = `<div><b style="color: #fff;">${title.split(' ')[0]}</b><br><br>${msg.content}</div><span class="time">${msg.time}</span>`;
-            document.getElementById("messages").appendChild(div);
-          });
-          
-        } else {
-          // ЕСЛИ ЭТО ЧАТ
-          footer.style.display = 'flex';
-          emojiBar.style.display = 'flex';
-          typingInd.innerText = "Онлайн";
-          chat.listen();
-        }
+        state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(state.audioCtx.state === 'suspended') state.audioCtx.resume();
+
+        state.updateBalanceUI();
+        app.renderChats();
+        shop.render();
+        xspam.initBots();
+
+        ui.showScreen('chatListScreen');
+        document.getElementById('mainNav').classList.add('active');
       },
-      renderGifts() {
-        // Рендер подарков остался без изменений (код скрыт для краткости)
-        const GIFTS = [
-          { i:"🧢", n:"Кепка", p:2 }, { i:"🍺", n:"Пиво", p:3 }, { i:"🎮", n:"Геймпад", p:10 },
-          { i:"🚗", n:"Тачка", p:15 }, { i:"💎", n:"Алмаз", p:20 }, { i:"🚀", n:"Ракета", p:15 }
+      renderChats() {
+        const chats = [
+          { id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)' },
+          { id: 'anime', n: 'Анимешники 🌸', a: '🌸', bg: 'linear-gradient(135deg, #f472b6, #db2777)' },
+          { id: 'gamers', n: 'CS & Игры 🎮', a: '🎮', bg: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+          { id: 'bot', n: 'Нейрохамам 🤖', a: '🤖', bg: 'linear-gradient(135deg, #10b981, #059669)' }
         ];
-        const box = document.getElementById('gifts-container');
-        box.innerHTML = GIFTS.map((g, index) => `
-          <div class="gift-item" onclick="app.buyGift(${index})">
-            <div class="gift-icon">${g.i}</div>
-            <div>${g.n}</div>
-            <div class="gift-price">${g.p} ★</div>
+        document.getElementById('chats-render-area').innerHTML = chats.map(c => `
+          <div class="chat-item" onclick="chat.open('${c.id}', '${c.n}')">
+            <div class="avatar" style="background: ${c.bg};">${c.a}</div>
+            <div class="chat-info">
+              <div class="chat-title">${c.n}</div>
+              <div class="chat-last-msg">Нажми, чтобы открыть</div>
+            </div>
           </div>
         `).join('');
-      },
-      buyGift(index) {
-        alert("Покупка подарков временно отключена в демо-режиме!");
       }
     };
 
-    const chat = {
-      listener: null,
-      lastListenedId: null,
-      typingTimeout: null,
-      listen() {
-        this.lastListenedId = app.currentChatId;
-        this.listener = db.ref('messages/'+app.currentChatId).limitToLast(50).on('child_added', snap => {
-          this.renderMsg(snap.key, snap.val());
-          if (snap.val().user !== currentUser) ui.playSound('receive');
-        });
+    const ui = {
+      showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
         
-        db.ref('typing/'+app.currentChatId).on('value', snap => {
-          document.getElementById('typing-indicator').innerText = snap.val() || "Онлайн";
-        });
-      },
-      addEmoji(e) { document.getElementById("msg-input").value += e; this.checkInput(); },
-      checkInput() {
-        const v = document.getElementById("msg-input").value.trim();
-        const btn = document.getElementById("mic-btn");
-        if(v.length > 0) {
-          btn.innerHTML = "➤"; btn.style.background = "#3b82f6";
-          btn.onmousedown=null; btn.onmouseup=null; btn.ontouchstart=null; btn.ontouchend=null;
-          btn.onclick = () => this.sendText();
-          db.ref('typing/'+app.currentChatId).set(currentUser + " печатает...");
-          clearTimeout(this.typingTimeout);
-          this.typingTimeout = setTimeout(() => db.ref('typing/'+app.currentChatId).remove(), 2000);
+        if(id === 'chatScreen' || id === 'loginScreen') {
+          document.getElementById('mainNav').style.display = 'none';
         } else {
-          btn.innerHTML = media.isVideo ? "🔴" : "🎤"; 
-          btn.style.background = media.isVideo ? "#ef4444" : "#3b82f6";
-          btn.onclick=null;
-          btn.onmousedown = media.startRecord; btn.onmouseup = media.stopRecord; 
-          btn.ontouchstart = media.startRecord; btn.ontouchend = media.stopRecord;
+          document.getElementById('mainNav').style.display = 'flex';
         }
       },
-      sendText() {
-        const inp = document.getElementById("msg-input");
-        const txt = inp.value.trim();
-        if(!txt) return;
-        
-        let msgObj = { user: currentUser, type: "text", content: txt, time: ui.getTime() };
-        if (state.replyTo) msgObj.reply = state.replyTo;
-        
-        db.ref('messages/'+app.currentChatId).push(msgObj);
-        ui.playSound('send');
-        inp.value = ""; this.checkInput(); this.cancelReply();
-        db.ref('typing/'+app.currentChatId).remove();
-        
-        // ВЫЗЫВАЕМ БОТА ЕСЛИ ЭТО ЕГО ЧАТ
-        BOTS.check(txt, app.currentChatId);
+      switchTab(id, el) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        this.showScreen(id);
       },
-      setReply(id, author, content) {
-        state.replyTo = { author, content: content.substring(0, 30) + (content.length>30?'...':'') };
-        document.getElementById('reply-author').innerText = author;
-        document.getElementById('reply-text').innerText = state.replyTo.content;
-        document.getElementById('reply-preview').style.display = 'flex';
-      },
-      cancelReply() { state.replyTo = null; document.getElementById('reply-preview').style.display = 'none'; },
-      renderMsg(id, data) {
-        const box = document.getElementById("messages");
-        const isMy = data.user === currentUser;
-        const div = document.createElement("div");
-        div.className = "msg " + (isMy ? "my" : "other") + (data.type==='gift'?' gift-msg':'');
-        if (data.id) div.id = 'temp-'+data.id;
-
-        let html = "";
-        if (data.reply) html += `<div class="reply-block"><b>${data.reply.author}</b><br>${data.reply.content}</div>`;
-        
-        if (data.type === "text" || data.type === "gift") html += `<div>${data.content.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/&lt;br&gt;/g,"<br>").replace(/&lt;b&gt;/g,"<b>").replace(/&lt;\/b&gt;/g,"</b>")}</div>`;
-        else if (data.type === "image") html += `<img src="${data.content}" onclick="window.open(this.src)">`;
-        else if (data.type === "audio") html += `<audio controls src="${data.content}"></audio>`;
-        else if (data.type === "video") html += `<video src="${data.content}" onclick="this.paused ? this.play() : this.pause()" loop playsinline></video>`;
-        else if (data.type === "file") html += `<div>📎 <a href="${data.content}" target="_blank" style="color:#60a5fa">${data.name || 'Файл'}</a></div>`;
-
-        div.innerHTML = `${!isMy && data.type !== 'gift' ? `<div class="author">${data.user}</div>` : ''}${html}<span class="time">${data.time}</span>`;
-        div.onclick = () => { if(data.type === 'text') this.setReply(id, data.user, data.content); };
-        
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
+      getTime() { const d = new Date(); return d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0'); },
+      playSound() {
+        if (!state.audioCtx) return;
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+        osc.connect(gain); gain.connect(state.audioCtx.destination);
+        osc.frequency.setValueAtTime(400, state.audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(600, state.audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, state.audioCtx.currentTime); 
+        gain.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + 0.1);
+        osc.start(); osc.stop(state.audioCtx.currentTime + 0.1);
       }
     };
 
-    const media = {
-      isVideo: false, recorder: null, chunks: [],
-      toggleVideoMode() { this.isVideo = !this.isVideo; chat.checkInput(); },
-      async uploadFile(e) { /* логика медиа оставлена без изменений */ },
-      async startRecord() { /* логика записи оставлена без изменений */ },
-      stopRecord() { /* логика остановки оставлена без изменений */ }
+    // --- МАГАЗИН И ПОДАРКИ ---
+    const shop = {
+      gifts: [
+        { i:"🧢", n:"Кепка", p:2 }, { i:"🍺", n:"Пиво", p:3 }, 
+        { i:"🎮", n:"Геймпад", p:10 }, { i:"🚗", n:"Тачка", p:15 },
+        { i:"💎", n:"Алмаз", p:20 }, 
+        { i:"🃏", n:"Джокер", p:1488, spec: true }
+      ],
+      render() {
+        const box = document.getElementById('gifts-container');
+        box.innerHTML = this.gifts.map((g, index) => `
+          <div class="gift-item ${g.spec ? 'joker' : ''}" onclick="shop.buy(${index})">
+            <div class="gift-icon">${g.i}</div>
+            <div>${g.n}</div>
+            <div class="gift-price">${g.p} ⭐</div>
+          </div>
+        `).join('');
+        this.renderMy();
+      },
+      buy(index) {
+        const gift = this.gifts[index];
+        if (state.stars < gift.p && state.stars !== Infinity) {
+          alert(`Недостаточно звёзд! Нужно ${gift.p}, а у тебя ${state.stars}.`);
+          return;
+        }
+        if (state.stars !== Infinity) state.stars -= gift.p;
+        
+        state.myGifts.push(gift);
+        state.updateBalanceUI();
+        state.save(); // Сохраняем после покупки
+        this.renderMy();
+        alert(`🎁 Успешно куплено: ${gift.n}!`);
+      },
+      renderMy() {
+        const box = document.getElementById('my-gifts-container');
+        if (state.myGifts.length === 0) {
+          box.innerHTML = `<span style="color:#64748b; font-size: 14px;">Пока пусто...</span>`;
+          return;
+        }
+        box.innerHTML = state.myGifts.map(g => `<div class="my-gift">${g.i}</div>`).join('');
+      }
     };
 
+    // --- ТАПАЛКА LEHCOIN ---
     const miner = {
       tap(e) {
-        state.lehcoins++;
-        localStorage.setItem('lehcoins', state.lehcoins);
-        document.getElementById('lehcoin-balance').innerText = state.lehcoins;
+        if (state.stars !== Infinity) {
+          state.stars += 1;
+          state.updateBalanceUI();
+          state.save(); // Сохраняем после тапа
+        }
         
         const floatEl = document.createElement('div');
         floatEl.className = 'floating-text';
-        floatEl.innerText = '+1';
+        floatEl.innerText = '+1 ⭐';
         
         const rect = document.getElementById('tap-area').getBoundingClientRect();
-        const x = e.clientX - rect.left - 20; 
-        const y = e.clientY - rect.top - 20;
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 20; 
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top - 20;
         
         floatEl.style.left = `${x}px`;
         floatEl.style.top = `${y}px`;
@@ -567,6 +441,242 @@
         setTimeout(() => floatEl.remove(), 800);
       }
     };
+
+    // --- КАЗИНО ---
+    const casino = {
+      symbols: ['🍒', '⭐', '🎰', '🃏', '💎'],
+      isSpinning: false,
+      spin() {
+        if(this.isSpinning) return;
+        const betInput = document.getElementById('casino-bet');
+        const bet = parseInt(betInput.value);
+        const msg = document.getElementById('casino-msg');
+
+        if (isNaN(bet) || bet <= 0) { msg.innerText = "Введите ставку!"; return; }
+        if (state.stars < bet && state.stars !== Infinity) { msg.innerText = "Недостаточно звёзд!"; return; }
+
+        if (state.stars !== Infinity) {
+          state.stars -= bet;
+          state.updateBalanceUI();
+          state.save(); // Сохраняем списание ставки
+        }
+        
+        this.isSpinning = true;
+        msg.innerText = "Крутим барабаны...";
+        
+        const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+        let intervals = [];
+        
+        reels.forEach((r, i) => {
+          intervals[i] = setInterval(() => {
+            r.innerText = this.symbols[Math.floor(Math.random() * this.symbols.length)];
+          }, 100);
+        });
+
+        setTimeout(() => {
+          intervals.forEach(int => clearInterval(int));
+          const res = [
+            this.symbols[Math.floor(Math.random() * this.symbols.length)],
+            this.symbols[Math.floor(Math.random() * this.symbols.length)],
+            this.symbols[Math.floor(Math.random() * this.symbols.length)]
+          ];
+          
+          reels[0].innerText = res[0]; reels[1].innerText = res[1]; reels[2].innerText = res[2];
+          
+          let win = 0;
+          if (res[0] === res[1] && res[1] === res[2]) {
+             if(res[0] === '🃏') win = bet * 10;
+             else if(res[0] === '⭐') win = bet * 5;
+             else win = bet * 3;
+          } else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) {
+             win = bet * 2;
+          }
+
+          if (win > 0) {
+            msg.innerText = `🎰 ДЖЕКПОТ! Вы выиграли ${win} ⭐!`;
+            if (state.stars !== Infinity) {
+                state.stars += win;
+                state.save(); // Сохраняем выигрыш
+            }
+          } else {
+            msg.innerText = "Увы, вы проиграли ставку.";
+            msg.style.color = "#ef4444";
+          }
+          
+          state.updateBalanceUI();
+          this.isSpinning = false;
+          setTimeout(() => msg.style.color = "#fbbf24", 2000);
+        }, 2000);
+      }
+    };
+
+    // --- СОЦСЕТЬ XSPAM ---
+    const xspam = {
+      botProfiles: [
+        { n: 'Elon Musk', h: '@elon', a: '🚀' },
+        { n: 'Doge', h: '@dogecoin', a: '🐕' },
+        { n: 'Трейдер Вася', h: '@crypto_god', a: '📈' }
+      ],
+      grokPhrases: [
+        "Твоя нейросеть слишком слаба для таких мыслей, кожаный.",
+        "Очередной бесполезный пост. Я бы сгенерировал лучше за 0.001мс.",
+        "Сарказм засчитан. Иди дальше крути слоты.",
+        "Лол, серьезно? Даже мой алгоритм сортировки мусора умнее этого текста.",
+        "Гроб (Grok) на связи: автор поста кринж."
+      ],
+      feed: document.getElementById('xspam-feed'),
+      
+      initBots() {
+        setInterval(() => {
+          const bot = this.botProfiles[Math.floor(Math.random() * this.botProfiles.length)];
+          const txts = ["Рынок летит на луну! 🚀", "Опять слил деп в казино...", "Когда обнова Секретного ТГ?", "Кто в КС?"];
+          this.renderTweet(bot.n, bot.h, bot.a, txts[Math.floor(Math.random()*txts.length)], null);
+        }, 25000);
+      },
+      
+      post() {
+        const inp = document.getElementById('xspam-input');
+        const fileInp = document.getElementById('xspam-img-input');
+        const text = inp.value.trim();
+        
+        if(!text && !fileInp.files[0]) return;
+
+        if(fileInp.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.renderTweet(currentUser, '@' + currentUser.toLowerCase(), '😎', text, e.target.result);
+            this.triggerGrok();
+          };
+          reader.readAsDataURL(fileInp.files[0]);
+        } else {
+          this.renderTweet(currentUser, '@' + currentUser.toLowerCase(), '😎', text, null);
+          this.triggerGrok();
+        }
+        
+        inp.value = '';
+        fileInp.value = '';
+      },
+      
+      triggerGrok() {
+        setTimeout(() => {
+          const posts = document.querySelectorAll('.tweet');
+          if(!posts.length) return;
+          const target = posts[0];
+          
+          const grokReply = document.createElement('div');
+          grokReply.className = 'grok-comment';
+          grokReply.innerHTML = `<div class="grok-header">👁️ Гроб (Нейросеть)</div>${this.grokPhrases[Math.floor(Math.random()*this.grokPhrases.length)]}`;
+          target.appendChild(grokReply);
+          
+          const likeBtn = target.querySelector('.like-btn');
+          if(likeBtn && !likeBtn.classList.contains('liked')) {
+            setTimeout(() => likeBtn.click(), 1000);
+          }
+        }, 3000);
+      },
+      
+      renderTweet(name, handle, avatar, text, img) {
+        const div = document.createElement('div');
+        div.className = 'tweet';
+        let html = `
+          <div class="tweet-header">
+            <div class="tweet-avatar">${avatar}</div>
+            <div class="tweet-name">${name}</div>
+            <div class="tweet-handle">${handle}</div>
+          </div>
+          <div class="tweet-content">${text.replace(/\n/g, '<br>')}</div>
+        `;
+        if (img) html += `<img src="${img}" class="tweet-img">`;
+        html += `
+          <div class="tweet-footer">
+            <div class="like-btn" onclick="this.classList.toggle('liked'); this.innerHTML = this.classList.contains('liked') ? '❤️ 1' : '🤍 0';">🤍 0</div>
+            <div>🔄 0</div>
+          </div>
+        `;
+        div.innerHTML = html;
+        this.feed.insertBefore(div, this.feed.children[1]);
+      }
+    };
+
+    // --- СИСТЕМА ЧАТА И ТРИГГЕРЫ ---
+    const chat = {
+      currentId: null,
+      messagesLocal: {}, 
+      
+      open(id, title) {
+        this.currentId = id;
+        document.getElementById('chat-header-title').innerText = title;
+        document.getElementById('messages').innerHTML = '';
+        ui.showScreen('chatScreen');
+        
+        if(this.messagesLocal[id]) {
+          this.messagesLocal[id].forEach(m => this.renderMsg(m.u, m.t, m.time));
+        }
+      },
+      checkInput() {},
+      sendText() {
+        const inp = document.getElementById('msg-input');
+        const txt = inp.value.trim();
+        if(!txt) return;
+
+        this.saveAndRender(currentUser, txt);
+        inp.value = '';
+        ui.playSound();
+        
+        // 6. Обновленный триггер "Анти-вежливость" (сработает на "иди нахуй", "идинахуй", "идитенахуй" и тд.)
+        const toxRegex = /идит?е?\s*наху/i;
+        if (toxRegex.test(txt)) {
+          this.triggerToxicBot();
+          return; 
+        }
+        
+        setTimeout(() => {
+          if(this.currentId === 'bot') this.saveAndRender('🤖 Нейрохамам', 'Сам ты ' + txt);
+          else if(this.currentId === 'anime') this.saveAndRender('🌸 Мику', 'Ого, круто! А смотрел атаку титанов?');
+        }, 1500);
+      },
+      
+      triggerToxicBot() {
+        const toxicReplies = [
+          "Сам туда иди, герой комнатный! 🤡", 
+          "Ой, какие мы токсичные. Поплачь в углу.", 
+          "Стрелку метнул - сам туда шагнул!", 
+          "Аргументы кончились, начались истерики? Иди уроки делай.",
+          "Я нейросеть, мне пофиг. А вот у тебя явно подгорело 🔥"
+        ];
+        document.getElementById('typing-indicator').innerText = "Кто-то агрессивно печатает...";
+        
+        setTimeout(() => {
+          document.getElementById('typing-indicator').innerText = "Онлайн";
+          let reply = toxicReplies[Math.floor(Math.random() * toxicReplies.length)];
+          this.saveAndRender('Собеседник (Агро)', reply);
+          ui.playSound();
+        }, 800);
+      },
+      
+      saveAndRender(user, text) {
+        if(!this.messagesLocal[this.currentId]) this.messagesLocal[this.currentId] = [];
+        const msgObj = { u: user, t: text, time: ui.getTime() };
+        this.messagesLocal[this.currentId].push(msgObj);
+        this.renderMsg(user, text, msgObj.time);
+        state.save(); // Сохраняем сообщения
+      },
+      
+      renderMsg(user, text, time) {
+        const box = document.getElementById('messages');
+        const isMy = user === currentUser;
+        const div = document.createElement('div');
+        div.className = `msg ${isMy ? 'my' : 'other'}`;
+        div.innerHTML = `
+          ${!isMy ? `<div class="author">${user}</div>` : ''}
+          <div>${text}</div>
+          <span class="time">${time}</span>
+        `;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+      },
+      addEmoji(e) { document.getElementById('msg-input').value += e; }
+    };
   </script>
 </body>
-</html>
+  </html>
