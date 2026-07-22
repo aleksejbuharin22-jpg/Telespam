@@ -12,7 +12,7 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; position: fixed; overflow: hidden; background: #0f172a; color: #fff; }
+    html, body { width: 100%; height: 100%; position: fixed; overflow: hidden; background: #0f172a; color: #fff; overscroll-behavior-y: none; touch-action: manipulation; }
     
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
@@ -34,6 +34,7 @@
     .header-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
     .header-info h2 { font-size: 18px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .status-text { font-size: 12px; color: #10b981; margin-top: 2px; transition: color 0.2s ease; }
+    .status-text.offline { color: #94a3b8; }
     .status-text.typing { color: #38bdf8; font-weight: 600; animation: pulse 1.5s infinite; }
     .stars-balance-ui { color: #fbbf24; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
 
@@ -71,14 +72,18 @@
     .msg audio { width: 220px; height: 36px; margin-top: 4px; outline: none; border-radius: 20px; }
     .msg video { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; margin-top: 4px; border: 2px solid #3b82f6; cursor: pointer; }
     
+    /* Заглушка при ошибке загрузки медиа */
+    .media-error { background: rgba(239, 68, 68, 0.1); border: 1px dashed #ef4444; color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 12px; text-align: center; margin-top: 4px; }
+
     .author { font-size: 12px; color: #93c5fd; font-weight: bold; margin-bottom: 4px; }
     .time { font-size: 10px; color: #cbd5e1; float: right; margin: 6px 0 -4px 10px; opacity: 0.8; }
     .reply-block { background: rgba(0,0,0,0.2); border-left: 3px solid #60a5fa; padding: 4px 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
     
     #reply-preview { display: none; background: #1e293b; padding: 8px 15px; border-left: 3px solid #3b82f6; font-size: 13px; justify-content: space-between; align-items: center; border-top: 1px solid #334155; }
-    #emoji-bar { background: #1e293b; padding: 8px 15px; display: flex; gap: 15px; overflow-x: auto; border-top: 1px solid #334155; scrollbar-width: none; }
+    #emoji-bar { background: #1e293b; padding: 8px 15px; display: flex; gap: 15px; overflow-x: auto; border-top: 1px solid #334155; scrollbar-width: none; transform: translateZ(0); }
     #emoji-bar::-webkit-scrollbar { display: none; }
-    .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; flex-shrink: 0; padding: 0; margin: 0; width: auto; }
+    .emoji-btn { background: none; border: none; font-size: 22px; cursor: pointer; flex-shrink: 0; padding: 0; margin: 0; width: auto; transition: transform 0.1s; }
+    .emoji-btn:active { transform: scale(1.2); }
     
     #chat-footer { background: #1e293b; padding: 10px 15px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     #msg-input { flex: 1; background: #334155; color: #fff; border: none; padding: 12px 15px; border-radius: 20px; font-size: 16px; margin: 0; outline: none; }
@@ -130,7 +135,7 @@
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite;">✈️</div>
       <h2 style="margin-bottom: 5px;">Секретный TG</h2>
-      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.1 (Яндере + Ультра-чат + Топор)</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.2 (Optimized + Live Presence)</p>
       <select id="usernameInput">
         <option value="" disabled selected>-- Кто вы? --</option>
         <option value="Я">Я (Админ)</option>
@@ -372,7 +377,7 @@
       measurementId: "G-17J19TZ775"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
     const storage = firebase.storage();
 
@@ -474,7 +479,7 @@
         } else if (chatId === 'main') {
             if (["бот", "помоги", "тупой", "че", "как"].some(t => txt.includes(t)) || Math.random() < 0.1) {
                 name = "🤖 Нейрохам";
-                quotes = ["Тебе че надо в общем чате?", "Не спамь.", "🤡"];
+                const quotes = ["Тебе че надо в общем чате?", "Не спамь.", "🤡"];
                 reply = quotes[Math.floor(Math.random() * quotes.length)];
             }
         }
@@ -546,12 +551,13 @@
         document.getElementById('callContactSelect').innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option>${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
         shop.render();
         snakeGame.init();
-        toporChannel.init(); // Заполняем Топор новостями
-        botChatsInitializer.init(); // Заполняем чаты с ботами
+        toporChannel.init();
+        botChatsInitializer.init();
 
         document.getElementById('prof-name-ui').innerText = currentDisplayName;
         document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎';
 
+        // Глобальный статус пользователя (в сети)
         const myRef = db.ref("presence/" + getUserKey(currentUser));
         myRef.set(true); myRef.onDisconnect().remove();
 
@@ -583,24 +589,12 @@
           if (!snap.exists()) {
             const news = [
               "🔥 В Тюмени бабушка жестко переехала КАМАЗом местную гоночную трассу на своем мопеде.",
-              "😱 Мужчина пытался расплатиться в магазине пачкой пельменей и заставил продавщицу плакать.",
+              "😱 Мужчина пытался расплатиться в магазине пачкой пельменей.",
               "🚨 В Челябинске кот угнал легковушку и уехал на ней в неизвестном направлении.",
-              "⚡️ Школьник собрал ядерный реактор из лего и теперь требует выкуп у директора.",
-              "💥 В Питере турист попытался погладить голубя, но голубь отобрал у него телефон.",
-              "🛑 На МКАД заметили медведя на самокате, который нарушал скоростной режим.",
-              "🔥 Бабка на лавочке предсказала курс биткоина с точностью до копейки.",
-              "⚠️ В Самаре из зоопарка сбежал пингвин и пытался записаться в автошколу.",
-              "🌪️ Сильный ветер унес ларек с шаурмой прямо на крышу элитного ЖК.",
-              "🎯 Парень выиграл в тире гигантского медведя, но не смог унести его из-за веса.",
-              "🚨 В Екатеринбурге инопланетяне забыли свой летающий тазик во дворе хрущевки.",
-              "⚡️ В метро пассажир прочитал целую лекцию по квантовой физике спящему соседу.",
-              "💥 Кошка-блогер заработала больше своего хозяина за один стрим с кормом.",
-              "🛑 В Красноярске мужчина построил забор вокруг лужи и начал продавать билеты.",
-              "🔥 Ученые выяснили, что понедельник действительно вредит котикам."
+              "⚡️ Школьник собрал ядерный реактор из лего.",
+              "💥 В Питере турист попытался погладить голубя, но голубь отобрал у него телефон."
             ];
-            news.forEach((n, idx) => {
-              ref.push({ user: 'Топор 18+', type: 'text', content: n, time: '12:' + (10 + idx) });
-            });
+            news.forEach((n, idx) => { ref.push({ user: 'Топор 18+', type: 'text', content: n, time: '12:' + (10 + idx) }); });
           }
         });
       }
@@ -617,21 +611,30 @@
         ];
         bots.forEach(b => {
           const ref = db.ref('chats/' + b.id + '/messages');
-          ref.once('value', s => {
-            if(!s.exists()) {
-              ref.push({ user: b.name, type: 'text', content: b.text, time: utils.getTime() });
-            }
-          });
+          ref.once('value', s => { if(!s.exists()) ref.push({ user: b.name, type: 'text', content: b.text, time: utils.getTime() }); });
         });
       }
     };
 
-    /* ================= ЖЕЛЕЗОБЕТОННЫЙ ЧАТ ================= */
+    /* ================= ОПТИМИЗИРОВАННЫЙ ЧАТ (МГНОВЕННЫЙ РЕНДЕР И СТАТУСЫ) ================= */
     const chat = {
-      currentId: null,
-      messagesRef: null,
-      typingTimeout: null,
+      currentId: null, messagesRef: null, presenceRef: null, typingTimeout: null,
+      isTyping: false, isOtherUserOnline: false,
       
+      updatePresenceUI() {
+        const st = document.getElementById('headerStatus');
+        if (this.isTyping) return; // Если печатает, не перебиваем статус
+        
+        if (this.currentId && this.currentId.startsWith('dm_')) {
+          if (this.isOtherUserOnline) { st.className = "status-text"; st.innerText = "🟢 Онлайн"; st.style.color = "#10b981"; } 
+          else { st.className = "status-text offline"; st.innerText = "💭 Оффлайн"; st.style.color = "#94a3b8"; }
+        } else if (this.currentId && this.currentId.startsWith('bot_')) {
+          st.className = "status-text"; st.innerText = "🤖 Бот"; st.style.color = "#38bdf8";
+        } else {
+          st.className = "status-text"; st.innerText = "📢 Чат/Канал"; st.style.color = "#fbbf24";
+        }
+      },
+
       open(id, title) {
         this.detachListeners(); 
         this.currentId = id;
@@ -652,27 +655,48 @@
           document.getElementById('media-controls').style.display = 'flex';
         }
 
+        // Загрузка сообщений с лимитом 50 (кэширование)
         this.messagesRef = db.ref('chats/' + id + '/messages');
-        this.messagesRef.limitToLast(100).on('child_added', snap => {
+        this.messagesRef.limitToLast(50).on('child_added', snap => {
           const data = snap.val();
           this.renderMsg(snap.key, data);
           if (data.user !== currentDisplayName && data.user !== currentUser && data.user !== 'Система') utils.playSound('receive');
         });
 
+        // Трекинг статуса (Оффлайн/Онлайн) для Личных Чатов
+        this.isTyping = false;
+        this.isOtherUserOnline = false;
+        if (id.startsWith('dm_')) {
+          const users = id.replace('dm_', '').split('__');
+          const otherUserKey = users.find(k => k !== getUserKey(currentUser));
+          if (otherUserKey) {
+            this.presenceRef = db.ref('presence/' + otherUserKey);
+            this.presenceRef.on('value', snap => {
+              this.isOtherUserOnline = !!snap.val();
+              this.updatePresenceUI();
+            });
+          }
+        } else {
+          this.updatePresenceUI();
+        }
+
         db.ref('typing/' + id).on('value', snap => {
           const data = snap.val() || {};
           const users = Object.keys(data).filter(k => k !== getUserKey(currentUser) && data[k]).map(k => data[k]);
           const st = document.getElementById('headerStatus');
-          if(users.length > 0) { st.className = "status-text typing"; st.innerText = `${users.join(', ')} печатает...`; }
-          else { st.className = "status-text"; st.innerText = "🟢 Онлайн"; }
+          if(users.length > 0) { 
+            this.isTyping = true;
+            st.className = "status-text typing"; st.innerText = `${users.join(', ')} печатает...`; st.style.color = "#38bdf8";
+          } else { 
+            this.isTyping = false;
+            this.updatePresenceUI(); 
+          }
         });
       },
       detachListeners() {
         if (!this.currentId) return;
-        if (this.messagesRef) {
-          this.messagesRef.off();
-          this.messagesRef = null;
-        }
+        if (this.messagesRef) { this.messagesRef.off(); this.messagesRef = null; }
+        if (this.presenceRef) { this.presenceRef.off(); this.presenceRef = null; }
         db.ref('typing/' + this.currentId).off();
       },
       checkInput() {
@@ -702,9 +726,12 @@
         let msgObj = { user: currentDisplayName, type: "text", content: txt, time: utils.getTime() };
         if (state.replyTo) msgObj.reply = state.replyTo;
 
-        db.ref('chats/' + this.currentId + '/messages').push(msgObj);
+        // Оптимистичный UI (отрисовка мгновенно перед ответом БД)
+        const newMsgRef = db.ref('chats/' + this.currentId + '/messages').push();
+        this.renderMsg(newMsgRef.key, msgObj, true); 
+        newMsgRef.set(msgObj); // Фактическая отправка
+
         utils.playSound('send');
-        
         inp.value = ''; this.checkInput(); this.cancelReply(); this.clearTypingStatus();
         BOT.check(txt, this.currentId);
       },
@@ -716,9 +743,9 @@
       },
       cancelReply() { state.replyTo = null; document.getElementById('reply-preview').style.display = 'none'; },
 
-      renderMsg(id, data) {
+      renderMsg(id, data, isOptimistic = false) {
         const box = document.getElementById("messages");
-        if (box.querySelector(`[data-id="${id}"]`)) return;
+        if (box.querySelector(`[data-id="${id}"]`)) return; // Исключаем дубли после оптимистичного рендера
 
         const isMy = data.user === currentDisplayName || data.user === currentUser;
         const div = document.createElement("div");
@@ -733,17 +760,21 @@
         if (data.reply) html += `<div class="reply-block"><b>${utils.escapeHTML(data.reply.author)}</b><br>${utils.escapeHTML(data.reply.content)}</div>`;
         const safeContent = utils.escapeHTML(data.content).replace(/\n/g, '<br>');
         
+        // Рендер с заглушками при ошибке загрузки медиа
         if (data.type === "text" || data.type === "gift") html += `<div>${safeContent}</div>`;
-        else if (data.type === "image") html += `<img src="${data.content}" onclick="window.open(this.src)">`;
-        else if (data.type === "audio") html += `<audio controls src="${data.content}"></audio>`;
-        else if (data.type === "video") html += `<video src="${data.content}" onclick="this.paused ? this.play() : this.pause()" loop playsinline></video>`;
+        else if (data.type === "image") html += `<img src="${data.content}" onerror="this.outerHTML='<div class=\\'media-error\\'>⚠️ Ошибка загрузки картинки</div>'" onclick="window.open(this.src)">`;
+        else if (data.type === "audio") html += `<audio controls src="${data.content}" onerror="this.outerHTML='<div class=\\'media-error\\'>⚠️ Ошибка загрузки аудио</div>'"></audio>`;
+        else if (data.type === "video") html += `<video src="${data.content}" onerror="this.outerHTML='<div class=\\'media-error\\'>⚠️ Ошибка загрузки видео</div>'" onclick="this.paused ? this.play() : this.pause()" loop playsinline></video>`;
         else if (data.type === "file") html += `<div>📎 <a href="${data.content}" target="_blank" style="color:#fff">${utils.escapeHTML(data.name) || 'Файл'}</a></div>`;
 
         div.innerHTML = `${!isMy && data.user !== 'Система' && data.type !== 'gift' ? `<div class="author">${utils.escapeHTML(data.user)}</div>` : ''}${html}<div class="time">${data.time}</div>`;
         
         div.onclick = (e) => { if(data.type === 'text' && e.target.tagName !== 'A') this.setReply(id, data.user, data.content); };
         box.appendChild(div);
-        setTimeout(() => box.scrollTop = box.scrollHeight, 50);
+        
+        if(isOptimistic || Math.abs(box.scrollTop + box.clientHeight - box.scrollHeight) < 150) {
+           setTimeout(() => box.scrollTop = box.scrollHeight, 10);
+        }
       },
 
       openGiftModal() {
@@ -758,16 +789,45 @@
         if (state.stars !== Infinity) { state.stars -= gift.p; state.updateBalance(); state.save(); }
         document.getElementById('giftModal').classList.remove('active');
         const text = `${gift.i}\nПодарок от ${currentDisplayName} для ${friend === 'Я'?'Я (Админ)':friend}:\n${gift.n}`;
-        db.ref('chats/' + this.currentId + '/messages').push({ user: 'Система', type: "gift", content: text, time: utils.getTime() });
+        
+        const newMsgRef = db.ref('chats/' + this.currentId + '/messages').push();
+        const msgObj = { user: 'Система', type: "gift", content: text, time: utils.getTime() };
+        this.renderMsg(newMsgRef.key, msgObj, true);
+        newMsgRef.set(msgObj);
         utils.playSound('send');
       }
     };
 
     /* ================= ЗАГРУЗКА МЕДИА ================= */
     const media = {
-      isVideo: false, recorder: null, chunks: [],
+      isVideo: false,
       toggleVideoMode() { this.isVideo = !this.isVideo; chat.checkInput(); },
-      async uploadFile(e) { /* Код загрузки файлов */ }
+      async uploadFile(e) { 
+        const file = e.target.files[0];
+        if(!file || !chat.currentId) return;
+        const type = file.type.startsWith('image') ? 'image' : (file.type.startsWith('audio') ? 'audio' : (file.type.startsWith('video') ? 'video' : 'file'));
+        
+        // Оптимистичная заглушка загрузки
+        const tempId = 'temp_' + Date.now();
+        chat.renderMsg(tempId, { user: currentDisplayName, type: "text", content: "⏳ Загрузка файла...", time: utils.getTime() }, true);
+
+        try {
+            const fileRef = storage.ref(`media/${Date.now()}_${file.name}`);
+            await fileRef.put(file);
+            const url = await fileRef.getDownloadURL();
+            
+            const tempDiv = document.querySelector(`[data-id="${tempId}"]`);
+            if(tempDiv) tempDiv.remove();
+
+            const msgObj = { user: currentDisplayName, type: type, content: url, name: file.name, time: utils.getTime() };
+            db.ref('chats/' + chat.currentId + '/messages').push(msgObj);
+        } catch(err) {
+            const tempDiv = document.querySelector(`[data-id="${tempId}"]`);
+            if(tempDiv) tempDiv.innerHTML = "<div class='media-error'>❌ Ошибка загрузки файла</div>";
+        }
+      },
+      startRecord() { /* Логика кружочков и войсов */ },
+      stopRecord() { /* ... */ }
     };
 
     /* ================= МАГАЗИН ================= */
@@ -794,9 +854,9 @@
       }
     };
 
-    /* ================= XSPAM (С АКТИВНЫМИ БОТАМИ) ================= */
+    /* ================= XSPAM (С АВТОНОМНЫМИ БОТАМИ) ================= */
     const xspam = {
-      ref: null,
+      ref: null, botsLoop: null,
       init() {
         this.ref = db.ref('xspam/posts');
         this.ref.on('value', snap => {
@@ -807,40 +867,49 @@
           if (posts.length === 0) feed.innerHTML = '<div style="color:#64748b; text-align:center;">Пока нет постов...</div>';
           posts.forEach(p => this.renderTweet(p));
         });
-        this.checkAndGenerateBotPosts();
+        
+        // Запуск автономной жизни ботов
+        if (!this.botsLoop) {
+           this.botsLoop = setInterval(() => this.generateBotActivity(), 40000); // Активность раз в 40 секунд
+        }
       },
-      checkAndGenerateBotPosts() {
-        db.ref('xspam/posts').once('value', snap => {
-          if (!snap.exists()) {
-            this.ref.push({ name: "🤖 Нейрохам", handle: "@neuro", avatar: "🤖", text: "Че тут за соцсеть для слабаков? 🤡", ts: Date.now() - 10000 });
-            this.ref.push({ name: "🌸 Аниме-тян (Яндере)", handle: "@yandere", avatar: "🌸", text: "Я слежу за каждым твоим постом... ❤️🔪", ts: Date.now() - 5000 });
-          }
-        });
+      generateBotActivity() {
+         const bots = [
+            { name: "🤖 Нейрохам", handle: "@neuro", avatar: "🤖", quotes: ["Опять кто-то тапает эту монетку. Скучно.", "XSpam лучше чем реальность 🤡", "Да мне вообще пофиг."] },
+            { name: "🌸 Аниме-тян (Яндере)", handle: "@yandere", avatar: "🌸", quotes: ["Я знаю, куда ты смотрел сегодня...", "Если ты не зайдешь в сеть через 5 минут, я приду к тебе.", "Никто не любит тебя так, как я! ❤️🔪"] }
+         ];
+         
+         // Шанс 40% создать новый пост
+         if (Math.random() > 0.6) {
+             const bot = bots[Math.floor(Math.random() * bots.length)];
+             const text = bot.quotes[Math.floor(Math.random() * bot.quotes.length)];
+             this.ref.push({ name: bot.name, handle: bot.handle, avatar: bot.avatar, text: text, ts: Date.now() });
+         }
+
+         // Шанс провзаимодействовать с чужим постом
+         this.ref.limitToLast(10).once('value', snap => {
+             const data = snap.val();
+             if (!data) return;
+             const keys = Object.keys(data);
+             const randomKey = keys[Math.floor(Math.random() * keys.length)];
+             const bot = bots[Math.floor(Math.random() * bots.length)];
+             
+             if (Math.random() > 0.5) {
+                 db.ref(`xspam/posts/${randomKey}/likes/bot_${bot.handle.replace('@','')}`).set(true); // Бот ставит лайк
+             }
+             if (Math.random() > 0.8) {
+                 const comment = bot.handle === "@neuro" ? "Полный бред 🤡" : "Почему ты пишешь это без меня?! 🔪";
+                 db.ref(`xspam/posts/${randomKey}/comments`).push({ name: bot.name, text: comment, ts: Date.now() });
+             }
+         });
       },
       post() {
         const t = document.getElementById('xspam-input').value.trim();
         if(!t) return;
         this.ref.push({
-          name: currentDisplayName,
-          handle: '@' + getUserKey(currentUser),
-          avatar: (currentUser === 'Я') ? '👑' : '😎',
-          text: t,
-          ts: Date.now()
+          name: currentDisplayName, handle: '@' + getUserKey(currentUser), avatar: (currentUser === 'Я') ? '👑' : '😎', text: t, ts: Date.now()
         });
         document.getElementById('xspam-input').value = '';
-
-        // Авто-реакция ботов на твой пост
-        setTimeout(() => {
-          if (Math.random() < 0.6) {
-            this.ref.push({
-              name: "🌸 Аниме-тян (Яндере)",
-              handle: "@yandere",
-              avatar: "🌸",
-              text: "О чем это ты пишешь?! Без меня?! 💢🔪",
-              ts: Date.now()
-            });
-          }
-        }, 3000);
       },
       toggleLike(id) {
         const likeRef = db.ref('xspam/posts/' + id + '/likes/' + getUserKey(currentUser));
