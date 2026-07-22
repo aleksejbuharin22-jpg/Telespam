@@ -1,7 +1,7 @@
 {
   "name": "Секретный TG",
   "short_name": "Секретный TG",
-  "start_url": "/",
+  "start_url": "/Telespam/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
