@@ -469,24 +469,28 @@
   </div>
 
   <script>
-    /* ================= ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ В РЕАЛЬНОМ ВРЕМЕНИ ================= */
-    // Конфигурация Firebase Realtime Database
+    /* ================= БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ ================= */
     const firebaseConfig = {
-      databaseURL: "https://secret-tg-chat-default-rtdb.firebaseio.com" // Публичный онлайн-бэкенд реального времени
+      databaseURL: "https://secret-tg-chat-default-rtdb.firebaseio.com"
     };
 
     let db = null;
     let isFirebaseReady = false;
 
+    // ИСПРАВЛЕНИЕ ЗАВИСАНИЯ: Безопасная проверка загрузки Firebase SDK
     try {
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+      if (typeof firebase !== 'undefined' && firebase && firebase.apps) {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+        isFirebaseReady = true;
+        console.log("Firebase Database подключен!");
+      } else {
+        console.warn("Firebase SDK недоступен. Работа в офлайн-режиме.");
       }
-      db = firebase.database();
-      isFirebaseReady = true;
-      console.log("Firebase Database успешно подключен!");
     } catch(e) {
-      console.warn("Ошибка инициализации сетевого бэкенда. Переход в автономный режим:", e);
+      console.warn("Ошибка инициализации сетевого бэкенда:", e);
     }
 
     /* ================= УТИЛИТЫ ФОРМАТИРОВАНИЯ И БЕЗОПАСНОСТИ ================= */
@@ -702,7 +706,6 @@
       currentId: null,
       messagesLocal: {},
       typingTimeout: null,
-      activeTypingUsers: new Set(),
       
       open(id, title) {
         if (this.currentId) {
@@ -730,19 +733,16 @@
           inp.disabled = false; inp.placeholder = "Сообщение...";
         }
 
-        // Подгрузка истории чата
         if(this.messagesLocal[id]) {
           this.messagesLocal[id].forEach(m => this.renderMsg(m.u, m.t, m.time, m.media, m.channel));
         }
 
-        // Подписка на Firebase сообщения и статусы печатания
         this.attachListeners(id);
       },
 
       attachListeners(chatId) {
-        if (!isFirebaseReady) return;
+        if (!isFirebaseReady || !db) return;
 
-        // 1. Подписка на сообщения в реальном времени
         const chatRef = db.ref(`chats/${chatId}/messages`);
         chatRef.limitToLast(50).on('child_added', (snapshot) => {
           const m = snapshot.val();
@@ -751,7 +751,6 @@
           }
         });
 
-        // 2. Подписка на статусы печатания участников в реальном времени
         const typingRef = db.ref(`typing/${chatId}`);
         typingRef.on('value', (snapshot) => {
           const data = snapshot.val() || {};
@@ -781,15 +780,14 @@
       },
 
       detachListeners() {
-        if (!isFirebaseReady || !this.currentId) return;
+        if (!isFirebaseReady || !db || !this.currentId) return;
         db.ref(`chats/${this.currentId}/messages`).off();
         db.ref(`typing/${this.currentId}`).off();
       },
 
       handleTyping() {
-        if (!isFirebaseReady || !this.currentId) return;
+        if (!isFirebaseReady || !db || !this.currentId) return;
 
-        // Отправка статуса "печатает..." в базу данных
         db.ref(`typing/${this.currentId}/${currentUser}`).set(true);
 
         clearTimeout(this.typingTimeout);
@@ -799,7 +797,7 @@
       },
 
       clearTypingStatus() {
-        if (!isFirebaseReady || !this.currentId) return;
+        if (!isFirebaseReady || !db || !this.currentId) return;
         db.ref(`typing/${this.currentId}/${currentUser}`).set(false);
       },
 
@@ -821,7 +819,7 @@
           ts: Date.now()
         };
 
-        if (isFirebaseReady) {
+        if (isFirebaseReady && db) {
           db.ref(`chats/${this.currentId}/messages`).push(msgData);
         } else {
           this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
@@ -849,7 +847,7 @@
             ts: Date.now()
           };
 
-          if (isFirebaseReady) {
+          if (isFirebaseReady && db) {
             db.ref(`chats/${this.currentId}/messages`).push(msgData);
           } else {
             this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
@@ -881,7 +879,7 @@
         document.getElementById('giftModal').classList.remove('active');
 
         const giftText = `🎁 ${currentUser} подарил(а) ${friend}: ${gift.i} ${gift.n}!`;
-        if (isFirebaseReady && this.currentId) {
+        if (isFirebaseReady && db && this.currentId) {
           db.ref(`chats/${this.currentId}/messages`).push({
             u: 'Система',
             t: giftText,
@@ -907,7 +905,6 @@
         const box = document.getElementById('messages');
         const isMy = user === currentUser;
         
-        // Защита от дублирования отрисовки при получении сообщений
         const msgKey = `${user}_${time}_${text.substring(0, 15)}`;
         if (box.querySelector(`[data-msg-id="${msgKey}"]`)) return;
 
@@ -1198,4 +1195,4 @@
 
   </script>
 </body>
-              </html>
+</html>
