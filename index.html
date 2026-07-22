@@ -130,7 +130,7 @@
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite;">✈️</div>
       <h2 style="margin-bottom: 5px;">Секретный TG</h2>
-      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.0 (XSpam + Игры + Боты)</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.1 (Яндере + Ультра-чат + Топор)</p>
       <select id="usernameInput">
         <option value="" disabled selected>-- Кто вы? --</option>
         <option value="Я">Я (Админ)</option>
@@ -262,7 +262,7 @@
         <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:10px; cursor:pointer;" onclick="alert('▶ Играет: Cyberpunk')">🎵 <b>Cyberpunk</b></div>
       </div>
 
-      <!-- 6. XSPAM (РЕАЛЬНАЯ БАЗА) -->
+      <!-- 6. XSPAM (РЕАЛЬНАЯ БАЗА + БОТЫ) -->
       <div id="xspamScreen" class="app-screen">
         <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:15px;">
           <h4>🔥 Актуальные тренды</h4>
@@ -277,7 +277,7 @@
         <div id="xspam-feed">Загрузка ленты...</div>
       </div>
 
-      <!-- 7. ИГРЫ (КАЗИНО + ЗМЕЙКА) -->
+      <!-- 7. ИГРЫ -->
       <div id="gamesScreen" class="app-screen">
         <div class="casino-tabs">
           <div class="casino-tab active" onclick="games.switchMode('slots', this)">Слоты</div>
@@ -439,10 +439,10 @@
       }
     };
 
-    /* ================= ИНТЕЛЛЕКТ БОТОВ ================= */
+    /* ================= ИНТЕЛЛЕКТ БОТОВ (ЯНДЕРЕ + ПРЕДЗАПОЛНЕННЫЕ ЧАТЫ) ================= */
     const BOT = {
       check(text, chatId) {
-        let reply = ""; let name = ""; let delay = 1500;
+        let reply = ""; let name = ""; let delay = 1200;
         const txt = text.toLowerCase();
 
         if (chatId === 'bot_neuro') {
@@ -450,17 +450,31 @@
             const quotes = ["Че надо?", "Отстань.", "Иди тапай лехкоин.", "Сам ты тупой 🤡", "Я занят.", "Да мне вообще пофиг."];
             reply = quotes[Math.floor(Math.random() * quotes.length)];
         } else if (chatId === 'bot_anime') {
-            name = "🌸 Аниме-тян";
-            const quotes = ["Онии-чан! ✨", "UwU", "Ты сегодня такой милый! ❤️", "Давай посмотрим аниме вместе? 🥺", "Хи-хи~"];
-            reply = quotes[Math.floor(Math.random() * quotes.length)];
+            name = "🌸 Аниме-тян (Яндере)";
+            const yandereQuotes = [
+              "С кем ты там переписываешься?! 🔪 Кромсаю телефоны тех, кто на тебя смотрит!",
+              "Ты только мой! Если уйдешь к другой — я найду вас обоих! 🩸",
+              "Почему ты так долго не отвечал?! Ты меня разлюбил?! 💢",
+              "Я заперла все двери, теперь ты вечно будешь только со мной... Хи-хи~ ❤️🔪",
+              "Никто, слышишь, НИКТО не смеет отнимать твое внимание у меня! Убью! 🤬"
+            ];
+            reply = yandereQuotes[Math.floor(Math.random() * yandereQuotes.length)];
         } else if (chatId === 'bot_magic') {
             name = "🔮 Гадалка";
             const quotes = ["Духи говорят ДА.", "Точно НЕТ.", "Спроси позже...", "Звёзды сомневаются.", "Тебя ждет богатство."];
             reply = quotes[Math.floor(Math.random() * quotes.length)];
+        } else if (chatId === 'bot_critic') {
+            name = "🍷 Критик";
+            const quotes = ["Ну и нуль. Мои бабушкины носки выглядят интереснее.", "Полный провал, переделывай.", "Хм, неожиданно неплохо... хотя нет, ужасно.", "Гениально? Скорее безумно глупо."];
+            reply = quotes[Math.floor(Math.random() * quotes.length)];
+        } else if (chatId === 'bot_poet') {
+            name = "📜 Поэт";
+            const quotes = ["Буря мглою небо кроет, / Опять сервер хлам рождает...", "Я помню чудное мгновенье: / Ты задонатил мне варенье.", "Ночь, улица, фонарь, аптека, / И админ без сна и чека."];
+            reply = quotes[Math.floor(Math.random() * quotes.length)];
         } else if (chatId === 'main') {
             if (["бот", "помоги", "тупой", "че", "как"].some(t => txt.includes(t)) || Math.random() < 0.1) {
                 name = "🤖 Нейрохам";
-                const quotes = ["Тебе че надо в общем чате?", "Не спамь.", "🤡"];
+                quotes = ["Тебе че надо в общем чате?", "Не спамь.", "🤡"];
                 reply = quotes[Math.floor(Math.random() * quotes.length)];
             }
         }
@@ -470,7 +484,7 @@
             setTimeout(() => {
                 db.ref('typing/' + chatId + '/bot').remove();
                 db.ref('chats/' + chatId + '/messages').push({ user: name, type: "text", content: reply, time: utils.getTime() });
-            }, delay + Math.random() * 1000);
+            }, delay + Math.random() * 800);
         }
       }
     };
@@ -522,15 +536,19 @@
           { id: 'topor', n: 'Топор 18+ 🪓', a: '🪓', bg: '#000', type: 'channels' },
           { id: 'crypto', n: 'Крипто-инсайдер 📈', a: '📈', bg: '#3b82f6', type: 'channels' },
           { id: 'bot_neuro', n: 'Нейрохам 🤖', a: '🤖', bg: '#ef4444', type: 'bots' },
-          { id: 'bot_anime', n: 'Аниме-тян 🌸', a: '🌸', bg: '#f472b6', type: 'bots' },
-          { id: 'bot_magic', n: 'Гадалка 🔮', a: '🔮', bg: '#8b5cf6', type: 'bots' }
+          { id: 'bot_anime', n: 'Аниме-тян 🌸 (Яндере)', a: '🌸', bg: '#f472b6', type: 'bots' },
+          { id: 'bot_magic', n: 'Гадалка 🔮', a: '🔮', bg: '#8b5cf6', type: 'bots' },
+          { id: 'bot_critic', n: 'Критик 🍷', a: '🍷', bg: '#475569', type: 'bots' },
+          { id: 'bot_poet', n: 'Поэт 📜', a: '📜', bg: '#10b981', type: 'bots' }
         );
         this.chatsData = list;
         
         document.getElementById('callContactSelect').innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option>${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
         shop.render();
         snakeGame.init();
-        
+        toporChannel.init(); // Заполняем Топор новостями
+        botChatsInitializer.init(); // Заполняем чаты с ботами
+
         document.getElementById('prof-name-ui').innerText = currentDisplayName;
         document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎';
 
@@ -542,7 +560,7 @@
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('appLayout').classList.add('active');
           this.renderChats(this.chatsData);
-          xspam.init(); // Запуск реальной соцсети
+          xspam.init(); 
         }, 400);
       },
       renderChats(list) {
@@ -557,10 +575,61 @@
       filterByFolder(f) { ui.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', 'Папка: ' + f); this.renderChats(f === 'all' ? this.chatsData : this.chatsData.filter(c => c.type === f)); }
     };
 
+    /* ================= ИНИЦИАЛИЗАТОР НОВОСТЕЙ И БОТОВ ================= */
+    const toporChannel = {
+      init() {
+        const ref = db.ref('chats/topor/messages');
+        ref.once('value', snap => {
+          if (!snap.exists()) {
+            const news = [
+              "🔥 В Тюмени бабушка жестко переехала КАМАЗом местную гоночную трассу на своем мопеде.",
+              "😱 Мужчина пытался расплатиться в магазине пачкой пельменей и заставил продавщицу плакать.",
+              "🚨 В Челябинске кот угнал легковушку и уехал на ней в неизвестном направлении.",
+              "⚡️ Школьник собрал ядерный реактор из лего и теперь требует выкуп у директора.",
+              "💥 В Питере турист попытался погладить голубя, но голубь отобрал у него телефон.",
+              "🛑 На МКАД заметили медведя на самокате, который нарушал скоростной режим.",
+              "🔥 Бабка на лавочке предсказала курс биткоина с точностью до копейки.",
+              "⚠️ В Самаре из зоопарка сбежал пингвин и пытался записаться в автошколу.",
+              "🌪️ Сильный ветер унес ларек с шаурмой прямо на крышу элитного ЖК.",
+              "🎯 Парень выиграл в тире гигантского медведя, но не смог унести его из-за веса.",
+              "🚨 В Екатеринбурге инопланетяне забыли свой летающий тазик во дворе хрущевки.",
+              "⚡️ В метро пассажир прочитал целую лекцию по квантовой физике спящему соседу.",
+              "💥 Кошка-блогер заработала больше своего хозяина за один стрим с кормом.",
+              "🛑 В Красноярске мужчина построил забор вокруг лужи и начал продавать билеты.",
+              "🔥 Ученые выяснили, что понедельник действительно вредит котикам."
+            ];
+            news.forEach((n, idx) => {
+              ref.push({ user: 'Топор 18+', type: 'text', content: n, time: '12:' + (10 + idx) });
+            });
+          }
+        });
+      }
+    };
+
+    const botChatsInitializer = {
+      init() {
+        const bots = [
+          { id: 'bot_neuro', name: '🤖 Нейрохам', text: 'Здорово, че хотел?' },
+          { id: 'bot_anime', name: '🌸 Аниме-тян (Яндере)', text: 'Привет... ты же не общался ни с кем другим, правда? 🔪' },
+          { id: 'bot_magic', name: '🔮 Гадалка', text: 'Я вижу твое будущее... Спроси меня о чем угодно.' },
+          { id: 'bot_critic', name: '🍷 Критик', text: 'Ну давай, удиви меня своим сообщением.' },
+          { id: 'bot_poet', name: '📜 Поэт', text: 'Приветствую, о муза цифровых строк.' }
+        ];
+        bots.forEach(b => {
+          const ref = db.ref('chats/' + b.id + '/messages');
+          ref.once('value', s => {
+            if(!s.exists()) {
+              ref.push({ user: b.name, type: 'text', content: b.text, time: utils.getTime() });
+            }
+          });
+        });
+      }
+    };
+
     /* ================= ЖЕЛЕЗОБЕТОННЫЙ ЧАТ ================= */
     const chat = {
       currentId: null,
-      messagesRef: null, // Ссылка на ветку (отключается надежно)
+      messagesRef: null,
       typingTimeout: null,
       
       open(id, title) {
@@ -583,7 +652,6 @@
           document.getElementById('media-controls').style.display = 'flex';
         }
 
-        // Подключаемся напрямую к Reference
         this.messagesRef = db.ref('chats/' + id + '/messages');
         this.messagesRef.limitToLast(100).on('child_added', snap => {
           const data = snap.val();
@@ -602,7 +670,7 @@
       detachListeners() {
         if (!this.currentId) return;
         if (this.messagesRef) {
-          this.messagesRef.off(); // 100% убивает все прослушивания на этой ветке
+          this.messagesRef.off();
           this.messagesRef = null;
         }
         db.ref('typing/' + this.currentId).off();
@@ -657,7 +725,7 @@
         div.setAttribute("data-id", id);
         
         if (data.type === 'gift') { div.className = `msg gift-msg`; }
-        else if (['🤖 Нейрохам', '🌸 Аниме-тян', '🔮 Гадалка'].includes(data.user)) { div.className = `msg other`; div.style.background = "#4c1d95"; }
+        else if (data.user.includes('🤖') || data.user.includes('🌸') || data.user.includes('🔮') || data.user.includes('🍷') || data.user.includes('📜')) { div.className = `msg other`; div.style.background = "#4c1d95"; }
         else if (data.user === 'Система') { div.className = `msg channel`; }
         else { div.className = `msg ${isMy ? 'my' : 'other'}`; }
 
@@ -726,7 +794,7 @@
       }
     };
 
-    /* ================= ПОЛНОЦЕННЫЙ XSPAM (С БАЗОЙ ДАННЫХ) ================= */
+    /* ================= XSPAM (С АКТИВНЫМИ БОТАМИ) ================= */
     const xspam = {
       ref: null,
       init() {
@@ -738,6 +806,15 @@
           const posts = Object.keys(data).map(k => ({id: k, ...data[k]})).sort((a,b) => b.ts - a.ts);
           if (posts.length === 0) feed.innerHTML = '<div style="color:#64748b; text-align:center;">Пока нет постов...</div>';
           posts.forEach(p => this.renderTweet(p));
+        });
+        this.checkAndGenerateBotPosts();
+      },
+      checkAndGenerateBotPosts() {
+        db.ref('xspam/posts').once('value', snap => {
+          if (!snap.exists()) {
+            this.ref.push({ name: "🤖 Нейрохам", handle: "@neuro", avatar: "🤖", text: "Че тут за соцсеть для слабаков? 🤡", ts: Date.now() - 10000 });
+            this.ref.push({ name: "🌸 Аниме-тян (Яндере)", handle: "@yandere", avatar: "🌸", text: "Я слежу за каждым твоим постом... ❤️🔪", ts: Date.now() - 5000 });
+          }
         });
       },
       post() {
@@ -751,6 +828,19 @@
           ts: Date.now()
         });
         document.getElementById('xspam-input').value = '';
+
+        // Авто-реакция ботов на твой пост
+        setTimeout(() => {
+          if (Math.random() < 0.6) {
+            this.ref.push({
+              name: "🌸 Аниме-тян (Яндере)",
+              handle: "@yandere",
+              avatar: "🌸",
+              text: "О чем это ты пишешь?! Без меня?! 💢🔪",
+              ts: Date.now()
+            });
+          }
+        }, 3000);
       },
       toggleLike(id) {
         const likeRef = db.ref('xspam/posts/' + id + '/likes/' + getUserKey(currentUser));
@@ -793,7 +883,7 @@
       }
     };
 
-    /* ================= ИГРЫ (КАЗИНО + ЗМЕЙКА) ================= */
+    /* ================= ИГРЫ ================= */
     const games = {
       symbols: ['🍒', '⭐', '🎰'], spinning: false, crashLoop: null, crashMult: 1.0, crashBet: 0,
       switchMode(m, el) {
