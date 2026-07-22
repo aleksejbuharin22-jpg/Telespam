@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Секретный TG</title>
-  <!-- Убрана ссылка на manifest.json, чтобы не было ошибки 404 -->
+  
+  <!-- Firebase SDK для работы в реальном времени (Realtime Database) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; position: fixed; overflow: hidden; background: #0f172a; color: #fff; }
@@ -32,7 +36,8 @@
     .back-btn { font-size: 28px; cursor: pointer; color: #3b82f6; display: none; margin-top: -4px; padding-right: 5px; }
     .header-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
     .header-info h2 { font-size: 18px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .status-text { font-size: 12px; color: #10b981; margin-top: 2px; }
+    .status-text { font-size: 12px; color: #10b981; margin-top: 2px; transition: color 0.2s ease; }
+    .status-text.typing { color: #38bdf8; font-weight: 600; animation: pulse 1.5s infinite; }
     .stars-balance-ui { color: #fbbf24; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
 
     /* Верхняя панель навигации */
@@ -51,7 +56,7 @@
     .app-screen.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; z-index: 10; }
     .app-screen.no-padding { padding: 0; }
 
-    /* 1. Чаты и поиск */
+    /* Чаты и поиск */
     .search-box { background: #1e293b; padding: 0 0 12px 0; position: sticky; top: 0; z-index: 10; }
     .search-input { width: 100%; background: #334155; border: none; color: #fff; padding: 10px 15px; border-radius: 12px; font-size: 15px; outline: none; }
     .chat-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #1e293b; cursor: pointer; transition: background 0.2s; border-radius: 12px; margin-bottom: 5px; }
@@ -249,7 +254,7 @@
           
           <button class="gift-btn" onclick="chat.openGiftModal()">🎁</button>
 
-          <input type="text" id="msg-input" placeholder="Сообщение..." onkeypress="if(event.key==='Enter') chat.sendText()">
+          <input type="text" id="msg-input" placeholder="Сообщение..." oninput="chat.handleTyping()" onkeypress="if(event.key==='Enter') chat.sendText()">
           <button class="action-btn" onclick="chat.sendText()">➤</button>
         </div>
       </div>
@@ -261,9 +266,13 @@
           <h2 id="callTitle" style="margin-bottom: 5px;">Нет активного вызова</h2>
           <p id="callStatus" style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Выберите контакт для звонка</p>
           <select id="callContactSelect" style="max-width: 280px; margin-bottom: 20px;">
+            <option value="Друг 1">Друг 1</option>
+            <option value="Друг 2">Друг 2</option>
+            <option value="Друг 3">Друг 3</option>
+            <option value="Друг 4">Друг 4</option>
+            <option value="Друг 5">Друг 5</option>
             <option value="🌸 Мику">🌸 Мику</option>
             <option value="🎮 Саня">🎮 Саня</option>
-            <option value="Бро">Бро</option>
           </select>
           <div style="display: flex; gap: 15px; width: 100%; max-width: 280px; justify-content: center;">
             <button class="btn-primary" style="background: #10b981;" onclick="calls.startAudioCall()">🎤 Аудио</button>
@@ -282,6 +291,11 @@
             <div style="font-weight: bold;">Все чаты</div>
             <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Общий список</div>
           </div>
+          <div class="folder-card" onclick="app.filterByFolder('private')">
+            <div class="folder-icon">👤</div>
+            <div style="font-weight: bold;">Личные</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Друзья (1-5)</div>
+          </div>
           <div class="folder-card" onclick="app.filterByFolder('groups')">
             <div class="folder-icon">🚀</div>
             <div style="font-weight: bold;">Группы</div>
@@ -291,11 +305,6 @@
             <div class="folder-icon">🪓</div>
             <div style="font-weight: bold;">Каналы</div>
             <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Только чтение</div>
-          </div>
-          <div class="folder-card" onclick="app.filterByFolder('bots')">
-            <div class="folder-icon">🤖</div>
-            <div style="font-weight: bold;">Боты</div>
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Автоматические</div>
           </div>
         </div>
       </div>
@@ -449,6 +458,7 @@
         <option value="Друг 3">Друг 3</option>
         <option value="Друг 4">Друг 4</option>
         <option value="Друг 5">Друг 5</option>
+        <option value="Я (Админ)">Я (Админ)</option>
       </select>
       <select id="gift-item-select"></select>
       <div style="display:flex; gap:10px; margin-top: 15px;">
@@ -459,6 +469,26 @@
   </div>
 
   <script>
+    /* ================= ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ В РЕАЛЬНОМ ВРЕМЕНИ ================= */
+    // Конфигурация Firebase Realtime Database
+    const firebaseConfig = {
+      databaseURL: "https://secret-tg-chat-default-rtdb.firebaseio.com" // Публичный онлайн-бэкенд реального времени
+    };
+
+    let db = null;
+    let isFirebaseReady = false;
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      db = firebase.database();
+      isFirebaseReady = true;
+      console.log("Firebase Database успешно подключен!");
+    } catch(e) {
+      console.warn("Ошибка инициализации сетевого бэкенда. Переход в автономный режим:", e);
+    }
+
     /* ================= УТИЛИТЫ ФОРМАТИРОВАНИЯ И БЕЗОПАСНОСТИ ================= */
     const utils = {
       escapeHTML(str) {
@@ -474,18 +504,15 @@
 
     /* ================= СИСТЕМА И СОСТОЯНИЕ ================= */
     let currentUser = "";
-    // ИСПРАВЛЕНИЕ: Уменьшен лимит до 500 КБ для защиты LocalStorage от переполнения
     const MAX_FILE_SIZE = 500 * 1024; 
     
     const state = {
       stars: 0,
       myGifts: [],
-      isToxic: false,
       
       load() {
         if (!currentUser) return;
         
-        // ИСПРАВЛЕНИЕ: Безопасный парсинг данных пользователя
         try {
           const saved = localStorage.getItem('secret_tg_user_' + currentUser);
           if (saved) {
@@ -493,41 +520,25 @@
             this.stars = parsed.stars === 'Infinity' ? Infinity : Number(parsed.stars);
             this.myGifts = parsed.myGifts || [];
           } else {
-            this.stars = (currentUser === 'Я') ? Infinity : 50;
+            this.stars = (currentUser === 'Я' || currentUser === 'Я (Админ)') ? Infinity : 100;
             this.myGifts = [];
           }
         } catch(e) {
-          console.error("Ошибка чтения пользователя:", e);
-          this.stars = (currentUser === 'Я') ? Infinity : 50;
+          this.stars = (currentUser === 'Я' || currentUser === 'Я (Админ)') ? Infinity : 100;
           this.myGifts = [];
         }
 
-        // ИСПРАВЛЕНИЕ: Безопасный парсинг истории чатов
         try {
           const savedChats = localStorage.getItem('secret_tg_chats');
           chat.messagesLocal = savedChats ? JSON.parse(savedChats) : {};
         } catch(e) {
-          console.error("Ошибка чтения чатов:", e);
           chat.messagesLocal = {};
-        }
-        
-        if(!chat.messagesLocal['topor']) {
-          chat.messagesLocal['topor'] = [
-            { u: 'Топор 18+ 🪓', t: 'ШОК! В Мухосранске дед отбился от медведя с помощью батона колбасы! Смотреть без смс...', time: '10:00', channel: true },
-            { u: 'Топор 18+ 🪓', t: 'Срочные новости: Биткоин упал до нуля, инвесторы идут работать на завод.', time: '12:30', channel: true }
-          ];
-        }
-        if(!chat.messagesLocal['crypto']) {
-          chat.messagesLocal['crypto'] = [
-            { u: 'Крипто-инсайдер 📈', t: 'Аналитика рынка: ждем рост или очередной обвал?', time: '09:15', channel: true }
-          ];
         }
       },
 
       save() {
         if (!currentUser) return;
         
-        // ИСПРАВЛЕНИЕ: Защита от QuotaExceededError (переполнение LocalStorage)
         try {
           const data = {
             stars: this.stars === Infinity ? 'Infinity' : this.stars,
@@ -537,7 +548,6 @@
           localStorage.setItem('secret_tg_chats', JSON.stringify(chat.messagesLocal));
         } catch (e) {
           console.error("Ошибка сохранения в LocalStorage:", e);
-          alert("Память устройства переполнена! Сохранение не удалось. Удалите старые медиафайлы или очистите кэш.");
         }
       },
 
@@ -552,7 +562,6 @@
       getTime() { const d=new Date(); return d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0'); },
       
       switchTab(id, el, title, status) {
-        // ИСПРАВЛЕНИЕ: Останавливаем фоновый процесс Краша при переключении вкладки
         if (casino.crashLoop) {
           casino.endCrash(false);
         }
@@ -579,6 +588,11 @@
         mainNav.style.display = 'flex';
         setTimeout(() => mainNav.style.height = '65px', 10);
         
+        if (chat.currentId) {
+          chat.clearTypingStatus();
+          chat.detachListeners();
+        }
+
         this.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', 'Соединение установлено');
         chat.currentId = null;
       }
@@ -587,14 +601,15 @@
     const app = {
       chatsData: [
         { id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', type: 'groups' },
+        { id: 'friend1', n: 'Друг 1', a: '👤', bg: 'linear-gradient(135deg, #6366f1, #4f46e5)', type: 'private' },
+        { id: 'friend2', n: 'Друг 2', a: '👤', bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', type: 'private' },
+        { id: 'friend3', n: 'Друг 3', a: '👤', bg: 'linear-gradient(135deg, #06b6d4, #0891b2)', type: 'private' },
+        { id: 'friend4', n: 'Друг 4', a: '👤', bg: 'linear-gradient(135deg, #10b981, #059669)', type: 'private' },
+        { id: 'friend5', n: 'Друг 5', a: '👤', bg: 'linear-gradient(135deg, #f59e0b, #d97706)', type: 'private' },
         { id: 'anime', n: 'Анимешники 🌸', a: '🌸', bg: 'linear-gradient(135deg, #f472b6, #db2777)', type: 'groups' },
         { id: 'gamers', n: 'CS & Игры 🎮', a: '🎮', bg: 'linear-gradient(135deg, #f59e0b, #d97706)', type: 'groups' },
-        { id: 'bot', n: 'Нейрохамам 🤖', a: '🤖', bg: 'linear-gradient(135deg, #10b981, #059669)', type: 'bots' },
         { id: 'topor', n: 'Топор 18+ 🪓', a: '🪓', bg: 'linear-gradient(135deg, #000000, #333333)', type: 'channels' },
-        { id: 'crypto', n: 'Крипто-инсайдер 📈', a: '📈', bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', type: 'channels' },
-        { id: 'memes', n: 'Мемы дня 😂', a: '😂', bg: 'linear-gradient(135deg, #eab308, #ca8a04)', type: 'channels' },
-        { id: 'friend1', n: 'Друг 1', a: '👤', bg: 'linear-gradient(135deg, #6366f1, #4f46e5)', type: 'private' },
-        { id: 'friend2', n: 'Друг 2', a: '👤', bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', type: 'private' }
+        { id: 'crypto', n: 'Крипто-инсайдер 📈', a: '📈', bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', type: 'channels' }
       ],
 
       login() {
@@ -682,39 +697,18 @@
       }
     };
 
-    /* ================= ЧАТЫ И БОТЫ ================= */
-    const botLogic = {
-      toxicReplies: [
-        "Сам туда иди, герой комнатный! 🤡", 
-        "Плачь больше, нытик.", 
-        "Твое мнение тут никого не волнует. Отдыхай.", 
-        "Стрелку метнул - сам туда шагнул!",
-        "Аргументы кончились, начались истерики? Иди уроки делай."
-      ],
-      friendly: {
-        'anime': (msg) => {
-          if (msg.includes("посоветуй") || msg.includes("посмотреть")) return "Глянь 'Атаку Титанов' или 'Киберпанк: Бегущие по краю', абсолютная имба! 😍";
-          return "Согласна! Аниме — это искусство 🌸";
-        },
-        'gamers': (msg) => {
-          if (msg.includes("кс") || msg.includes("cs")) return "Го в КС, я создал! Залетай в дискорд 🎮";
-          return "Да, игруха топ. Ждем новых релизов!";
-        },
-        'bot': (msg) => "Я анализирую твои слова... Очень логично. Но я нейросеть, мне всё равно 🤖",
-        'main': (msg) => "Хаха, ну ты выдал, бро 🚀"
-      },
-      getReply(chatId, text) {
-        if (state.isToxic) return this.toxicReplies[Math.floor(Math.random() * this.toxicReplies.length)];
-        if (this.friendly[chatId]) return this.friendly[chatId](text.toLowerCase());
-        return "Да, понимаю.";
-      }
-    };
-
+    /* ================= ЧАТЫ И СТАТУСЫ В РЕАЛЬНОМ ВРЕМЕНИ ================= */
     const chat = {
       currentId: null,
       messagesLocal: {},
+      typingTimeout: null,
+      activeTypingUsers: new Set(),
       
       open(id, title) {
+        if (this.currentId) {
+          this.detachListeners();
+        }
+
         this.currentId = id;
         document.getElementById('messages').innerHTML = '';
         
@@ -726,47 +720,112 @@
         
         document.getElementById('headerTitle').innerText = title;
         document.getElementById('headerStatus').innerText = "Онлайн";
+        document.getElementById('headerStatus').className = "status-text";
         document.getElementById('headerBack').style.display = 'block';
         
         const inp = document.getElementById('msg-input');
-        if(id === 'topor' || id === 'crypto' || id === 'memes') {
+        if(id === 'topor' || id === 'crypto') {
           inp.disabled = true; inp.placeholder = "Канал доступен только для чтения";
         } else {
           inp.disabled = false; inp.placeholder = "Сообщение...";
         }
 
+        // Подгрузка истории чата
         if(this.messagesLocal[id]) {
           this.messagesLocal[id].forEach(m => this.renderMsg(m.u, m.t, m.time, m.media, m.channel));
         }
+
+        // Подписка на Firebase сообщения и статусы печатания
+        this.attachListeners(id);
+      },
+
+      attachListeners(chatId) {
+        if (!isFirebaseReady) return;
+
+        // 1. Подписка на сообщения в реальном времени
+        const chatRef = db.ref(`chats/${chatId}/messages`);
+        chatRef.limitToLast(50).on('child_added', (snapshot) => {
+          const m = snapshot.val();
+          if (m) {
+            this.renderMsg(m.u, m.t, m.time, m.media, m.channel);
+          }
+        });
+
+        // 2. Подписка на статусы печатания участников в реальном времени
+        const typingRef = db.ref(`typing/${chatId}`);
+        typingRef.on('value', (snapshot) => {
+          const data = snapshot.val() || {};
+          const typingUsers = [];
+          
+          Object.keys(data).forEach(user => {
+            if (user !== currentUser && data[user] === true) {
+              typingUsers.push(user);
+            }
+          });
+
+          const statusEl = document.getElementById('headerStatus');
+          if (typingUsers.length > 0) {
+            statusEl.className = "status-text typing";
+            if (typingUsers.length === 1) {
+              statusEl.innerText = `${typingUsers[0]} печатает...`;
+            } else if (typingUsers.length === 2) {
+              statusEl.innerText = `${typingUsers[0]} и ${typingUsers[1]} печатают...`;
+            } else {
+              statusEl.innerText = `${typingUsers.length} участников печатают...`;
+            }
+          } else {
+            statusEl.className = "status-text";
+            statusEl.innerText = "Онлайн";
+          }
+        });
+      },
+
+      detachListeners() {
+        if (!isFirebaseReady || !this.currentId) return;
+        db.ref(`chats/${this.currentId}/messages`).off();
+        db.ref(`typing/${this.currentId}`).off();
+      },
+
+      handleTyping() {
+        if (!isFirebaseReady || !this.currentId) return;
+
+        // Отправка статуса "печатает..." в базу данных
+        db.ref(`typing/${this.currentId}/${currentUser}`).set(true);
+
+        clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => {
+          this.clearTypingStatus();
+        }, 2000);
+      },
+
+      clearTypingStatus() {
+        if (!isFirebaseReady || !this.currentId) return;
+        db.ref(`typing/${this.currentId}/${currentUser}`).set(false);
       },
 
       sendText() {
-        if(this.currentId === 'topor' || this.currentId === 'crypto' || this.currentId === 'memes') return;
+        if(this.currentId === 'topor' || this.currentId === 'crypto') return;
         const inp = document.getElementById('msg-input');
         const txt = inp.value.trim();
         if(!txt) return;
 
-        this.saveAndRender(currentUser, txt, null);
+        this.clearTypingStatus();
         inp.value = '';
-        
-        const toxRegex = /(идит?е?\s*наху|пизд|блять?|сука|даун|лошок)/i;
-        if (toxRegex.test(txt)) {
-          state.isToxic = true;
-          document.getElementById('headerStatus').innerText = "Кто-то агрессивно печатает...";
+
+        const msgData = {
+          u: currentUser,
+          t: txt,
+          time: ui.getTime(),
+          media: null,
+          channel: false,
+          ts: Date.now()
+        };
+
+        if (isFirebaseReady) {
+          db.ref(`chats/${this.currentId}/messages`).push(msgData);
         } else {
-          document.getElementById('headerStatus').innerText = "Печатает...";
+          this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
         }
-        
-        setTimeout(() => {
-          document.getElementById('headerStatus').innerText = "Онлайн";
-          let botName = this.currentId === 'anime' ? '🌸 Мику' : 
-                        this.currentId === 'gamers' ? '🎮 Саня' : 
-                        this.currentId === 'bot' ? '🤖 Нейрохамам' : 'Бро';
-          if(state.isToxic) botName = 'Собеседник (Агро)';
-          
-          const reply = botLogic.getReply(this.currentId, txt);
-          this.saveAndRender(botName, reply, null);
-        }, 1200 + Math.random()*1000);
       },
 
       attachMedia(input) {
@@ -774,14 +833,27 @@
         if(!file) return;
         
         if (file.size > MAX_FILE_SIZE) {
-            alert(`Размер файла не должен превышать ${MAX_FILE_SIZE / 1024} КБ. Выберите файл поменьше.`);
+            alert(`Размер файла не должен превышать ${MAX_FILE_SIZE / 1024} КБ.`);
             input.value = '';
             return;
         }
 
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.saveAndRender(currentUser, "", e.target.result);
+          const msgData = {
+            u: currentUser,
+            t: "",
+            time: ui.getTime(),
+            media: e.target.result,
+            channel: false,
+            ts: Date.now()
+          };
+
+          if (isFirebaseReady) {
+            db.ref(`chats/${this.currentId}/messages`).push(msgData);
+          } else {
+            this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
+          }
         };
         reader.readAsDataURL(file);
         input.value = '';
@@ -807,12 +879,25 @@
         state.save();
         
         document.getElementById('giftModal').classList.remove('active');
-        this.saveAndRender('Система', `🎁 ${currentUser} подарил(а) ${friend}: ${gift.i} ${gift.n}!`);
+
+        const giftText = `🎁 ${currentUser} подарил(а) ${friend}: ${gift.i} ${gift.n}!`;
+        if (isFirebaseReady && this.currentId) {
+          db.ref(`chats/${this.currentId}/messages`).push({
+            u: 'Система',
+            t: giftText,
+            time: ui.getTime(),
+            media: null,
+            channel: false,
+            ts: Date.now()
+          });
+        } else {
+          this.saveAndRender('Система', giftText, ui.getTime(), null, false);
+        }
       },
 
-      saveAndRender(user, text, media, channel = false) {
+      saveAndRender(user, text, time, media, channel = false) {
         if(!this.messagesLocal[this.currentId]) this.messagesLocal[this.currentId] = [];
-        const msgObj = { u: user, t: text, time: ui.getTime(), media: media, channel: channel };
+        const msgObj = { u: user, t: text, time: time || ui.getTime(), media: media, channel: channel };
         this.messagesLocal[this.currentId].push(msgObj);
         this.renderMsg(user, text, msgObj.time, media, channel);
         state.save();
@@ -821,7 +906,13 @@
       renderMsg(user, text, time, media, channel) {
         const box = document.getElementById('messages');
         const isMy = user === currentUser;
+        
+        // Защита от дублирования отрисовки при получении сообщений
+        const msgKey = `${user}_${time}_${text.substring(0, 15)}`;
+        if (box.querySelector(`[data-msg-id="${msgKey}"]`)) return;
+
         const div = document.createElement('div');
+        div.setAttribute('data-msg-id', msgKey);
         
         const safeText = utils.formatText(text);
         
@@ -852,7 +943,7 @@
     const profile = {
       update() {
         document.getElementById('prof-name-ui').innerText = utils.escapeHTML(currentUser);
-        document.getElementById('prof-avatar-ui').innerText = currentUser === 'Я' ? '👑' : '😎';
+        document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я' || currentUser === 'Я (Админ)') ? '👑' : '😎';
       }
     };
 
@@ -861,7 +952,7 @@
         { i:"🍭", n:"Чупа-чупс", p:1 }, { i:"🧢", n:"Кепка", p:2 }, 
         { i:"🍺", n:"Пиво", p:3 }, { i:"🎮", n:"Геймпад", p:10 }, 
         { i:"🚗", n:"Тачка", p:15 }, { i:"💎", n:"Алмаз", p:20 }, 
-        { i:"🃏", n:"Джокер", p:1488 }
+        { i:"🃏", n:"Джокер", p:100 }
       ],
       render() {
         document.getElementById('shop-grid').innerHTML = this.items.map((g, idx) => `
@@ -1033,7 +1124,6 @@
         if (state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
         this.crashBet = bet;
         
-        // ИСПРАВЛЕНИЕ: Защита от деления на ноль, ограничение макс. коэффициента до x100
         const rand = Math.random() || 0.01;
         this.crashPoint = Math.min(100.00, Math.max(1.00, 1 / rand));
         
@@ -1108,4 +1198,4 @@
 
   </script>
 </body>
-            </html>
+              </html>
