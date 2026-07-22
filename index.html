@@ -366,7 +366,7 @@
         </div>
       </div>
 
-      <!-- 10. ПРОФИЛЬ (ЗДЕСЬ БЫЛ БАГ - ВЕРНУЛ SHOP-GRID) -->
+      <!-- 10. ПРОФИЛЬ -->
       <div id="profileScreen" class="app-screen">
         <div class="profile-header-card">
           <div class="prof-avatar" id="prof-avatar-ui">😎</div>
@@ -398,7 +398,7 @@
   </div>
 
   <script>
-    /* ================= КОНФИГ ИЗ СТАРОГО КОДА (СТАБИЛЬНОСТЬ + STORAGE) ================= */
+    /* ================= КОНФИГ ================= */
     const firebaseConfig = {
       apiKey: "AIzaSyCJY8vOoQDkR2rW_AEG0iddY2sEFhh9OWw",
       authDomain: "telespam-141ed.firebaseapp.com",
@@ -413,7 +413,7 @@
     const db = firebase.database();
     const storage = firebase.storage();
 
-    /* ================= СПИСОК ПОЛЬЗОВАТЕЛЕЙ ================= */
+    /* ================= ПОЛЬЗОВАТЕЛИ ================= */
     const ALL_USERS = ["Я", "Друг 1", "Друг 2", "Друг 3", "Друг 4", "Друг 5"];
     let currentUser = "";
     let currentDisplayName = "";
@@ -438,11 +438,10 @@
       if (str.includes('5')) return 'u_d5';
       return 'u_' + encodeURIComponent(str).replace(/%/g, '_');
     }
-    
     function getUserAvatarBg(u) { return USER_COLORS[u.replace(' (Админ)','')] || "#6366f1"; }
     function getDmRoomId(u1, u2) { return 'dm_' + [getUserKey(u1), getUserKey(u2)].sort().join('__'); }
 
-    /* ================= СОСТОЯНИЕ И ЗВУКИ ================= */
+    /* ================= СОСТОЯНИЕ ================= */
     const state = {
       stars: 0,
       myGifts: [],
@@ -488,18 +487,10 @@
       }
     };
 
-    /* ================= БОТ НЕЙРОХАМ ================= */
     const BOT = {
       name: "🤖 Нейрохам",
       triggers: ["бот", "помоги", "тупой", "че", "как"],
-      quotes: [
-        "Тебе че надо, мешок с костями?", 
-        "Иди уроки делай, гений.", 
-        "Отстань, я нейросеть, а не твоя мамочка.",
-        "Сам ты тупой 🤡", 
-        "Да мне вообще пофиг.", 
-        "Задонать мне лехкоинов, тогда поговорю."
-      ],
+      quotes: ["Тебе че надо, мешок с костями?", "Иди уроки делай, гений.", "Отстань, я нейросеть, а не твоя мамочка.", "Сам ты тупой 🤡", "Да мне вообще пофиг."],
       check(text, chatId) {
         if (!text || chatId !== 'main') return;
         let txt = text.toLowerCase();
@@ -514,7 +505,7 @@
       }
     };
 
-    /* ================= ИНТЕРФЕЙС И НАВИГАЦИЯ ================= */
+    /* ================= ИНТЕРФЕЙС ================= */
     const ui = {
       switchTab(id, el, title, status) {
         if (casino.crashLoop) casino.endCrash(false);
@@ -563,8 +554,6 @@
         this.chatsData = list;
         
         document.getElementById('callContactSelect').innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option>${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
-        
-        // ВОТ ЗДЕСЬ БЫЛ БАГ: Вызывался рендер магазина, а блока в HTML не было
         shop.render();
         
         document.getElementById('prof-name-ui').innerText = currentDisplayName;
@@ -592,14 +581,14 @@
       filterByFolder(f) { ui.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', 'Папка: ' + f); this.renderChats(f === 'all' ? this.chatsData : this.chatsData.filter(c => c.type === f)); }
     };
 
-    /* ================= ЧАТ ================= */
+    /* ================= ЧАТ (ИСПРАВЛЕН БАГ ОТВАЛА СЛУШАТЕЛЕЙ) ================= */
     const chat = {
       currentId: null,
-      listener: null,
+      messagesQuery: null, // Добавлено хранилище для корректного удаления слушателя
       typingTimeout: null,
       
       open(id, title) {
-        this.detachListeners();
+        this.detachListeners(); // Жестко сбрасываем старых слушателей перед открытием
         this.currentId = id;
         document.getElementById('messages').innerHTML = '';
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
@@ -618,7 +607,9 @@
           document.getElementById('media-controls').style.display = 'flex';
         }
 
-        this.listener = db.ref('chats/' + id + '/messages').limitToLast(100).on('child_added', snap => {
+        // Создаем конкретный запрос и вешаем слушатель
+        this.messagesQuery = db.ref('chats/' + id + '/messages').limitToLast(100);
+        this.messagesQuery.on('child_added', snap => {
           const data = snap.val();
           this.renderMsg(snap.key, data);
           if (data.user !== currentDisplayName && data.user !== currentUser && data.user !== 'Система') utils.playSound('receive');
@@ -634,7 +625,11 @@
       },
       detachListeners() {
         if (!this.currentId) return;
-        if(this.listener) db.ref('chats/' + this.currentId + '/messages').off('child_added', this.listener);
+        // Исправление: удаляем слушателя ИМЕННО с запроса, чтобы не ломать Firebase
+        if (this.messagesQuery) {
+          this.messagesQuery.off(); 
+          this.messagesQuery = null;
+        }
         db.ref('typing/' + this.currentId).off();
       },
       checkInput() {
@@ -820,52 +815,100 @@
         if(!t) return;
         this.renderTweet(currentDisplayName, '@'+getUserKey(currentUser), '😎', t, null, true);
         document.getElementById('xspam-input').value = '';
-      },
-      renderTweet(name, handle, avatar, rawText, img, toTop = false) {
-        const div = document.createElement('div'); div.className = 'tweet';
-        div.innerHTML = `<div class="tweet-header"><div class="tweet-avatar">${avatar}</div><div><div style="font-weight:bold;">${utils.escapeHTML(name)}</div><div style="color:#64748b; font-size:13px;">${utils.escapeHTML(handle)}</div></div></div><div>${utils.escapeHTML(rawText)}</div>`;
-        if(toTop) this.feed.prepend(div); else this.feed.appendChild(div);
       }
     };
 
     const calls = { startAudioCall() { alert('Аудиозвонок начат'); }, startVideoCall() { alert('Видеозвонок начат'); } };
     const music = { play(el, title) { document.querySelectorAll('.track-item').forEach(i => i.classList.remove('playing')); el.classList.add('playing'); alert('Играет: ' + title); } };
 
+    /* ================= КАЗИНО (ИСПРАВЛЕНО 50/50 И АНИМАЦИЯ) ================= */
     const casino = {
       symbols: ['🍒', '⭐', '🎰'], spinning: false, crashLoop: null, crashMult: 1.0, crashBet: 0,
       switchMode(m, el) { document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById('casino-slots').style.display = m==='slots'?'block':'none'; document.getElementById('casino-crash').classList.toggle('active', m==='crash'); },
+      
       spinSlots() {
         if(this.spinning) return;
         const bet = parseInt(document.getElementById('slots-bet').value);
+        if(isNaN(bet) || bet <= 0) return alert('Введите ставку!');
         if(state.stars < bet && state.stars !== Infinity) return alert('Мало звезд!');
         if(state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
-        this.spinning = true; document.getElementById('slots-msg').innerText = "Крутим...";
+        
+        this.spinning = true; 
+        document.getElementById('slots-msg').innerText = "Крутим...";
+        
+        // Анимация прокрутки барабанов
+        let spinInterval = setInterval(() => {
+          document.getElementById('reel1').innerText = this.symbols[Math.floor(Math.random()*3)];
+          document.getElementById('reel2').innerText = this.symbols[Math.floor(Math.random()*3)];
+          document.getElementById('reel3').innerText = this.symbols[Math.floor(Math.random()*3)];
+        }, 80);
+
         setTimeout(() => {
-          if(Math.random() > 0.5) { const win = bet * 2; document.getElementById('slots-msg').innerText = `Выигрыш ${win} ⭐!`; if(state.stars !== Infinity) state.stars += win; }
-          else document.getElementById('slots-msg').innerText = "Проигрыш.";
+          clearInterval(spinInterval);
+          const isWin = Math.random() >= 0.5; // Ровно 50% шанс
+          
+          if(isWin) {
+            const winSym = this.symbols[Math.floor(Math.random()*3)];
+            document.getElementById('reel1').innerText = winSym;
+            document.getElementById('reel2').innerText = winSym;
+            document.getElementById('reel3').innerText = winSym;
+            
+            const win = bet * 2; 
+            document.getElementById('slots-msg').innerText = `Выигрыш ${win} ⭐!`; 
+            if(state.stars !== Infinity) state.stars += win; 
+          } else {
+            const syms = [...this.symbols].sort(() => Math.random() - 0.5);
+            document.getElementById('reel1').innerText = syms[0];
+            document.getElementById('reel2').innerText = syms[1];
+            // Гарантируем, что 3-й символ сломает комбинацию
+            document.getElementById('reel3').innerText = syms[0] === syms[1] ? syms[2] : syms[1];
+            document.getElementById('slots-msg').innerText = "Проигрыш.";
+          }
           state.updateBalance(); state.save(); this.spinning = false;
         }, 1000);
       },
+      
       startCrash() {
         if(this.crashLoop) return;
         const bet = parseInt(document.getElementById('crash-bet').value);
+        if(isNaN(bet) || bet <= 0) return alert('Введите ставку!');
         if(state.stars < bet && state.stars !== Infinity) return alert('Мало звезд!');
         if(state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
         this.crashBet = bet; this.crashMult = 1.0;
-        const crashPoint = Math.min(100, Math.max(1, 1 / (Math.random() || 0.01)));
-        document.getElementById('crash-start-btn').style.display = 'none'; document.getElementById('crash-cashout-btn').style.display = 'block';
+        
+        // 50% шанс перевалить за 2.00x
+        const isWin = Math.random() >= 0.5;
+        const crashPoint = isWin 
+            ? (2.0 + Math.random() * 8.0)  // Игра пойдет от 2x до 10x
+            : (1.0 + Math.random() * 0.99); // Игра крашнется между 1.0x и 1.99x
+            
+        document.getElementById('crash-start-btn').style.display = 'none'; 
+        document.getElementById('crash-cashout-btn').style.display = 'block';
+        
         let start = Date.now();
         this.crashLoop = setInterval(() => {
           this.crashMult = Math.pow(1.2, (Date.now() - start) / 1000);
-          if(this.crashMult >= crashPoint) this.endCrash(false);
+          
+          if(this.crashMult >= crashPoint) {
+            this.crashMult = crashPoint;
+            this.endCrash(false);
+          }
+          
           document.getElementById('crash-mult-ui').innerText = this.crashMult.toFixed(2) + "x";
         }, 30);
       },
-      cashoutCrash() { if(!this.crashLoop) return; if(state.stars !== Infinity) state.stars += Math.floor(this.crashBet * this.crashMult); this.endCrash(true, Math.floor(this.crashBet * this.crashMult)); },
+      
+      cashoutCrash() { 
+        if(!this.crashLoop) return; 
+        if(state.stars !== Infinity) state.stars += Math.floor(this.crashBet * this.crashMult); 
+        this.endCrash(true, Math.floor(this.crashBet * this.crashMult)); 
+      },
+      
       endCrash(win, amt=0) {
         clearInterval(this.crashLoop); this.crashLoop = null;
-        document.getElementById('crash-start-btn').style.display = 'block'; document.getElementById('crash-cashout-btn').style.display = 'none';
-        document.getElementById('crash-msg').innerText = win ? `Выигрыш: ${amt} ⭐` : "Краш!";
+        document.getElementById('crash-start-btn').style.display = 'block'; 
+        document.getElementById('crash-cashout-btn').style.display = 'none';
+        document.getElementById('crash-msg').innerText = win ? `Вы забрали: ${amt} ⭐` : "Краш!";
         state.updateBalance(); state.save();
       }
     };
@@ -882,4 +925,4 @@
     };
   </script>
 </body>
-</html>
+  </html>
