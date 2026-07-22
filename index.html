@@ -79,18 +79,18 @@
 </head>
 <body>
 
-  <!-- 1. ЭКРАН ВХОДА С ТВОИМ INPUT -->
+  <!-- 1. ЭКРАН ВХОДА С ТВОИМ МЕНЮ (ПОЯВЛЯЕТСЯ ПЕРВЫМ) -->
   <div id="loginScreen" class="screen active">
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px;">✈️</div>
-      <h2>Вход в TG</h2>
+      <h2>Кто ты?</h2>
       <select id="usernameInput">
-        <option value="Я (Владелец)">Я (Владелец) ∞★</option>
-        <option value="Друг 1">Друг 1 (50★)</option>
-        <option value="Друг 2">Друг 2 (50★)</option>
-        <option value="Друг 3">Друг 3 (50★)</option>
+        <option value="Я">Я</option>
+        <option value="Друг 1">Друг 1</option>
+        <option value="Друг 2">Друг 2</option>
+        <option value="Друг 3">Друг 3</option>
       </select>
-      <button class="btn-primary" onclick="enterChat()">Войти</button>
+      <button class="btn-primary" onclick="enterChat()">Войти в чат</button>
     </div>
   </div>
 
@@ -110,7 +110,7 @@
       <div class="chat-item" onclick="app.openChat('main')">
         <div class="avatar" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">🚀</div>
         <div class="chat-info">
-          <div class="chat-title">С пацанами 🚀</div>
+          <div class="chat-title">Чат с пацанами 🚀</div>
           <div class="chat-last-msg" id="main-last-msg">Загрузка...</div>
         </div>
       </div>
@@ -121,8 +121,6 @@
           <div class="chat-last-msg">Токсичный ИИ</div>
         </div>
       </div>
-      <div class="chat-item"><div class="avatar" style="background: #475569;">📢</div><div class="chat-info"><div class="chat-title">Новости TG</div><div class="chat-last-msg">Обновление 10.5...</div></div></div>
-      <div class="chat-item"><div class="avatar" style="background: #3b82f6;">П</div><div class="chat-info"><div class="chat-title">Павел Дуров</div><div class="chat-last-msg">Привет!</div></div></div>
     </div>
   </div>
 
@@ -131,7 +129,7 @@
     <header>
       <div class="back-btn" onclick="ui.showScreen('chatListScreen')">‹</div>
       <div class="header-info">
-        <h2 id="chat-header-title">Чат</h2>
+        <h2 id="chat-header-title">Чат с пацанами 🚀</h2>
         <div class="status-text" id="typing-indicator"></div>
       </div>
     </header>
@@ -196,7 +194,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script>
-    // ТВОЙ ТОЧНЫЙ FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyCJY8vOoQDkR2rW_AEG0iddY2sEFhh9OWw",
       authDomain: "telespam-141ed.firebaseapp.com",
@@ -212,7 +209,6 @@
     const storage = firebase.storage();
     let currentUser = "";
 
-    // ГЛОБАЛЬНЫЙ СТЕЙТ
     const state = {
       stars: 50,
       lehcoins: parseInt(localStorage.getItem('lehcoins')) || 0,
@@ -220,19 +216,15 @@
       audioCtx: null
     };
 
-    // ТВОЯ ФУНКЦИЯ ВХОДА (ENTER CHAT) С ПРИСУТСТВИЕМ
     function enterChat() {
       currentUser = document.getElementById("usernameInput").value.trim();
-      if (!currentUser) {
-        alert("Введи имя!");
-        return;
-      }
+      if (!currentUser) return;
       
-      if (currentUser !== 'Я (Владелец)') {
+      // Если это не "Я", даем баланс 50 звезд из памяти
+      if (currentUser !== 'Я') {
         state.stars = parseInt(localStorage.getItem('stars_'+currentUser)) || 50;
       }
 
-      // Включаем аудио-контекст по клику (чтобы звуки работали)
       state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if(state.audioCtx.state === 'suspended') state.audioCtx.resume();
 
@@ -243,7 +235,6 @@
       myRef.set(true);
       myRef.onDisconnect().remove();
 
-      // Слушаем последние сообщения для главного чата
       db.ref('messages/main').limitToLast(1).on('value', snap => {
         snap.forEach(child => document.getElementById("main-last-msg").innerText = child.val().content || 'Медиа');
       });
@@ -251,7 +242,6 @@
       app.renderGifts();
     }
 
-    // 30 ПОДАРКОВ
     const GIFTS = [
       { i:"🧢", n:"Кепка", p:2 }, { i:"🍺", n:"Пиво", p:3 }, { i:"🎄", n:"Ёлка", p:5 },
       { i:"💩", n:"Говно", p:2 }, { i:"🎮", n:"Геймпад", p:10 }, { i:"🚗", n:"Тачка", p:15 },
@@ -265,7 +255,6 @@
       { i:"💊", n:"Таблетка", p:4 }, { i:"🧠", n:"Мозг", p:10 }, { i:"🔪", n:"Нож", p:8 }
     ];
 
-    // ТОКСИЧНЫЙ БОТ "НЕЙРОХАМАМ"
     const BOT = {
       name: "🤖 Нейрохамам",
       triggers: ["бот", "помоги", "тупой", "че", "как"],
@@ -300,7 +289,7 @@
       showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
       closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); },
       showShop() { 
-        document.getElementById('my-stars-ui').innerText = currentUser === 'Я (Владелец)' ? '∞' : state.stars;
+        document.getElementById('my-stars-ui').innerText = currentUser === 'Я' ? '∞' : state.stars;
         document.getElementById('shop-modal').style.display = 'flex'; 
       },
       showMiner() {
@@ -324,7 +313,7 @@
       currentChatId: '',
       openChat(id) {
         this.currentChatId = id;
-        document.getElementById("chat-header-title").innerText = id === 'main' ? "С пацанами 🚀" : "🤖 Нейрохамам";
+        document.getElementById("chat-header-title").innerText = id === 'main' ? "Чат с пацанами 🚀" : "🤖 Нейрохамам";
         document.getElementById("messages").innerHTML = "";
         ui.showScreen('chatScreen');
         chat.listen();
@@ -341,8 +330,8 @@
       },
       buyGift(index) {
         const gift = GIFTS[index];
-        if (currentUser !== 'Я (Владелец)' && state.stars < gift.p) return alert("Не хватает звезд!");
-        if (currentUser !== 'Я (Владелец)') {
+        if (currentUser !== 'Я' && state.stars < gift.p) return alert("Не хватает звезд!");
+        if (currentUser !== 'Я') {
           state.stars -= gift.p;
           localStorage.setItem('stars_'+currentUser, state.stars);
           document.getElementById('my-stars-ui').innerText = state.stars;
