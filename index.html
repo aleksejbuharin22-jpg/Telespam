@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Секретный TG</title>
   
-  <!-- Firebase SDK для работы в реальном времени -->
+  <!-- Firebase SDK для работы в реальном времени (Realtime Database) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -13,18 +13,22 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; position: fixed; overflow: hidden; background: #0f172a; color: #fff; }
     
+    /* Анимации */
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     
+    /* Базовые элементы */
     select, input, button { width: 100%; padding: 14px; margin-top: 12px; border-radius: 10px; border: none; font-size: 16px; outline: none; }
     select, input { background: #334155; color: #fff; }
     .btn-primary { background: #3b82f6; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
     .btn-primary:active { transform: scale(0.95); background: #2563eb; }
     
+    /* Экран логина */
     #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: absolute; width: 100%; height: 100%; z-index: 1000; background: #0f172a; transition: opacity 0.4s ease; }
     .login-card { padding: 30px 20px; text-align: center; width: 100%; max-width: 350px; background: #1e293b; border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.6); }
 
+    /* Глобальный Layout */
     #appLayout { display: none; flex-direction: column; width: 100%; height: 100%; background: #0f172a; opacity: 0; transition: opacity 0.4s ease; }
     #appLayout.active { display: flex; opacity: 1; }
     
@@ -32,15 +36,11 @@
     .back-btn { font-size: 28px; cursor: pointer; color: #3b82f6; display: none; margin-top: -4px; padding-right: 5px; }
     .header-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
     .header-info h2 { font-size: 18px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    /* Стили для статусов Online/Offline/Typing */
-    .status-text { font-size: 12px; margin-top: 2px; transition: color 0.2s ease; }
-    .status-text.online { color: #10b981; }
-    .status-text.offline { color: #94a3b8; }
+    .status-text { font-size: 12px; color: #10b981; margin-top: 2px; transition: color 0.2s ease; }
     .status-text.typing { color: #38bdf8; font-weight: 600; animation: pulse 1.5s infinite; }
-    
     .stars-balance-ui { color: #fbbf24; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
 
+    /* Верхняя панель навигации */
     #mainNav { display: flex; width: 100%; height: 65px; background: #1e293b; border-bottom: 1px solid #334155; flex-shrink: 0; z-index: 90; transition: margin-top 0.3s ease, height 0.3s ease; overflow-x: auto; scrollbar-width: none; }
     #mainNav::-webkit-scrollbar { display: none; }
     .nav-item { flex: 0 0 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; cursor: pointer; transition: 0.2s; position: relative; padding: 0 5px; }
@@ -50,11 +50,13 @@
     .nav-item:active .nav-icon { transform: scale(0.85); }
     .nav-divider { width: 1px; background: #334155; margin: 10px 0; flex-shrink: 0; }
 
+    /* Область экранов */
     #screensViewport { flex: 1; position: relative; overflow: hidden; }
     .app-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 15px; opacity: 0; transform: translateY(15px) scale(0.98); pointer-events: none; transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
     .app-screen.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; z-index: 10; }
     .app-screen.no-padding { padding: 0; }
 
+    /* Чаты и поиск */
     .search-box { background: #1e293b; padding: 0 0 12px 0; position: sticky; top: 0; z-index: 10; }
     .search-input { width: 100%; background: #334155; border: none; color: #fff; padding: 10px 15px; border-radius: 12px; font-size: 15px; outline: none; }
     .chat-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #1e293b; cursor: pointer; transition: background 0.2s; border-radius: 12px; margin-bottom: 5px; }
@@ -80,28 +82,41 @@
     .attach-btn { background: none; border: none; color: #94a3b8; font-size: 26px; cursor: pointer; margin: 0; padding: 0 5px; width: auto; }
     .gift-btn { background: none; border: none; font-size: 24px; cursor: pointer; margin: 0; padding: 0 5px; width: auto; }
 
-    /* Остальные стили для модулей */
+    /* Звонки */
     .call-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); text-align: center; padding: 20px; }
     .call-avatar { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 60px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
+
+    /* Папки */
     .folders-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
     .folder-card { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; cursor: pointer; transition: 0.2s; }
     .folder-card:active { transform: scale(0.96); background: #334155; }
     .folder-icon { font-size: 30px; margin-bottom: 10px; }
+
+    /* Карта */
     .map-box { flex: 1; background: #1e293b; border-radius: 16px; border: 1px solid #334155; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
     .map-pin { position: absolute; font-size: 28px; animation: pulse 2s infinite; cursor: pointer; }
+
+    /* Музыка */
     .track-item { display: flex; align-items: center; gap: 15px; background: #1e293b; padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #334155; cursor: pointer; }
     .track-item.playing { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
     .track-cover { width: 45px; height: 45px; border-radius: 8px; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+
+    /* Погода */
     .weather-card { background: linear-gradient(135deg, #1e293b, #334155); padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #475569; margin-bottom: 20px; }
     .weather-temp { font-size: 48px; font-weight: bold; color: #38bdf8; margin: 10px 0; }
+
+    /* Профиль */
     .profile-header-card { display: flex; flex-direction: column; align-items: center; background: #1e293b; padding: 30px 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #334155; }
     .prof-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
     .prof-name { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
     .prof-balance { color: #fbbf24; font-size: 18px; font-weight: bold; }
+    
     .gifts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .gift-item { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 15px 5px; text-align: center; cursor: pointer; }
     .gift-item:active { transform: scale(0.95); }
     .gift-icon { font-size: 35px; margin-bottom: 5px; }
+
+    /* XSPAM */
     .trends-box { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
     .trend-tag { display: inline-block; color: #3b82f6; font-size: 14px; margin-right: 10px; margin-top: 5px; background: rgba(59, 130, 246, 0.1); padding: 5px 10px; border-radius: 15px; }
     .xspam-post-box { padding: 15px; background: #1e293b; border-radius: 16px; margin-bottom: 15px; }
@@ -115,21 +130,29 @@
     .action-icon { cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
     .action-icon.liked { color: #f91880; }
     .action-icon.retweeted { color: #10b981; }
+
+    /* Казино & Краш */
     .casino-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
     .casino-tab { flex: 1; padding: 12px; text-align: center; background: #1e293b; border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .casino-tab.active { background: #3b82f6; color: #fff; }
+    
     .slots-box { display: flex; gap: 15px; background: #1e293b; padding: 25px; border-radius: 16px; border: 2px solid #334155; justify-content: center; margin-bottom: 20px; }
     .reel-window { width: 75px; height: 95px; background: #0f172a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 55px; position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+    
     .crash-container { display: none; flex-direction: column; align-items: center; background: #1e293b; border-radius: 16px; padding: 20px; text-align: center; }
     .crash-container.active { display: flex; }
     .crash-graph { width: 100%; height: 180px; background: #0f172a; border-radius: 12px; position: relative; margin-bottom: 20px; overflow: hidden; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; }
     .crash-mult { font-size: 48px; font-weight: bold; color: #10b981; z-index: 2; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .crash-mult.crashed { color: #ef4444; }
     .crash-line { position: absolute; bottom: 0; left: 0; width: 0%; height: 4px; background: #10b981; transition: width 0.1s linear, bottom 0.1s linear; }
+
+    /* Тапалка */
     .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
     .lehcoin { width: 240px; height: 240px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: bold; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4), inset 0 5px 20px rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.05s; user-select: none; }
     .lehcoin:active { transform: scale(0.92); }
     .floating-text { position: absolute; font-size: 28px; color: #fbbf24; font-weight: bold; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+    /* Модалки */
     .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
     .modal-overlay.active { display: flex; opacity: 1; }
     .modal-box { background: #1e293b; padding: 20px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; }
@@ -138,6 +161,7 @@
 </head>
 <body>
 
+  <!-- ЭКРАН ВХОДА -->
   <div id="loginScreen">
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite;">✈️</div>
@@ -156,18 +180,22 @@
     </div>
   </div>
 
+  <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
   <div id="appLayout">
+    <!-- Глобальная Шапка -->
     <header id="globalHeader">
       <div class="back-btn" id="headerBack" onclick="ui.goBack()">‹</div>
       <div class="header-info">
         <h2 id="headerTitle">Мои Чаты</h2>
-        <div class="status-text online" id="headerStatus">🟢 В сети</div>
+        <div class="status-text" id="headerStatus">🟢 Онлайн</div>
       </div>
       <div class="stars-balance-ui" id="headerBalance" onclick="ui.switchTab('minerScreen', document.getElementById('nav-miner'), '⛏️ Lehcoin', 'Тапай и фарми')">⭐ <span class="stars-val">0</span></div>
     </header>
 
+    <!-- Верхняя Панель Навигации -->
     <nav id="mainNav">
-      <div id="nav-chats" onclick="ui.switchTab('chatListScreen', this, 'Мои Чаты', '🟢 В сети')" class="nav-item active">
+      <!-- Основные модули -->
+      <div id="nav-chats" onclick="ui.switchTab('chatListScreen', this, 'Мои Чаты', '🟢 Онлайн')" class="nav-item active">
         <div class="nav-icon">💬</div><div>Чаты</div>
       </div>
       <div onclick="ui.switchTab('callsScreen', this, '📞 Звонки', 'История вызовов')" class="nav-item">
@@ -176,7 +204,10 @@
       <div onclick="ui.switchTab('foldersScreen', this, '📁 Папки', 'Категории чатов')" class="nav-item">
         <div class="nav-icon">📁</div><div>Папки</div>
       </div>
+      
       <div class="nav-divider"></div>
+
+      <!-- Приложения -->
       <div onclick="ui.switchTab('xspamScreen', this, '🕊️ XSpam', 'Актуальные тренды')" class="nav-item">
         <div class="nav-icon">🕊️</div><div>XSpam</div>
       </div>
@@ -189,7 +220,10 @@
       <div onclick="ui.switchTab('profileScreen', this, '👤 Профиль', 'Твои данные')" class="nav-item">
         <div class="nav-icon">👤</div><div>Профиль</div>
       </div>
+
       <div class="nav-divider"></div>
+
+      <!-- Доп модули -->
       <div onclick="ui.switchTab('mapScreen', this, '🗺️ Карты', 'Интерактивный сервис')" class="nav-item">
         <div class="nav-icon">🗺️</div><div>Карты</div>
       </div>
@@ -201,7 +235,10 @@
       </div>
     </nav>
 
+    <!-- Область экранов -->
     <div id="screensViewport">
+      
+      <!-- 1. СПИСОК ЧАТОВ -->
       <div id="chatListScreen" class="app-screen active">
         <div class="search-box">
           <input type="text" id="chatSearchInput" class="search-input" placeholder="Поиск по чатам и каналам..." oninput="app.filterChats(this.value)">
@@ -209,30 +246,202 @@
         <div id="chats-render-area"></div>
       </div>
 
+      <!-- ОКНО КОНКРЕТНОГО ЧАТА -->
       <div id="chatScreen" class="app-screen no-padding">
         <div id="messages"></div>
+        
         <div id="chat-footer">
           <button class="attach-btn" onclick="document.getElementById('chat-file-input').click()">📎</button>
           <input type="file" id="chat-file-input" style="display:none" accept="image/*,video/*" onchange="chat.attachMedia(this)">
+          
           <button class="gift-btn" onclick="chat.openGiftModal()">🎁</button>
+
           <input type="text" id="msg-input" placeholder="Сообщение..." oninput="chat.handleTyping()" onkeypress="if(event.key==='Enter') chat.sendText()">
           <button class="action-btn" onclick="chat.sendText()">➤</button>
         </div>
       </div>
 
-      <!-- Остальные экраны -->
-      <div id="callsScreen" class="app-screen"><div class="call-container"><div class="call-avatar" id="callAvatar">📞</div><h2 id="callTitle" style="margin-bottom: 5px;">Нет активного вызова</h2><p id="callStatus" style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Выберите контакт для звонка</p><select id="callContactSelect" style="max-width: 280px; margin-bottom: 20px;"></select><div style="display: flex; gap: 15px; width: 100%; max-width: 280px; justify-content: center;"><button class="btn-primary" style="background: #10b981;" onclick="calls.startAudioCall()">🎤 Аудио</button><button class="btn-primary" style="background: #3b82f6;" onclick="calls.startVideoCall()">📹 Видео</button></div></div></div>
-      <div id="foldersScreen" class="app-screen"><h3 style="margin-bottom: 10px;">Категории чатов</h3><p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Быстрая фильтрация ваших бесед</p><div class="folders-grid"><div class="folder-card" onclick="app.filterByFolder('all')"><div class="folder-icon">📥</div><div style="font-weight: bold;">Все чаты</div><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Общий список</div></div><div class="folder-card" onclick="app.filterByFolder('private')"><div class="folder-icon">👤</div><div style="font-weight: bold;">Личные</div><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Беседы 1 на 1</div></div><div class="folder-card" onclick="app.filterByFolder('groups')"><div class="folder-icon">🚀</div><div style="font-weight: bold;">Группы</div><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Общие беседы</div></div><div class="folder-card" onclick="app.filterByFolder('channels')"><div class="folder-icon">🪓</div><div style="font-weight: bold;">Каналы</div><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Только чтение</div></div></div></div>
-      <div id="mapScreen" class="app-screen"><div class="search-box"><input type="text" class="search-input" placeholder="Поиск мест на карте..." onkeypress="if(event.key==='Enter') alert('Место найдено!')"></div><div class="map-box" id="mapBox"><div class="map-pin" style="top: 30%; left: 40%;" onclick="alert('Точка: Секретный штаб')">📍</div><div class="map-pin" style="top: 60%; left: 70%;" onclick="alert('Точка: Компьютерный клуб')">📍</div><div style="color: #94a3b8; margin-top: 150px; font-size: 14px;">Интерактивная псевдокарта мира</div></div></div>
-      <div id="musicScreen" class="app-screen"><h3 style="margin-bottom: 15px;">Плейлист</h3><div id="musicList"><div class="track-item" onclick="music.play(this, 'Cyberpunk 2077 - Rebel Path')"><div class="track-cover">🎵</div><div style="flex:1;"><div style="font-weight: bold;">Rebel Path</div><div style="font-size: 12px; color: #94a3b8;">Cyberpunk 2077</div></div><div style="font-size: 20px;">▶️</div></div><div class="track-item" onclick="music.play(this, 'Jujutsu Kaisen - Ao no Sumika')"><div class="track-cover">🎵</div><div style="flex:1;"><div style="font-weight: bold;">Ao no Sumika</div><div style="font-size: 12px; color: #94a3b8;">Tatsuya Kitani</div></div><div style="font-size: 20px;">▶️</div></div><div class="track-item" onclick="music.play(this, 'Phonk - Drift Sunrise')"><div class="track-cover">🎵</div><div style="flex:1;"><div style="font-weight: bold;">Drift Sunrise</div><div style="font-size: 12px; color: #94a3b8;">Aggressive Phonk</div></div><div style="font-size: 20px;">▶️</div></div></div></div>
-      <div id="weatherScreen" class="app-screen"><div class="weather-card"><h3 id="cityName">Санкт-Петербург</h3><div class="weather-temp">+22°C</div><div style="color: #cbd5e1; font-size: 16px;">Облачно, возможен дождь</div></div><select onchange="weather.changeCity(this.value)"><option value="Санкт-Петербург">Санкт-Петербург</option><option value="Москва">Москва</option><option value="Токио">Токио</option><option value="Мухосранск">Мухосранск</option></select></div>
-      <div id="xspamScreen" class="app-screen"><div class="trends-box"><h4 style="margin-bottom: 5px;">🔥 Актуальные тренды</h4><span class="trend-tag">#СекретныйTG</span><span class="trend-tag">#КриптаЛетит</span><span class="trend-tag">#Топор18+</span></div><div class="xspam-post-box"><textarea id="xspam-input" class="xspam-input" placeholder="Что у вас нового?"></textarea><div style="display: flex; justify-content: space-between; align-items: center;"><label style="cursor: pointer; font-size: 24px; color: #1d9bf0;">🖼️ <input type="file" style="display:none" id="xspam-img-input" accept="image/*"></label><button class="btn-primary" style="margin: 0; width: auto; padding: 10px 20px;" onclick="xspam.post()">Твитнуть</button></div></div><div id="xspam-feed"></div></div>
-      <div id="casinoScreen" class="app-screen"><div class="casino-tabs"><div class="casino-tab active" onclick="casino.switchMode('slots', this)">Слоты 777</div><div class="casino-tab" onclick="casino.switchMode('crash', this)">📈 Краш</div></div><div id="casino-slots" style="text-align:center;"><div class="slots-box"><div class="reel-window" id="reel1">🍒</div><div class="reel-window" id="reel2">⭐</div><div class="reel-window" id="reel3">🎰</div></div><input type="number" id="slots-bet" placeholder="Ставка ⭐" value="10" min="10"><button class="btn-primary" onclick="casino.spinSlots()">КРУТИТЬ (Шанс 50%)</button><div id="slots-msg" style="height: 20px; color: #fbbf24; font-weight: bold; margin-top: 15px;"></div></div><div id="casino-crash" class="crash-container"><div class="crash-graph"><div class="crash-mult" id="crash-mult-ui">1.00x</div><div class="crash-line" id="crash-line-ui"></div></div><input type="number" id="crash-bet" placeholder="Ставка ⭐" value="10" min="10"><div style="display:flex; gap:10px; width:100%; margin-top:12px;"><button class="btn-primary" id="crash-start-btn" onclick="casino.startCrash()">Ставка</button><button class="btn-primary" id="crash-cashout-btn" style="background:#10b981; display:none;" onclick="casino.cashoutCrash()">ЗАБРАТЬ</button></div><div id="crash-msg" style="height: 20px; font-weight: bold; margin-top: 15px;"></div></div></div>
-      <div id="minerScreen" class="app-screen"><div style="text-align: center; margin: 20px 0; color: #94a3b8; font-size: 18px;">Тапай и получай Звёзды!</div><div class="tap-area" id="tap-area"><div class="lehcoin" onpointerdown="miner.tap(event)">Ł</div></div></div>
-      <div id="profileScreen" class="app-screen"><div class="profile-header-card"><div class="prof-avatar" id="prof-avatar-ui">😎</div><h2 class="prof-name" id="prof-name-ui">Загрузка...</h2><div class="prof-balance">Баланс: <span class="stars-val">0</span> ⭐</div></div><h3 style="margin-bottom: 15px;">Магазин подарков:</h3><div class="gifts-grid" id="shop-grid"></div><h3 style="margin: 20px 0 15px;">Мои трофеи:</h3><div style="display: flex; gap: 10px; flex-wrap: wrap;" id="my-gifts-ui"><span style="color:#64748b; font-size: 14px;">Пока пусто...</span></div></div>
+      <!-- 2. ЗВОНКИ -->
+      <div id="callsScreen" class="app-screen">
+        <div class="call-container">
+          <div class="call-avatar" id="callAvatar">📞</div>
+          <h2 id="callTitle" style="margin-bottom: 5px;">Нет активного вызова</h2>
+          <p id="callStatus" style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Выберите контакт для звонка</p>
+          <select id="callContactSelect" style="max-width: 280px; margin-bottom: 20px;"></select>
+          <div style="display: flex; gap: 15px; width: 100%; max-width: 280px; justify-content: center;">
+            <button class="btn-primary" style="background: #10b981;" onclick="calls.startAudioCall()">🎤 Аудио</button>
+            <button class="btn-primary" style="background: #3b82f6;" onclick="calls.startVideoCall()">📹 Видео</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. ПАПКИ -->
+      <div id="foldersScreen" class="app-screen">
+        <h3 style="margin-bottom: 10px;">Категории чатов</h3>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Быстрая фильтрация ваших бесед</p>
+        <div class="folders-grid">
+          <div class="folder-card" onclick="app.filterByFolder('all')">
+            <div class="folder-icon">📥</div>
+            <div style="font-weight: bold;">Все чаты</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Общий список</div>
+          </div>
+          <div class="folder-card" onclick="app.filterByFolder('private')">
+            <div class="folder-icon">👤</div>
+            <div style="font-weight: bold;">Личные</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Беседы 1 на 1</div>
+          </div>
+          <div class="folder-card" onclick="app.filterByFolder('groups')">
+            <div class="folder-icon">🚀</div>
+            <div style="font-weight: bold;">Группы</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Общие беседы</div>
+          </div>
+          <div class="folder-card" onclick="app.filterByFolder('channels')">
+            <div class="folder-icon">🪓</div>
+            <div style="font-weight: bold;">Каналы</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Только чтение</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. КАРТЫ -->
+      <div id="mapScreen" class="app-screen">
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="Поиск мест на карте..." onkeypress="if(event.key==='Enter') alert('Место найдено!')">
+        </div>
+        <div class="map-box" id="mapBox">
+          <div class="map-pin" style="top: 30%; left: 40%;" onclick="alert('Точка: Секретный штаб')">📍</div>
+          <div class="map-pin" style="top: 60%; left: 70%;" onclick="alert('Точка: Компьютерный клуб')">📍</div>
+          <div style="color: #94a3b8; margin-top: 150px; font-size: 14px;">Интерактивная псевдокарта мира</div>
+        </div>
+      </div>
+
+      <!-- 5. МУЗЫКА -->
+      <div id="musicScreen" class="app-screen">
+        <h3 style="margin-bottom: 15px;">Плейлист</h3>
+        <div id="musicList">
+          <div class="track-item" onclick="music.play(this, 'Cyberpunk 2077 - Rebel Path')">
+            <div class="track-cover">🎵</div>
+            <div style="flex:1;">
+              <div style="font-weight: bold;">Rebel Path</div>
+              <div style="font-size: 12px; color: #94a3b8;">Cyberpunk 2077</div>
+            </div>
+            <div style="font-size: 20px;">▶️</div>
+          </div>
+          <div class="track-item" onclick="music.play(this, 'Jujutsu Kaisen - Ao no Sumika')">
+            <div class="track-cover">🎵</div>
+            <div style="flex:1;">
+              <div style="font-weight: bold;">Ao no Sumika</div>
+              <div style="font-size: 12px; color: #94a3b8;">Tatsuya Kitani</div>
+            </div>
+            <div style="font-size: 20px;">▶️</div>
+          </div>
+          <div class="track-item" onclick="music.play(this, 'Phonk - Drift Sunrise')">
+            <div class="track-cover">🎵</div>
+            <div style="flex:1;">
+              <div style="font-weight: bold;">Drift Sunrise</div>
+              <div style="font-size: 12px; color: #94a3b8;">Aggressive Phonk</div>
+            </div>
+            <div style="font-size: 20px;">▶️</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. ПОГОДА -->
+      <div id="weatherScreen" class="app-screen">
+        <div class="weather-card">
+          <h3 id="cityName">Санкт-Петербург</h3>
+          <div class="weather-temp">+22°C</div>
+          <div style="color: #cbd5e1; font-size: 16px;">Облачно, возможен дождь</div>
+        </div>
+        <select onchange="weather.changeCity(this.value)">
+          <option value="Санкт-Петербург">Санкт-Петербург</option>
+          <option value="Москва">Москва</option>
+          <option value="Токио">Токио</option>
+          <option value="Мухосранск">Мухосранск</option>
+        </select>
+      </div>
+
+      <!-- 7. XSPAM -->
+      <div id="xspamScreen" class="app-screen">
+        <div class="trends-box">
+          <h4 style="margin-bottom: 5px;">🔥 Актуальные тренды</h4>
+          <span class="trend-tag">#СекретныйTG</span>
+          <span class="trend-tag">#КриптаЛетит</span>
+          <span class="trend-tag">#Топор18+</span>
+        </div>
+        <div class="xspam-post-box">
+          <textarea id="xspam-input" class="xspam-input" placeholder="Что у вас нового?"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="cursor: pointer; font-size: 24px; color: #1d9bf0;">
+              🖼️ <input type="file" style="display:none" id="xspam-img-input" accept="image/*">
+            </label>
+            <button class="btn-primary" style="margin: 0; width: auto; padding: 10px 20px;" onclick="xspam.post()">Твитнуть</button>
+          </div>
+        </div>
+        <div id="xspam-feed"></div>
+      </div>
+
+      <!-- 8. КАЗИНО -->
+      <div id="casinoScreen" class="app-screen">
+        <div class="casino-tabs">
+          <div class="casino-tab active" onclick="casino.switchMode('slots', this)">Слоты 777</div>
+          <div class="casino-tab" onclick="casino.switchMode('crash', this)">📈 Краш</div>
+        </div>
+        
+        <div id="casino-slots" style="text-align:center;">
+          <div class="slots-box">
+            <div class="reel-window" id="reel1">🍒</div>
+            <div class="reel-window" id="reel2">⭐</div>
+            <div class="reel-window" id="reel3">🎰</div>
+          </div>
+          <input type="number" id="slots-bet" placeholder="Ставка ⭐" value="10" min="10">
+          <button class="btn-primary" onclick="casino.spinSlots()">КРУТИТЬ (Шанс 50%)</button>
+          <div id="slots-msg" style="height: 20px; color: #fbbf24; font-weight: bold; margin-top: 15px;"></div>
+        </div>
+
+        <div id="casino-crash" class="crash-container">
+          <div class="crash-graph">
+            <div class="crash-mult" id="crash-mult-ui">1.00x</div>
+            <div class="crash-line" id="crash-line-ui"></div>
+          </div>
+          <input type="number" id="crash-bet" placeholder="Ставка ⭐" value="10" min="10">
+          <div style="display:flex; gap:10px; width:100%; margin-top:12px;">
+            <button class="btn-primary" id="crash-start-btn" onclick="casino.startCrash()">Ставка</button>
+            <button class="btn-primary" id="crash-cashout-btn" style="background:#10b981; display:none;" onclick="casino.cashoutCrash()">ЗАБРАТЬ</button>
+          </div>
+          <div id="crash-msg" style="height: 20px; font-weight: bold; margin-top: 15px;"></div>
+        </div>
+      </div>
+
+      <!-- 9. МАЙНЕР / ФАРМ -->
+      <div id="minerScreen" class="app-screen">
+        <div style="text-align: center; margin: 20px 0; color: #94a3b8; font-size: 18px;">Тапай и получай Звёзды!</div>
+        <div class="tap-area" id="tap-area">
+          <div class="lehcoin" onpointerdown="miner.tap(event)">Ł</div>
+        </div>
+      </div>
+
+      <!-- 10. ПРОФИЛЬ -->
+      <div id="profileScreen" class="app-screen">
+        <div class="profile-header-card">
+          <div class="prof-avatar" id="prof-avatar-ui">😎</div>
+          <h2 class="prof-name" id="prof-name-ui">Загрузка...</h2>
+          <div class="prof-balance">Баланс: <span class="stars-val">0</span> ⭐</div>
+        </div>
+        
+        <h3 style="margin-bottom: 15px;">Магазин подарков:</h3>
+        <div class="gifts-grid" id="shop-grid"></div>
+        
+        <h3 style="margin: 20px 0 15px;">Мои трофеи:</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="my-gifts-ui">
+          <span style="color:#64748b; font-size: 14px;">Пока пусто...</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
+  <!-- МОДАЛКА ОТПРАВКИ ПОДАРКА -->
   <div id="giftModal" class="modal-overlay">
     <div class="modal-box">
       <h3>Отправить подарок</h3>
@@ -247,14 +456,61 @@
   </div>
 
   <script>
+    /* ================= СПИСОК ВСЕХ 6 ПОЛЬЗОВАТЕЛЕЙ ================= */
     const ALL_USERS = ["Я", "Друг 1", "Друг 2", "Друг 3", "Друг 4", "Друг 5"];
 
-    function getDmRoomId(u1, u2) {
-      const c1 = String(u1).replace(/[^a-zA-Z0-9а-яА-Я0-9]/g, '_');
-      const c2 = String(u2).replace(/[^a-zA-Z0-9а-яА-Я0-9]/g, '_');
-      return 'dm_' + [c1, c2].sort().join('__');
+    /* Уникальные цвета аватарок для каждого пользователя */
+    const USER_COLORS = {
+      "Я": "linear-gradient(135deg, #f59e0b, #ef4444)",
+      "Друг 1": "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+      "Друг 2": "linear-gradient(135deg, #10b981, #047857)",
+      "Друг 3": "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+      "Друг 4": "linear-gradient(135deg, #ec4899, #be185d)",
+      "Друг 5": "linear-gradient(135deg, #06b6d4, #0e7490)"
+    };
+
+    /* Каноничный ключ пользователя для однозначного совпадения в БД */
+    function getUserKey(u) {
+      if (!u) return 'u_unknown';
+      const str = String(u).trim();
+      if (str === 'Я' || str.includes('Админ') || str === 'Я (Админ)') return 'u_ya';
+      if (str.includes('1')) return 'u_d1';
+      if (str.includes('2')) return 'u_d2';
+      if (str.includes('3')) return 'u_d3';
+      if (str.includes('4')) return 'u_d4';
+      if (str.includes('5')) return 'u_d5';
+      return 'u_' + encodeURIComponent(str).replace(/%/g, '_');
     }
 
+    function getUserDisplayNameByKey(key) {
+      if (key === 'u_ya') return 'Я (Админ)';
+      if (key === 'u_d1') return 'Друг 1';
+      if (key === 'u_d2') return 'Друг 2';
+      if (key === 'u_d3') return 'Друг 3';
+      if (key === 'u_d4') return 'Друг 4';
+      if (key === 'u_d5') return 'Друг 5';
+      return 'Собеседник';
+    }
+
+    function getUserAvatarBg(u) {
+      const key = getUserKey(u);
+      if (key === 'u_ya') return USER_COLORS["Я"];
+      if (key === 'u_d1') return USER_COLORS["Друг 1"];
+      if (key === 'u_d2') return USER_COLORS["Друг 2"];
+      if (key === 'u_d3') return USER_COLORS["Друг 3"];
+      if (key === 'u_d4') return USER_COLORS["Друг 4"];
+      if (key === 'u_d5') return USER_COLORS["Друг 5"];
+      return "linear-gradient(135deg, #6366f1, #4f46e5)";
+    }
+
+    /* Генератор единого ID для личного чата между любыми двумя пользователями */
+    function getDmRoomId(u1, u2) {
+      const k1 = getUserKey(u1);
+      const k2 = getUserKey(u2);
+      return 'dm_' + [k1, k2].sort().join('__');
+    }
+
+    /* ================= ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ ================= */
     const firebaseConfig = {
       databaseURL: "https://secret-tg-chat-default-rtdb.firebaseio.com"
     };
@@ -264,14 +520,20 @@
 
     try {
       if (typeof firebase !== 'undefined' && firebase && firebase.apps) {
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
         db = firebase.database();
         isFirebaseReady = true;
+        console.log("Firebase Database подключен!");
+      } else {
+        console.warn("Firebase SDK недоступен. Работа в офлайн-режиме.");
       }
     } catch(e) {
-      console.warn("Сетевой бэкенд недоступен:", e);
+      console.warn("Ошибка инициализации сетевого бэкенда:", e);
     }
 
+    /* ================= УТИЛИТЫ ================= */
     const utils = {
       escapeHTML(str) {
         if (typeof str !== 'string') return '';
@@ -279,16 +541,22 @@
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
         });
       },
-      formatText(str) { return this.escapeHTML(str).replace(/\n/g, '<br>'); }
+      formatText(str) {
+        return this.escapeHTML(str).replace(/\n/g, '<br>');
+      }
     };
 
+    /* ================= СИСТЕМА И СОСТОЯНИЕ ================= */
     let currentUser = "";
     const MAX_FILE_SIZE = 500 * 1024; 
     
     const state = {
-      stars: 0, myGifts: [],
+      stars: 0,
+      myGifts: [],
+      
       load() {
         if (!currentUser) return;
+        
         try {
           const saved = localStorage.getItem('secret_tg_user_' + currentUser);
           if (saved) {
@@ -299,93 +567,54 @@
             this.stars = (currentUser === 'Я') ? Infinity : 100;
             this.myGifts = [];
           }
-        } catch(e) { this.stars = (currentUser === 'Я') ? Infinity : 100; this.myGifts = []; }
+        } catch(e) {
+          this.stars = (currentUser === 'Я') ? Infinity : 100;
+          this.myGifts = [];
+        }
 
         try {
           const savedChats = localStorage.getItem('secret_tg_chats');
           chat.messagesLocal = savedChats ? JSON.parse(savedChats) : {};
-        } catch(e) { chat.messagesLocal = {}; }
+        } catch(e) {
+          chat.messagesLocal = {};
+        }
       },
+
       save() {
         if (!currentUser) return;
+        
         try {
-          const data = { stars: this.stars === Infinity ? 'Infinity' : this.stars, myGifts: this.myGifts };
+          const data = {
+            stars: this.stars === Infinity ? 'Infinity' : this.stars,
+            myGifts: this.myGifts
+          };
           localStorage.setItem('secret_tg_user_' + currentUser, JSON.stringify(data));
           localStorage.setItem('secret_tg_chats', JSON.stringify(chat.messagesLocal));
-        } catch (e) {}
+        } catch (e) {
+          console.error("Ошибка сохранения в LocalStorage:", e);
+        }
       },
+
       updateBalance() {
         const display = (this.stars === Infinity) ? '∞' : Math.floor(this.stars);
         document.querySelectorAll('.stars-val').forEach(el => el.innerText = display);
       }
     };
 
-    /* СИСТЕМА ПРИСУТСТВИЯ (ОНЛАЙН/ОФФЛАЙН) */
-    const presence = {
-      users: {},
-      init() {
-        if (!isFirebaseReady || !db) return;
-        const myStatusRef = db.ref(`presence/${currentUser}`);
-        
-        db.ref('.info/connected').on('value', snap => {
-          if (snap.val() === true) {
-            myStatusRef.onDisconnect().set(false);
-            myStatusRef.set(true);
-          }
-        });
-        
-        db.ref('presence').on('value', snap => {
-          this.users = snap.val() || {};
-          this.updateUI();
-        });
-      },
-      updateUI() {
-        const statusEl = document.getElementById('headerStatus');
-        if (!statusEl) return;
-
-        // Если кто-то печатает, это приоритет
-        if (chat.currentTyping && chat.currentTyping.length > 0) {
-          statusEl.className = "status-text typing";
-          statusEl.innerText = `${chat.currentTyping.join(', ')} печатает...`;
-          return;
-        }
-
-        // Если открыт личный чат
-        if (chat.currentId && chat.currentId.startsWith('dm_')) {
-          let friendName = chat.currentTitle;
-          if (friendName === 'Я (Админ)') friendName = 'Я';
-          
-          const isOnline = this.users[friendName];
-          if (isOnline) {
-            statusEl.className = "status-text online";
-            statusEl.innerText = "🟢 Online";
-          } else {
-            statusEl.className = "status-text offline";
-            statusEl.innerText = "⚪ Offline";
-          }
-        } 
-        // Если открыт общий чат или меню
-        else if (chat.currentId) {
-          statusEl.className = "status-text offline";
-          statusEl.innerText = chat.currentId === 'main' ? 'Общий чат' : (chat.currentId === 'topor' || chat.currentId === 'crypto' ? 'Канал' : 'Группа');
-        }
-      }
-    };
-
+    /* ================= ИНТЕРФЕЙС И НАВИГАЦИЯ ================= */
     const ui = {
       getTime() { const d=new Date(); return d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0'); },
+      
       switchTab(id, el, title, status) {
-        if (casino.crashLoop) casino.endCrash(false);
+        if (casino.crashLoop) {
+          casino.endCrash(false);
+        }
 
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
         
         document.getElementById('headerTitle').innerText = title;
-        
-        const statusEl = document.getElementById('headerStatus');
-        statusEl.className = "status-text online"; // сброс стилей для меню
-        statusEl.innerText = status;
-        
+        document.getElementById('headerStatus').innerText = status;
         document.getElementById('headerBack').style.display = 'none';
         
         const mainNav = document.getElementById('mainNav');
@@ -397,6 +626,7 @@
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
       },
+
       goBack() {
         const mainNav = document.getElementById('mainNav');
         mainNav.style.display = 'flex';
@@ -407,38 +637,59 @@
           chat.detachListeners();
         }
 
-        this.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', '🟢 В сети');
+        this.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', '🟢 Онлайн');
         chat.currentId = null;
-        chat.currentTitle = null;
       }
     };
 
     const app = {
       chatsData: [],
+
       buildChatsList() {
-        const list = [{ id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', type: 'groups' }];
+        const list = [
+          { id: 'main', n: 'С пацанами 🚀', a: '🚀', bg: 'linear-gradient(135deg, #ec4899, #f43f5e)', type: 'groups' }
+        ];
+
+        // Добавляем всех друзей в лички с их собственными градиентами
         ALL_USERS.forEach(u => {
           if (u !== currentUser) {
             const roomId = getDmRoomId(currentUser, u);
             const displayName = u === 'Я' ? 'Я (Админ)' : u;
-            list.push({ id: roomId, n: displayName, a: u === 'Я' ? '👑' : '👤', bg: 'linear-gradient(135deg, #6366f1, #4f46e5)', type: 'private' });
+            list.push({
+              id: roomId,
+              n: displayName,
+              a: u === 'Я' ? '👑' : '👤',
+              bg: getUserAvatarBg(u),
+              type: 'private'
+            });
           }
         });
+
+        // Добавляем остальные группы и каналы
         list.push(
           { id: 'anime', n: 'Анимешники 🌸', a: '🌸', bg: 'linear-gradient(135deg, #f472b6, #db2777)', type: 'groups' },
           { id: 'gamers', n: 'CS & Игры 🎮', a: '🎮', bg: 'linear-gradient(135deg, #f59e0b, #d97706)', type: 'groups' },
           { id: 'topor', n: 'Топор 18+ 🪓', a: '🪓', bg: 'linear-gradient(135deg, #000000, #333333)', type: 'channels' },
           { id: 'crypto', n: 'Крипто-инсайдер 📈', a: '📈', bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', type: 'channels' }
         );
+
         this.chatsData = list;
       },
+
       login() {
         const userInput = document.getElementById("usernameInput").value;
-        if (!userInput) return alert('Пожалуйста, выберите пользователя для входа!');
+        if (!userInput) {
+            alert('Пожалуйста, выберите пользователя для входа!');
+            return;
+        }
         
         currentUser = userInput.trim();
-        state.load(); state.save(); state.updateBalance();
-        this.buildChatsList(); this.updateCallContacts();
+        state.load();
+        state.save();
+        state.updateBalance();
+
+        this.buildChatsList();
+        this.updateCallContacts();
 
         document.getElementById('loginScreen').style.opacity = '0';
         setTimeout(() => {
@@ -446,10 +697,12 @@
           document.getElementById('appLayout').classList.add('active');
           
           app.renderChats(app.chatsData);
-          shop.render(); profile.update(); xspam.init();
-          presence.init(); // ЗАПУСКАЕМ ТРЕКИНГ СТАТУСА
+          shop.render();
+          profile.update();
+          xspam.init();
         }, 400);
       },
+
       updateCallContacts() {
         const sel = document.getElementById('callContactSelect');
         sel.innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => {
@@ -457,6 +710,7 @@
           return `<option value="${name}">${name}</option>`;
         }).join('');
       },
+      
       renderChats(list) {
         document.getElementById('chats-render-area').innerHTML = list.map(c => `
           <div class="chat-item" onclick="chat.open('${c.id}', '${utils.escapeHTML(c.n)}')">
@@ -468,29 +722,68 @@
           </div>
         `).join('');
       },
+
       filterChats(query) {
         const q = query.toLowerCase();
         const filtered = this.chatsData.filter(c => c.n.toLowerCase().includes(q));
         this.renderChats(filtered);
       },
+
       filterByFolder(folderType) {
         ui.switchTab('chatListScreen', document.getElementById('nav-chats'), 'Мои Чаты', 'Папка: ' + folderType);
-        if(folderType === 'all') this.renderChats(this.chatsData);
-        else this.renderChats(this.chatsData.filter(c => c.type === folderType));
+        if(folderType === 'all') {
+          this.renderChats(this.chatsData);
+        } else {
+          const filtered = this.chatsData.filter(c => c.type === folderType);
+          this.renderChats(filtered);
+        }
       }
     };
 
+    /* ================= ЗВОНКИ, МУЗЫКА, ПОГОДА ================= */
+    const calls = {
+      startAudioCall() {
+        const contact = document.getElementById('callContactSelect').value;
+        document.getElementById('callTitle').innerText = 'Аудиозвонок: ' + contact;
+        document.getElementById('callStatus').innerText = 'Идет соединение...';
+        document.getElementById('callAvatar').innerText = '📞';
+        setTimeout(() => document.getElementById('callStatus').innerText = 'Разговор идет (00:15)', 2000);
+      },
+      startVideoCall() {
+        const contact = document.getElementById('callContactSelect').value;
+        document.getElementById('callTitle').innerText = 'Видеозвонок: ' + contact;
+        document.getElementById('callStatus').innerText = 'Подключение видео...';
+        document.getElementById('callAvatar').innerText = '📹';
+        setTimeout(() => document.getElementById('callStatus').innerText = 'Видеосвязь активна', 2000);
+      }
+    };
+
+    const music = {
+      play(el, title) {
+        document.querySelectorAll('.track-item').forEach(i => i.classList.remove('playing'));
+        el.classList.add('playing');
+        alert('Воспроизведение: ' + title);
+      }
+    };
+
+    const weather = {
+      changeCity(city) {
+        document.getElementById('cityName').innerText = city;
+      }
+    };
+
+    /* ================= ЧАТЫ И СТАТУСЫ В РЕАЛЬНОМ ВРЕМЕНИ ================= */
     const chat = {
-      currentId: null, currentTitle: null, currentTyping: [], messagesLocal: {}, typingTimeout: null,
+      currentId: null,
+      messagesLocal: {},
+      typingTimeout: null,
       
       open(id, title) {
-        if (this.currentId) this.detachListeners();
-        
+        this.detachListeners();
+
         this.currentId = id;
-        this.currentTitle = title;
-        this.currentTyping = [];
-        
         document.getElementById('messages').innerHTML = '';
+        
         document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
         document.getElementById('chatScreen').classList.add('active');
         
@@ -498,10 +791,9 @@
         setTimeout(() => document.getElementById('mainNav').style.display = 'none', 300);
         
         document.getElementById('headerTitle').innerText = title;
+        document.getElementById('headerStatus').innerText = "🟢 Онлайн";
+        document.getElementById('headerStatus').className = "status-text";
         document.getElementById('headerBack').style.display = 'block';
-        
-        // Обновляем статус (Online/Offline) через систему присутствия
-        presence.updateUI();
         
         const inp = document.getElementById('msg-input');
         if(id === 'topor' || id === 'crypto') {
@@ -510,15 +802,20 @@
           inp.disabled = false; inp.placeholder = "Сообщение...";
         }
 
-        if(this.messagesLocal[id]) {
-          this.messagesLocal[id].forEach(m => this.renderMsg(m.u, m.t, m.time, m.media, m.channel, m.key));
+        if (isFirebaseReady && db) {
+          this.attachListeners(id);
+        } else {
+          if(this.messagesLocal[id]) {
+            this.messagesLocal[id].forEach(m => this.renderMsg(m.u, m.t, m.time, m.media, m.channel, m.key));
+          }
         }
-
-        this.attachListeners(id);
       },
 
       attachListeners(chatId) {
         if (!isFirebaseReady || !db) return;
+
+        this.detachListeners();
+        this.currentId = chatId;
 
         const chatRef = db.ref(`chats/${chatId}/messages`);
         chatRef.limitToLast(100).on('child_added', (snapshot) => {
@@ -526,6 +823,7 @@
           const m = snapshot.val();
           if (m) {
             this.renderMsg(m.u, m.t, m.time, m.media, m.channel, key);
+            
             if (!this.messagesLocal[chatId]) this.messagesLocal[chatId] = [];
             if (!this.messagesLocal[chatId].some(x => x.key === key)) {
               this.messagesLocal[chatId].push({ ...m, key });
@@ -538,11 +836,22 @@
         typingRef.on('value', (snapshot) => {
           const data = snapshot.val() || {};
           const typingUsers = [];
-          Object.keys(data).forEach(user => {
-            if (user !== currentUser && data[user] === true) typingUsers.push(user);
+          
+          const currentKey = getUserKey(currentUser);
+          Object.keys(data).forEach(userKey => {
+            if (userKey !== currentKey && data[userKey] === true) {
+              typingUsers.push(getUserDisplayNameByKey(userKey));
+            }
           });
-          this.currentTyping = typingUsers;
-          presence.updateUI(); // Обновляем UI с учетом набора текста
+
+          const statusEl = document.getElementById('headerStatus');
+          if (typingUsers.length > 0) {
+            statusEl.className = "status-text typing";
+            statusEl.innerText = `${typingUsers.join(', ')} печатает...`;
+          } else {
+            statusEl.className = "status-text";
+            statusEl.innerText = "🟢 Онлайн";
+          }
         });
       },
 
@@ -554,14 +863,20 @@
 
       handleTyping() {
         if (!isFirebaseReady || !db || !this.currentId) return;
-        db.ref(`typing/${this.currentId}/${currentUser}`).set(true);
+
+        const uKey = getUserKey(currentUser);
+        db.ref(`typing/${this.currentId}/${uKey}`).set(true);
+
         clearTimeout(this.typingTimeout);
-        this.typingTimeout = setTimeout(() => this.clearTypingStatus(), 2000);
+        this.typingTimeout = setTimeout(() => {
+          this.clearTypingStatus();
+        }, 2000);
       },
 
       clearTypingStatus() {
         if (!isFirebaseReady || !db || !this.currentId) return;
-        db.ref(`typing/${this.currentId}/${currentUser}`).set(false);
+        const uKey = getUserKey(currentUser);
+        db.ref(`typing/${this.currentId}/${uKey}`).set(false);
       },
 
       sendText() {
@@ -573,42 +888,95 @@
         this.clearTypingStatus();
         inp.value = '';
 
-        const msgData = { u: currentUser, t: txt, time: ui.getTime(), media: null, channel: false, ts: Date.now() };
+        const senderName = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
 
-        if (isFirebaseReady && db) db.ref(`chats/${this.currentId}/messages`).push(msgData);
-        else this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
+        const msgData = {
+          u: senderName,
+          t: txt,
+          time: ui.getTime(),
+          media: null,
+          channel: false,
+          ts: Date.now()
+        };
 
-        if (this.currentId === 'main' && currentUser !== 'Нейрохам') this.triggerNeuroHam();
+        const activeChatId = this.currentId;
+
+        if (isFirebaseReady && db) {
+          db.ref(`chats/${activeChatId}/messages`).push(msgData);
+        } else {
+          this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
+        }
+
+        if (activeChatId === 'main' && currentUser !== 'Нейрохам') {
+          this.triggerNeuroHam();
+        }
       },
 
       triggerNeuroHam() {
         setTimeout(() => {
-          const toxicReplies = ["Меньше текста. Иди уроки учи.", "Мнение экспертов забыли спросить. Гуляй.", "Ты это вслух при людях не повтори, засмеют."];
+          const toxicReplies = [
+            "Слышь, ты чё тут выписал? Кому твой бред вообще сдался?",
+            "Меньше текста. Иди уроки учи.",
+            "Опять сопли на клавиатуру намазал? Выключи компилятор и не позорься.",
+            "Чё за ахинея? Ты сам хоть понял, какую дичь ляпнул?",
+            "Заткнись и не беси меня, гуманоид.",
+            "Мнение экспертов забыли спросить. Гуляй.",
+            "Ты это вслух при людях не повтори, засмеют."
+          ];
           const randomReply = toxicReplies[Math.floor(Math.random() * toxicReplies.length)];
-          const botMsg = { u: 'Нейрохам 🤖', t: randomReply, time: ui.getTime(), media: null, channel: false, ts: Date.now() };
-          
-          if (isFirebaseReady && db) db.ref('chats/main/messages').push(botMsg);
-          else this.saveAndRender(botMsg.u, botMsg.t, botMsg.time, botMsg.media, false);
+          const botMsg = {
+            u: 'Нейрохам 🤖',
+            t: randomReply,
+            time: ui.getTime(),
+            media: null,
+            channel: false,
+            ts: Date.now()
+          };
+          if (isFirebaseReady && db) {
+            db.ref('chats/main/messages').push(botMsg);
+          } else {
+            this.saveAndRender(botMsg.u, botMsg.t, botMsg.time, botMsg.media, false);
+          }
         }, 1200);
       },
 
       attachMedia(input) {
         const file = input.files[0];
         if(!file) return;
-        if (file.size > MAX_FILE_SIZE) { alert(`Размер файла не более ${MAX_FILE_SIZE / 1024} КБ.`); input.value = ''; return; }
+        
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`Размер файла не должен превышать ${MAX_FILE_SIZE / 1024} КБ.`);
+            input.value = '';
+            return;
+        }
+
+        const senderName = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
 
         const reader = new FileReader();
         reader.onload = (e) => {
-          const msgData = { u: currentUser, t: "", time: ui.getTime(), media: e.target.result, channel: false, ts: Date.now() };
-          if (isFirebaseReady && db) db.ref(`chats/${this.currentId}/messages`).push(msgData);
-          else this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
+          const msgData = {
+            u: senderName,
+            t: "",
+            time: ui.getTime(),
+            media: e.target.result,
+            channel: false,
+            ts: Date.now()
+          };
+
+          if (isFirebaseReady && db) {
+            db.ref(`chats/${this.currentId}/messages`).push(msgData);
+          } else {
+            this.saveAndRender(msgData.u, msgData.t, msgData.time, msgData.media, msgData.channel);
+          }
         };
-        reader.readAsDataURL(file); input.value = '';
+        reader.readAsDataURL(file);
+        input.value = '';
       },
 
       openGiftModal() {
         const friendSel = document.getElementById('gift-friend-select');
         friendSel.innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option value="${u}">${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
+
         const sel = document.getElementById('gift-item-select');
         sel.innerHTML = shop.items.map(g => `<option value="${g.n}">${g.i} ${g.n} (${g.p}⭐)</option>`).join('');
         document.getElementById('giftModal').classList.add('active');
@@ -619,15 +987,28 @@
         const giftName = document.getElementById('gift-item-select').value;
         const gift = shop.items.find(i => i.n === giftName);
         
-        if (state.stars < gift.p && state.stars !== Infinity) return alert(`Недостаточно звёзд! Нужно ${gift.p}`);
+        if (state.stars < gift.p && state.stars !== Infinity) {
+          alert(`Недостаточно звёзд! Нужно ${gift.p}`);
+          return;
+        }
         if (state.stars !== Infinity) state.stars -= gift.p;
-        state.updateBalance(); state.save();
+        state.updateBalance();
+        state.save();
         
         document.getElementById('giftModal').classList.remove('active');
 
-        const giftText = `🎁 ${currentUser} подарил(а) ${friend}: ${gift.i} ${gift.n}!`;
+        const senderName = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
+        const giftText = `🎁 ${senderName} подарил(а) ${friend === 'Я' ? 'Я (Админ)' : friend}: ${gift.i} ${gift.n}!`;
+        
         if (isFirebaseReady && db && this.currentId) {
-          db.ref(`chats/${this.currentId}/messages`).push({ u: 'Система', t: giftText, time: ui.getTime(), media: null, channel: false, ts: Date.now() });
+          db.ref(`chats/${this.currentId}/messages`).push({
+            u: 'Система',
+            t: giftText,
+            time: ui.getTime(),
+            media: null,
+            channel: false,
+            ts: Date.now()
+          });
         } else {
           this.saveAndRender('Система', giftText, ui.getTime(), null, false);
         }
@@ -643,7 +1024,8 @@
       
       renderMsg(user, text, time, media, channel, key) {
         const box = document.getElementById('messages');
-        const isMy = (user === currentUser) || (currentUser === 'Я' && user === 'Я (Админ)');
+        const myName = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
+        const isMy = (user === currentUser) || (user === myName) || (currentUser === 'Я' && user === 'Я');
         const isNeuro = (user === 'Нейрохам 🤖' || user === 'Нейрохам');
         
         const msgKey = key || `${user}_${time}_${(text||'').substring(0, 15)}`;
@@ -655,33 +1037,292 @@
         const safeText = utils.formatText(text);
         
         if (channel) {
-          div.className = `msg channel`; div.innerHTML = `<div>${safeText}</div><div style="font-size:10px; opacity:0.7; margin-top:5px;">${time}</div>`;
+          div.className = `msg channel`;
+          div.innerHTML = `<div>${safeText}</div><div style="font-size:10px; opacity:0.7; margin-top:5px;">${time}</div>`;
         } else if (isNeuro) {
-          div.className = `msg neuroham`; div.innerHTML = `<div class="author neuro">🤖 Нейрохам</div><div>${safeText}</div><div style="font-size:10px; opacity:0.7; text-align:right; margin-top:4px;">${time}</div>`;
+          div.className = `msg neuroham`;
+          div.innerHTML = `<div class="author neuro">🤖 Нейрохам</div><div>${safeText}</div><div style="font-size:10px; opacity:0.7; text-align:right; margin-top:4px;">${time}</div>`;
         } else {
           div.className = `msg ${isMy ? 'my' : 'other'}`;
           let html = !isMy && user !== 'Система' ? `<div class="author">${utils.escapeHTML(user)}</div>` : '';
-          if (user === 'Система') html += `<div style="color: #fbbf24; font-weight: bold;">${safeText}</div>`;
-          else if (text) html += `<div>${safeText}</div>`;
+          
+          if (user === 'Система') {
+              html += `<div style="color: #fbbf24; font-weight: bold;">${safeText}</div>`;
+          } else if (text) {
+              html += `<div>${safeText}</div>`;
+          }
+
           if (media) html += `<img src="${media}" class="msg-media">`;
           html += `<div style="font-size:10px; opacity:0.7; text-align:right; margin-top:4px;">${time}</div>`;
           div.innerHTML = html;
         }
+        
         box.appendChild(div);
         setTimeout(() => box.scrollTop = box.scrollHeight, 50);
       }
     };
 
-    // Остальные объекты (profile, shop, xspam, casino, miner) остаются без изменений как в предыдущей версии
-    const profile = { update() { document.getElementById('prof-name-ui').innerText = utils.escapeHTML(currentUser === 'Я' ? 'Я (Админ)' : currentUser); document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎'; } };
-    const shop = { items: [{ i:"🍭", n:"Чупа-чупс", p:1 }, { i:"🧢", n:"Кепка", p:2 }, { i:"🍺", n:"Пиво", p:3 }, { i:"🎮", n:"Геймпад", p:10 }, { i:"🚗", n:"Тачка", p:15 }, { i:"💎", n:"Алмаз", p:20 }, { i:"🃏", n:"Джокер", p:100 }], render() { document.getElementById('shop-grid').innerHTML = this.items.map((g, idx) => `<div class="gift-item" onclick="shop.buy(${idx})"><div class="gift-icon">${g.i}</div><div style="font-size:13px; margin-top:5px;">${g.n}</div><div style="font-size:12px; color:#fbbf24; font-weight:bold;">${g.p} ⭐</div></div>`).join(''); this.renderMy(); }, buy(idx) { const gift = this.items[idx]; if (state.stars < gift.p && state.stars !== Infinity) return alert('Мало звёзд!'); if (state.stars !== Infinity) state.stars -= gift.p; state.myGifts.push(gift); state.updateBalance(); state.save(); this.renderMy(); }, renderMy() { const box = document.getElementById('my-gifts-ui'); if (state.myGifts.length === 0) box.innerHTML = `<span style="color:#64748b; font-size: 14px;">Пока пусто...</span>`; else box.innerHTML = state.myGifts.map(g => `<div style="font-size: 30px; background: #1e293b; padding: 10px; border-radius: 12px; border:1px solid #334155;">${g.i}</div>`).join(''); } };
-    const xspam = { bots: [{ n: 'Elon Musk', h: '@elon', a: '🚀', t: 'Dogecoin to the moon! 🐕' }, { n: 'Трейдер Вася', h: '@crypto_god', a: '📈', t: 'Опять ликвидация...' }, { n: 'Топор Live', h: '@topor', a: '🪓', t: 'Жесть!' }], feed: null, init() { this.feed = document.getElementById('xspam-feed'); this.feed.innerHTML = ''; this.bots.forEach(b => this.renderTweet(b.n, b.h, b.a, b.t, null)); }, post() { const inp = document.getElementById('xspam-input'); const fileInp = document.getElementById('xspam-img-input'); const text = inp.value.trim(); const file = fileInp.files[0]; if(!text && !file) return; if(file) { if (file.size > MAX_FILE_SIZE) { alert(`Размер изображения не должен превышать ${MAX_FILE_SIZE / 1024} КБ.`); fileInp.value = ''; return; } const reader = new FileReader(); reader.onload = (e) => { this.renderTweet(currentUser, '@'+currentUser.toLowerCase(), '😎', text, e.target.result, true); }; reader.readAsDataURL(file); } else { this.renderTweet(currentUser, '@'+currentUser.toLowerCase(), '😎', text, null, true); } inp.value = ''; fileInp.value = ''; }, retweet(btn, encName, encText) { btn.classList.add('retweeted'); this.renderTweet(currentUser, '@'+currentUser.toLowerCase(), '😎', `♻️ Репост от ${decodeURIComponent(encName)}:\n\n${decodeURIComponent(encText)}`, null, true); }, renderTweet(name, handle, avatar, rawText, img, toTop = false) { const div = document.createElement('div'); div.className = 'tweet'; let html = `<div class="tweet-header"><div class="tweet-avatar">${avatar}</div><div><div style="font-weight:bold;">${utils.escapeHTML(name)}</div><div style="color:#64748b; font-size:13px;">${utils.escapeHTML(handle)}</div></div></div><div class="tweet-content">${utils.formatText(rawText)}</div>`; if (img) html += `<img src="${img}" class="tweet-img">`; html += `<div class="tweet-footer"><div class="action-icon" onclick="this.classList.toggle('liked'); this.innerHTML = this.classList.contains('liked') ? '❤️ 1' : '🤍 0';">🤍 0</div><div class="action-icon" onclick="xspam.retweet(this, '${encodeURIComponent(name)}', '${encodeURIComponent(rawText)}')">🔄 Репост</div></div>`; div.innerHTML = html; if(toTop) this.feed.prepend(div); else this.feed.appendChild(div); } };
-    const casino = { symbols: ['🍒', '⭐', '🎰', '🃏', '💎'], spinning: false, switchMode(mode, el) { document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); document.getElementById('casino-slots').style.display = mode === 'slots' ? 'block' : 'none'; document.getElementById('casino-crash').classList.toggle('active', mode === 'crash'); }, spinSlots() { if(this.spinning) return; const bet = parseInt(document.getElementById('slots-bet').value); const msg = document.getElementById('slots-msg'); if (isNaN(bet) || bet < 10) return msg.innerText = "Мин. ставка 10 ⭐!"; if (state.stars < bet && state.stars !== Infinity) return msg.innerText = "Мало звёзд!"; if (state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); } this.spinning = true; msg.innerText = "Крутим..."; msg.style.color = "#fbbf24"; const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')]; let ints = reels.map(r => setInterval(() => r.innerText = this.symbols[Math.floor(Math.random()*this.symbols.length)], 100)); setTimeout(() => { ints.forEach(i => clearInterval(i)); const isWin = Math.random() >= 0.5; let res = []; if(isWin) { const s = this.symbols[Math.floor(Math.random()*this.symbols.length)]; res = [s, s, s]; const win = bet * (s==='🃏'?10 : s==='⭐'?5 : 2); msg.innerText = `🎰 ВЫИГРЫШ ${win} ⭐!`; if (state.stars !== Infinity) state.stars += win; } else { res = [this.symbols[0], this.symbols[1], this.symbols[2]]; msg.innerText = "Увы, проигрыш."; msg.style.color = "#ef4444"; } reels.forEach((r, i) => r.innerText = res[i]); state.updateBalance(); state.save(); this.spinning = false; }, 1500); }, crashLoop: null, crashMult: 1.00, crashPoint: 1.00, crashBet: 0, startCrash() { if(this.crashLoop) return; const bet = parseInt(document.getElementById('crash-bet').value); const msg = document.getElementById('crash-msg'); if (isNaN(bet) || bet < 10) return msg.innerText = "Мин. ставка 10 ⭐!"; if (state.stars < bet && state.stars !== Infinity) return msg.innerText = "Мало звёзд!"; if (state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); } this.crashBet = bet; const rand = Math.random() || 0.01; this.crashPoint = Math.min(100.00, Math.max(1.00, 1 / rand)); this.crashMult = 1.00; document.getElementById('crash-mult-ui').classList.remove('crashed'); document.getElementById('crash-start-btn').style.display = 'none'; document.getElementById('crash-cashout-btn').style.display = 'block'; msg.innerText = "Летим! 🚀"; msg.style.color = "#10b981"; let startTime = Date.now(); this.crashLoop = setInterval(() => { let elapsed = (Date.now() - startTime) / 1000; this.crashMult = Math.pow(1.2, elapsed); if(this.crashMult >= this.crashPoint) { this.crashMult = this.crashPoint; this.endCrash(false); } this.updateCrashUI(); }, 30); }, cashoutCrash() { if(!this.crashLoop) return; const win = Math.floor(this.crashBet * this.crashMult); if (state.stars !== Infinity) state.stars += win; this.endCrash(true, win); }, endCrash(success, win=0) { clearInterval(this.crashLoop); this.crashLoop = null; this.updateCrashUI(); document.getElementById('crash-start-btn').style.display = 'block'; document.getElementById('crash-cashout-btn').style.display = 'none'; const msg = document.getElementById('crash-msg'); if(success) { msg.innerText = `Успели! Выигрыш: ${win} ⭐`; } else { document.getElementById('crash-mult-ui').classList.add('crashed'); msg.innerText = "График обвалился! Проигрыш."; msg.style.color = "#ef4444"; } state.updateBalance(); state.save(); }, updateCrashUI() { document.getElementById('crash-mult-ui').innerText = this.crashMult.toFixed(2) + "x"; let width = 100 - (100 / this.crashMult); document.getElementById('crash-line-ui').style.width = width + "%"; } };
-    const miner = { tap(e) { if (state.stars !== Infinity) { state.stars += 1; state.updateBalance(); state.save(); } const floatEl = document.createElement('div'); floatEl.className = 'floating-text'; floatEl.innerText = '+1 ⭐'; const rect = document.getElementById('tap-area').getBoundingClientRect(); const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 20; const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top - 20; floatEl.style.left = `${x}px`; floatEl.style.top = `${y}px`; document.getElementById('tap-area').appendChild(floatEl); setTimeout(() => floatEl.remove(), 800); } };
-    const calls = { startAudioCall() { document.getElementById('callTitle').innerText = 'Аудиозвонок: ' + document.getElementById('callContactSelect').value; document.getElementById('callStatus').innerText = 'Идет соединение...'; document.getElementById('callAvatar').innerText = '📞'; setTimeout(() => document.getElementById('callStatus').innerText = 'Разговор идет (00:15)', 2000); }, startVideoCall() { document.getElementById('callTitle').innerText = 'Видеозвонок: ' + document.getElementById('callContactSelect').value; document.getElementById('callStatus').innerText = 'Подключение видео...'; document.getElementById('callAvatar').innerText = '📹'; setTimeout(() => document.getElementById('callStatus').innerText = 'Видеосвязь активна', 2000); } };
-    const music = { play(el, title) { document.querySelectorAll('.track-item').forEach(i => i.classList.remove('playing')); el.classList.add('playing'); alert('Воспроизведение: ' + title); } };
-    const weather = { changeCity(city) { document.getElementById('cityName').innerText = city; } };
+    /* ================= ПРОФИЛЬ И МАГАЗИН ================= */
+    const profile = {
+      update() {
+        const disp = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
+        document.getElementById('prof-name-ui').innerText = utils.escapeHTML(disp);
+        document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎';
+      }
+    };
+
+    const shop = {
+      items: [
+        { i:"🍭", n:"Чупа-чупс", p:1 }, { i:"🧢", n:"Кепка", p:2 }, 
+        { i:"🍺", n:"Пиво", p:3 }, { i:"🎮", n:"Геймпад", p:10 }, 
+        { i:"🚗", n:"Тачка", p:15 }, { i:"💎", n:"Алмаз", p:20 }, 
+        { i:"🃏", n:"Джокер", p:100 }
+      ],
+      render() {
+        document.getElementById('shop-grid').innerHTML = this.items.map((g, idx) => `
+          <div class="gift-item" onclick="shop.buy(${idx})">
+            <div class="gift-icon">${g.i}</div>
+            <div style="font-size:13px; margin-top:5px;">${g.n}</div>
+            <div style="font-size:12px; color:#fbbf24; font-weight:bold;">${g.p} ⭐</div>
+          </div>
+        `).join('');
+        this.renderMy();
+      },
+      buy(idx) {
+        const gift = this.items[idx];
+        if (state.stars < gift.p && state.stars !== Infinity) return alert('Мало звёзд!');
+        if (state.stars !== Infinity) state.stars -= gift.p;
+        state.myGifts.push(gift);
+        state.updateBalance();
+        state.save();
+        this.renderMy();
+      },
+      renderMy() {
+        const box = document.getElementById('my-gifts-ui');
+        if (state.myGifts.length === 0) box.innerHTML = `<span style="color:#64748b; font-size: 14px;">Пока пусто...</span>`;
+        else box.innerHTML = state.myGifts.map(g => `<div style="font-size: 30px; background: #1e293b; padding: 10px; border-radius: 12px; border:1px solid #334155;">${g.i}</div>`).join('');
+      }
+    };
+
+    /* ================= XSPAM (ТВИТТЕР) ================= */
+    const xspam = {
+      bots: [
+        { n: 'Elon Musk', h: '@elon', a: '🚀', t: 'Dogecoin to the moon! 🐕\nCrypto is the future.' },
+        { n: 'Трейдер Вася', h: '@crypto_god', a: '📈', t: 'Опять ликвидация...\nИду на завод.' },
+        { n: 'Топор Live', h: '@topor', a: '🪓', t: 'Подписчик прислал дикие кадры! Жесть!' }
+      ],
+      feed: null,
+      init() {
+        this.feed = document.getElementById('xspam-feed');
+        this.feed.innerHTML = '';
+        this.bots.forEach(b => this.renderTweet(b.n, b.h, b.a, b.t, null));
+      },
+      post() {
+        const inp = document.getElementById('xspam-input');
+        const fileInp = document.getElementById('xspam-img-input');
+        const text = inp.value.trim();
+        const file = fileInp.files[0];
+        
+        if(!text && !file) return;
+
+        const myDisp = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
+
+        if(file) {
+          if (file.size > MAX_FILE_SIZE) {
+              alert(`Размер изображения не должен превышать ${MAX_FILE_SIZE / 1024} КБ.`);
+              fileInp.value = '';
+              return;
+          }
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.renderTweet(myDisp, '@'+getUserKey(currentUser), '😎', text, e.target.result, true);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          this.renderTweet(myDisp, '@'+getUserKey(currentUser), '😎', text, null, true);
+        }
+        
+        inp.value = ''; 
+        fileInp.value = '';
+      },
+      retweet(btn, encName, encText) {
+        const name = decodeURIComponent(encName);
+        const text = decodeURIComponent(encText);
+        
+        btn.classList.add('retweeted');
+        const myDisp = currentUser === 'Я' ? 'Я (Админ)' : currentUser;
+        this.renderTweet(myDisp, '@'+getUserKey(currentUser), '😎', `♻️ Репост от ${name}:\n\n${text}`, null, true);
+      },
+      renderTweet(name, handle, avatar, rawText, img, toTop = false) {
+        const div = document.createElement('div');
+        div.className = 'tweet';
+        
+        const safeName = utils.escapeHTML(name);
+        const safeHandle = utils.escapeHTML(handle);
+        const safeTextHtml = utils.formatText(rawText);
+        
+        const encodedName = encodeURIComponent(name);
+        const encodedText = encodeURIComponent(rawText);
+
+        let html = `
+          <div class="tweet-header">
+            <div class="tweet-avatar">${avatar}</div>
+            <div>
+              <div style="font-weight:bold;">${safeName}</div>
+              <div style="color:#64748b; font-size:13px;">${safeHandle}</div>
+            </div>
+          </div>
+          <div class="tweet-content">${safeTextHtml}</div>
+        `;
+        if (img) html += `<img src="${img}" class="tweet-img">`;
+        html += `
+          <div class="tweet-footer">
+            <div class="action-icon" onclick="this.classList.toggle('liked'); this.innerHTML = this.classList.contains('liked') ? '❤️ 1' : '🤍 0';">🤍 0</div>
+            <div class="action-icon" onclick="xspam.retweet(this, '${encodedName}', '${encodedText}')">🔄 Репост</div>
+          </div>
+        `;
+        div.innerHTML = html;
+        if(toTop) this.feed.prepend(div);
+        else this.feed.appendChild(div);
+      }
+    };
+
+    /* ================= КАЗИНО И КРАШ ================= */
+    const casino = {
+      symbols: ['🍒', '⭐', '🎰', '🃏', '💎'],
+      spinning: false,
+      
+      switchMode(mode, el) {
+        document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('casino-slots').style.display = mode === 'slots' ? 'block' : 'none';
+        document.getElementById('casino-crash').classList.toggle('active', mode === 'crash');
+      },
+
+      spinSlots() {
+        if(this.spinning) return;
+        const bet = parseInt(document.getElementById('slots-bet').value);
+        const msg = document.getElementById('slots-msg');
+        
+        if (isNaN(bet) || bet < 10) return msg.innerText = "Мин. ставка 10 ⭐!";
+        if (state.stars < bet && state.stars !== Infinity) return msg.innerText = "Мало звёзд!";
+        
+        if (state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
+        
+        this.spinning = true; msg.innerText = "Крутим..."; msg.style.color = "#fbbf24";
+        const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+        
+        let ints = reels.map(r => setInterval(() => r.innerText = this.symbols[Math.floor(Math.random()*this.symbols.length)], 100));
+        
+        setTimeout(() => {
+          ints.forEach(i => clearInterval(i));
+          
+          const isWin = Math.random() >= 0.5;
+          let res = [];
+          if(isWin) {
+            const s = this.symbols[Math.floor(Math.random()*this.symbols.length)];
+            res = [s, s, s];
+            const win = bet * (s==='🃏'?10 : s==='⭐'?5 : 2);
+            msg.innerText = `🎰 ВЫИГРЫШ ${win} ⭐!`;
+            if (state.stars !== Infinity) state.stars += win;
+          } else {
+            res = [this.symbols[0], this.symbols[1], this.symbols[2]];
+            msg.innerText = "Увы, проигрыш."; msg.style.color = "#ef4444";
+          }
+          
+          reels.forEach((r, i) => r.innerText = res[i]);
+          state.updateBalance(); state.save();
+          this.spinning = false;
+        }, 1500);
+      },
+
+      crashLoop: null,
+      crashMult: 1.00,
+      crashPoint: 1.00,
+      crashBet: 0,
+      
+      startCrash() {
+        if(this.crashLoop) return;
+        const bet = parseInt(document.getElementById('crash-bet').value);
+        const msg = document.getElementById('crash-msg');
+        if (isNaN(bet) || bet < 10) return msg.innerText = "Мин. ставка 10 ⭐!";
+        if (state.stars < bet && state.stars !== Infinity) return msg.innerText = "Мало звёзд!";
+        
+        if (state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
+        this.crashBet = bet;
+        
+        const rand = Math.random() || 0.01;
+        this.crashPoint = Math.min(100.00, Math.max(1.00, 1 / rand));
+        
+        this.crashMult = 1.00;
+        document.getElementById('crash-mult-ui').classList.remove('crashed');
+        document.getElementById('crash-start-btn').style.display = 'none';
+        document.getElementById('crash-cashout-btn').style.display = 'block';
+        msg.innerText = "Летим! 🚀"; msg.style.color = "#10b981";
+        
+        let startTime = Date.now();
+        this.crashLoop = setInterval(() => {
+          let elapsed = (Date.now() - startTime) / 1000;
+          this.crashMult = Math.pow(1.2, elapsed);
+          
+          if(this.crashMult >= this.crashPoint) {
+            this.crashMult = this.crashPoint;
+            this.endCrash(false);
+          }
+          this.updateCrashUI();
+        }, 30);
+      },
+
+      cashoutCrash() {
+        if(!this.crashLoop) return;
+        const win = Math.floor(this.crashBet * this.crashMult);
+        if (state.stars !== Infinity) state.stars += win;
+        this.endCrash(true, win);
+      },
+
+      endCrash(success, win=0) {
+        clearInterval(this.crashLoop);
+        this.crashLoop = null;
+        this.updateCrashUI();
+        
+        document.getElementById('crash-start-btn').style.display = 'block';
+        document.getElementById('crash-cashout-btn').style.display = 'none';
+        const msg = document.getElementById('crash-msg');
+        
+        if(success) {
+          msg.innerText = `Успели! Выигрыш: ${win} ⭐`;
+        } else {
+          document.getElementById('crash-mult-ui').classList.add('crashed');
+          msg.innerText = "График обвалился! Проигрыш.";
+          msg.style.color = "#ef4444";
+        }
+        state.updateBalance(); state.save();
+      },
+
+      updateCrashUI() {
+        document.getElementById('crash-mult-ui').innerText = this.crashMult.toFixed(2) + "x";
+        let width = 100 - (100 / this.crashMult);
+        document.getElementById('crash-line-ui').style.width = width + "%";
+      }
+    };
+
+    /* ================= ФАРМ LEHCOIN ================= */
+    const miner = {
+      tap(e) {
+        if (state.stars !== Infinity) { state.stars += 1; state.updateBalance(); state.save(); }
+        const floatEl = document.createElement('div');
+        floatEl.className = 'floating-text'; floatEl.innerText = '+1 ⭐';
+        
+        const rect = document.getElementById('tap-area').getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left - 20; 
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top - 20;
+        
+        floatEl.style.left = `${x}px`; floatEl.style.top = `${y}px`;
+        document.getElementById('tap-area').appendChild(floatEl);
+        setTimeout(() => floatEl.remove(), 800);
+      }
+    };
 
   </script>
 </body>
-</html>
+              </html>
