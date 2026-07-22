@@ -660,6 +660,22 @@
         this.messagesRef.limitToLast(50).on('child_added', snap => {
           const data = snap.val();
           this.renderMsg(snap.key, data);
+          
+          // МГНОВЕННЫЙ ФИКС ЗАВИСШЕЙ НАДПИСИ "ПЕЧАТАЕТ"
+          // Если мы получаем любое сообщение, мы 100% стираем статус "печатает" от этого человека
+          if (this.currentId) {
+              db.ref('typing/' + this.currentId).once('value', tSnap => {
+                  const tData = tSnap.val();
+                  if (tData) {
+                      for (let key in tData) {
+                          if (tData[key] === data.user) {
+                              db.ref('typing/' + this.currentId + '/' + key).remove();
+                          }
+                      }
+                  }
+              });
+          }
+
           if (data.user !== currentDisplayName && data.user !== currentUser && data.user !== 'Система') utils.playSound('receive');
         });
 
@@ -706,12 +722,14 @@
           ctrls.innerHTML = `<button class="action-btn" style="background:#3b82f6" onclick="chat.sendText()">➤</button>`;
           db.ref('typing/'+this.currentId+'/'+getUserKey(currentUser)).set(currentDisplayName);
           clearTimeout(this.typingTimeout);
-          this.typingTimeout = setTimeout(() => this.clearTypingStatus(), 2000);
+          // Таймер уменьшен для более быстрой очистки, если человек просто бросил писать
+          this.typingTimeout = setTimeout(() => this.clearTypingStatus(), 1500);
         } else {
           ctrls.innerHTML = `
             <button class="action-btn" id="video-btn" onclick="media.toggleVideoMode()" style="background: ${media.isVideo?'#ef4444':'#334155'}; font-size: 14px;">📹</button>
             <button class="action-btn" id="mic-btn" onmousedown="media.startRecord()" onmouseup="media.stopRecord()" ontouchstart="media.startRecord()" ontouchend="media.stopRecord()">🎤</button>`;
           this.clearTypingStatus();
+          clearTimeout(this.typingTimeout); // Обеспечиваем гарантированное снятие таймера
         }
       },
       clearTypingStatus() { if(this.currentId) db.ref('typing/'+this.currentId+'/'+getUserKey(currentUser)).remove(); },
@@ -726,13 +744,17 @@
         let msgObj = { user: currentDisplayName, type: "text", content: txt, time: utils.getTime() };
         if (state.replyTo) msgObj.reply = state.replyTo;
 
+        // МАКСИМАЛЬНО БЫСТРО и гарантированно очищаем статус перед самой отправкой
+        this.clearTypingStatus();
+        clearTimeout(this.typingTimeout);
+
         // Оптимистичный UI (отрисовка мгновенно перед ответом БД)
         const newMsgRef = db.ref('chats/' + this.currentId + '/messages').push();
         this.renderMsg(newMsgRef.key, msgObj, true); 
         newMsgRef.set(msgObj); // Фактическая отправка
 
         utils.playSound('send');
-        inp.value = ''; this.checkInput(); this.cancelReply(); this.clearTypingStatus();
+        inp.value = ''; this.checkInput(); this.cancelReply(); 
         BOT.check(txt, this.currentId);
       },
       setReply(id, author, content) {
@@ -772,8 +794,13 @@
         div.onclick = (e) => { if(data.type === 'text' && e.target.tagName !== 'A') this.setReply(id, data.user, data.content); };
         box.appendChild(div);
         
-        if(isOptimistic || Math.abs(box.scrollTop + box.clientHeight - box.scrollHeight) < 150) {
-           setTimeout(() => box.scrollTop = box.scrollHeight, 10);
+        // Гарантированный скролл (увеличен порог, чтобы 100% было видно новые сообщения)
+        if(isOptimistic || Math.abs(box.scrollTop + box.clientHeight - box.scrollHeight) < 500) {
+           setTimeout(() => {
+               box.scrollTop = box.scrollHeight;
+               // Двойной скролл для надежности (защита от скачков из-за медиафайлов)
+               setTimeout(() => box.scrollTop = box.scrollHeight, 50);
+           }, 10);
         }
       },
 
@@ -1088,4 +1115,4 @@
     };
   </script>
 </body>
-</html>
+  </html>
