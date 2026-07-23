@@ -17,7 +17,7 @@
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-    @keyframes toastIn { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
     select, input, button { width: 100%; padding: 14px; margin-top: 12px; border-radius: 10px; border: none; font-size: 16px; outline: none; }
     select, input { background: #334155; color: #fff; }
@@ -109,8 +109,9 @@
     .action-icon { cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
     .action-icon.liked { color: #ef4444; }
     
-    .casino-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .casino-tab { flex: 1; padding: 12px; text-align: center; background: #1e293b; border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid #334155; }
+    .casino-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
+    .casino-tabs::-webkit-scrollbar { display: none; }
+    .casino-tab { flex: 1; min-width: 70px; padding: 12px; text-align: center; background: #1e293b; border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: bold; transition: 0.2s; border: 1px solid #334155; white-space: nowrap; }
     .casino-tab.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
     
     .slots-box { display: flex; gap: 15px; background: #1e293b; padding: 25px; border-radius: 16px; border: 2px solid #334155; justify-content: center; margin-bottom: 20px; }
@@ -122,10 +123,10 @@
     .crash-mult.crashed { color: #ef4444; }
     .crash-line { position: absolute; bottom: 0; left: 0; width: 0%; height: 4px; background: #10b981; transition: width 0.1s linear, bottom 0.1s linear; }
 
-    .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+    .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; }
     .lehcoin { width: 240px; height: 240px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: bold; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4); cursor: pointer; transition: transform 0.05s; user-select: none; }
     .lehcoin:active { transform: scale(0.92); }
-    .floating-text { position: absolute; font-size: 28px; color: #fbbf24; font-weight: bold; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .floating-text { position: absolute; font-size: 28px; color: #fbbf24; font-weight: bold; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 50; }
 
     .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
     .modal-overlay.active { display: flex; opacity: 1; }
@@ -151,9 +152,9 @@
     .radio-play-btn:active { transform: scale(0.9); }
     .radio-volume-slider { flex: 1; accent-color: #3b82f6; height: 6px; cursor: pointer; margin: 0; }
 
-    /* TOAST УВЕДОМЛЕНИЯ */
-    #toastContainer { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; width: 90%; max-width: 380px; display: flex; flex-direction: column; gap: 8px; }
-    .toast-msg { background: #1e293b; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); color: #fff; pointer-events: auto; animation: toastIn 0.3s ease forwards; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    /* TOAST УВЕДОМЛЕНИЯ (ИСПРАВЛЕНО) */
+    #toastContainer { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; width: 90%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .toast-msg { width: 100%; background: #1e293b; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); color: #fff; pointer-events: auto; animation: toastIn 0.3s ease forwards; display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .toast-avatar { font-size: 24px; }
     .toast-body { flex: 1; overflow: hidden; }
     .toast-title { font-weight: bold; font-size: 14px; margin-bottom: 2px; }
@@ -170,7 +171,7 @@
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite;">✈️</div>
       <h2 style="margin-bottom: 5px;">Секретный TG</h2>
-      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.2 (Optimized + Live Presence)</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.2 (Optimized + Games Update)</p>
       <select id="usernameInput">
         <option value="" disabled selected>-- Кто вы? --</option>
         <option value="Я">Я (Админ)</option>
@@ -367,23 +368,26 @@
           <div class="casino-tab active" onclick="games.switchMode('slots', this)">Слоты</div>
           <div class="casino-tab" onclick="games.switchMode('crash', this)">Краш</div>
           <div class="casino-tab" onclick="games.switchMode('snake', this)">Змейка</div>
+          <div class="casino-tab" onclick="games.switchMode('wheel', this)">Колесо</div>
         </div>
         
+        <!-- СЛОТЫ -->
         <div id="casino-slots" style="text-align:center;">
           <div class="slots-box">
             <div class="reel-window" id="reel1">🍒</div><div class="reel-window" id="reel2">⭐</div><div class="reel-window" id="reel3">🎰</div>
           </div>
-          <input type="number" id="slots-bet" value="10">
+          <input type="number" id="slots-bet" value="10" placeholder="Ставка ⭐">
           <button class="btn-primary" onclick="games.spinSlots()">КРУТИТЬ</button>
           <div id="slots-msg" style="height: 20px; color: #fbbf24; font-weight: bold; margin-top: 15px;"></div>
         </div>
         
+        <!-- КРАШ -->
         <div id="casino-crash" class="crash-container">
           <div class="crash-graph">
             <div class="crash-mult" id="crash-mult-ui">1.00x</div>
             <div class="crash-line" id="crash-line-ui"></div>
           </div>
-          <input type="number" id="crash-bet" value="10">
+          <input type="number" id="crash-bet" value="10" placeholder="Ставка ⭐">
           <div style="display:flex; gap:10px; width:100%; margin-top:12px;">
             <button class="btn-primary" id="crash-start-btn" onclick="games.startCrash()">Ставка</button>
             <button class="btn-primary" id="crash-cashout-btn" style="background:#10b981; display:none;" onclick="games.cashoutCrash()">ЗАБРАТЬ</button>
@@ -391,6 +395,7 @@
           <div id="crash-msg" style="height: 20px; font-weight: bold; margin-top: 15px;"></div>
         </div>
 
+        <!-- ЗМЕЙКА -->
         <div id="games-snake" style="display:none; flex-direction:column; align-items:center;">
           <div style="background:#0f172a; padding: 5px; border-radius: 8px; border: 2px solid #334155; margin-bottom: 15px;">
             <canvas id="snakeCanvas" width="280" height="280" style="background:#000; border-radius: 4px; display:block;"></canvas>
@@ -403,8 +408,20 @@
             <button class="btn-primary" style="padding:15px; font-size:24px;" onclick="snakeGame.setDir(0, 1)">⬇️</button>
             <button class="btn-primary" style="padding:15px; font-size:24px;" onclick="snakeGame.setDir(1, 0)">➡️</button>
           </div>
-          <button class="btn-primary" style="width: 200px;" onclick="snakeGame.start()">▶ Играть</button>
+          <button class="btn-primary" style="width: 200px;" onclick="snakeGame.start()">▶ Играть (5 ⭐)</button>
         </div>
+
+        <!-- НОВАЯ ИГРА: КОЛЕСО ФОРТУНЫ -->
+        <div id="casino-wheel" style="display:none; text-align:center;">
+          <div style="position:relative; width:260px; height:260px; margin:10px auto 20px; display:flex; align-items:center; justify-content:center;">
+            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); z-index:10; font-size:24px; color:#ef4444; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">▼</div>
+            <canvas id="wheelCanvas" width="260" height="260" style="border-radius:50%; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); border: 4px solid #334155;"></canvas>
+          </div>
+          <input type="number" id="wheel-bet" value="10" placeholder="Ставка ⭐" style="max-width:220px; margin:0 auto 12px; display:block;">
+          <button class="btn-primary" style="max-width:220px; margin:0 auto;" onclick="wheelGame.spin()">ВРАЩАТЬ</button>
+          <div id="wheel-msg" style="height: 24px; color: #fbbf24; font-weight: bold; margin-top: 15px;"></div>
+        </div>
+
       </div>
 
       <!-- 8. МАЙНЕР -->
@@ -772,6 +789,7 @@
         document.getElementById('callContactSelect').innerHTML = ALL_USERS.filter(u => u !== currentUser).map(u => `<option>${u === 'Я' ? 'Я (Админ)' : u}</option>`).join('');
         shop.render();
         snakeGame.init();
+        wheelGame.init();
         toporChannel.init();
         botChatsInitializer.init();
 
@@ -881,7 +899,7 @@
       }
     };
 
-    /* ================= ОПТИМИЗИРОВАННЫЙ ЧАТ (МГНОВЕННЫЙ РЕНДЕР И СТАТУСЫ) ================= */
+    /* ================= ОПТИМИЗИРОВАННЫЙ ЧАТ ================= */
     const chat = {
       currentId: null, messagesRef: null, presenceRef: null, typingTimeout: null, typingRef: null,
       isTyping: false, isOtherUserOnline: false,
@@ -906,7 +924,6 @@
         this.currentId = id;
         state.currentTabId = 'chatScreen';
         
-        // Сброс счетчика неполных сообщений
         state.unreadChatsCount = 0;
         notifications.updateChatsBadge(0);
 
@@ -927,7 +944,6 @@
           document.getElementById('media-controls').style.display = 'flex';
         }
 
-        // Загрузка сообщений с лимитом 50
         this.messagesRef = db.ref('chats/' + id + '/messages');
         this.messagesRef.limitToLast(50).on('child_added', snap => {
           if (!snap.exists()) return;
@@ -1230,164 +1246,514 @@
              const comms = Object.values(p.comments).sort((a,b) => a.ts - b.ts);
              commentsHtml = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155; font-size: 13px;">` +
                comms.map(c => `<div style="margin-bottom: 5px;"><b>${utils.escapeHTML(c.name)}:</b> ${utils.escapeHTML(c.text)}</div>`).join('') +
-             `</div>`;
+               `</div>`;
          }
 
-         const div = document.createElement('div'); div.className = 'tweet';
-         div.innerHTML = `
+         const card = document.createElement('div');
+         card.className = 'tweet';
+         card.innerHTML = `
            <div class="tweet-header">
-             <div class="tweet-avatar">${p.avatar}</div>
-             <div><div style="font-weight:bold;">${utils.escapeHTML(p.name)}</div>
-             <div style="color:#64748b; font-size:13px;">${utils.escapeHTML(p.handle)}</div></div>
+             <div class="tweet-avatar">${utils.escapeHTML(p.avatar || '👤')}</div>
+             <div>
+               <div style="font-weight:bold;">${utils.escapeHTML(p.name)}</div>
+               <div style="font-size:12px; color:#94a3b8;">${utils.escapeHTML(p.handle)}</div>
+             </div>
            </div>
-           <div style="margin: 10px 0; word-break: break-word;">${utils.escapeHTML(p.text).replace(/\n/g, '<br>')}</div>
+           <div style="font-size:15px; line-height:1.4; word-break:break-word;">${utils.escapeHTML(p.text).replace(/\n/g, '<br>')}</div>
            <div class="tweet-footer">
-             <div class="action-icon ${isLiked ? 'liked' : ''}" onclick="xspam.toggleLike('${p.id}')">❤️ ${likesCount}</div>
-             <div class="action-icon" onclick="xspam.addComment('${p.id}')">💬 ${commentsCount}</div>
+             <div class="action-icon ${isLiked ? 'liked' : ''}" onclick="xspam.toggleLike('${p.id}')">❤️ <span>${likesCount}</span></div>
+             <div class="action-icon" onclick="xspam.addComment('${p.id}')">💬 <span>${commentsCount}</span></div>
            </div>
            ${commentsHtml}
          `;
-         feed.appendChild(div);
+         feed.appendChild(card);
       }
     };
 
-    /* ================= ИГРЫ ================= */
+    /* ================= 🕹️ МИНУС/ПЛЮС БАЛАНСА И ИГРЫ ================= */
     const games = {
-      symbols: ['🍒', '⭐', '🎰'], spinning: false, crashLoop: null, crashMult: 1.0, crashBet: 0,
-      switchMode(m, el) {
-        document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('casino-slots').style.display = m==='slots'?'block':'none';
-        document.getElementById('casino-crash').classList.toggle('active', m==='crash');
-        document.getElementById('games-snake').style.display = m==='snake'?'flex':'none';
-        if(m==='snake' && !snakeGame.ctx) snakeGame.init();
-      },
-      spinSlots() {
-        if(this.spinning) return;
-        const bet = parseInt(document.getElementById('slots-bet').value);
-        if(isNaN(bet) || bet <= 0) return alert('Введите ставку!');
-        if(state.stars < bet && state.stars !== Infinity) return alert('Мало звезд!');
-        if(state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
-        this.spinning = true; 
-        document.getElementById('slots-msg').innerText = "Крутим...";
-        let spinInterval = setInterval(() => {
-          document.getElementById('reel1').innerText = this.symbols[Math.floor(Math.random()*3)];
-          document.getElementById('reel2').innerText = this.symbols[Math.floor(Math.random()*3)];
-          document.getElementById('reel3').innerText = this.symbols[Math.floor(Math.random()*3)];
-        }, 80);
-        setTimeout(() => {
-          clearInterval(spinInterval);
-          if(Math.random() >= 0.5) {
-            const winSym = this.symbols[Math.floor(Math.random()*3)];
-            document.getElementById('reel1').innerText = winSym; document.getElementById('reel2').innerText = winSym; document.getElementById('reel3').innerText = winSym;
-            const win = bet * 2; document.getElementById('slots-msg').innerText = `Выигрыш ${win} ⭐!`; 
-            if(state.stars !== Infinity) state.stars += win; 
-          } else {
-            const syms = [...this.symbols].sort(() => Math.random() - 0.5);
-            document.getElementById('reel1').innerText = syms[0]; document.getElementById('reel2').innerText = syms[1]; document.getElementById('reel3').innerText = syms[0] === syms[1] ? syms[2] : syms[1];
-            document.getElementById('slots-msg').innerText = "Проигрыш.";
-          }
-          state.updateBalance(); state.save(); this.spinning = false;
-        }, 1000);
-      },
-      startCrash() {
-        if(this.crashLoop) return;
-        const bet = parseInt(document.getElementById('crash-bet').value);
-        if(isNaN(bet) || bet <= 0) return alert('Введите ставку!');
-        if(state.stars < bet && state.stars !== Infinity) return alert('Мало звезд!');
-        if(state.stars !== Infinity) { state.stars -= bet; state.updateBalance(); }
-        this.crashBet = bet; this.crashMult = 1.0;
-        const crashPoint = (Math.random() >= 0.5) ? (2.0 + Math.random() * 8.0) : (1.0 + Math.random() * 0.99);
-        document.getElementById('crash-start-btn').style.display = 'none'; 
-        document.getElementById('crash-cashout-btn').style.display = 'block';
-        let start = Date.now();
-        this.crashLoop = setInterval(() => {
-          this.crashMult = Math.pow(1.2, (Date.now() - start) / 1000);
-          if(this.crashMult >= crashPoint) { this.crashMult = crashPoint; this.endCrash(false); }
-          document.getElementById('crash-mult-ui').innerText = this.crashMult.toFixed(2) + "x";
-        }, 30);
-      },
-      cashoutCrash() { 
-        if(!this.crashLoop) return; 
-        if(state.stars !== Infinity) state.stars += Math.floor(this.crashBet * this.crashMult); 
-        this.endCrash(true, Math.floor(this.crashBet * this.crashMult)); 
-      },
-      endCrash(win, amt=0) {
-        clearInterval(this.crashLoop); this.crashLoop = null;
-        document.getElementById('crash-start-btn').style.display = 'block'; 
-        document.getElementById('crash-cashout-btn').style.display = 'none';
-        document.getElementById('crash-msg').innerText = win ? `Вы забрали: ${amt} ⭐` : "Краш!";
-        state.updateBalance(); state.save();
-      }
-    };
+      crashMult: 1.00,
+      crashBet: 10,
+      crashLoop: null,
+      isCrashRunning: false,
+      isCashedOut: false,
 
-    /* ================= ЗМЕЙКА ================= */
-    const snakeGame = {
-      ctx: null, snake: [], food: {}, dx: 1, dy: 0, loop: null, score: 0,
-      init() {
-        const canvas = document.getElementById('snakeCanvas');
-        if (!canvas) return;
-        this.ctx = canvas.getContext('2d');
-        this.drawInitial();
+      switchMode(mode, tabEl) {
+        document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active'));
+        if (tabEl) tabEl.classList.add('active');
+
+        document.getElementById('casino-slots').style.display = 'none';
+        document.getElementById('casino-crash').classList.remove('active');
+        document.getElementById('casino-crash').style.display = 'none';
+        document.getElementById('games-snake').style.display = 'none';
+        if (document.getElementById('casino-wheel')) document.getElementById('casino-wheel').style.display = 'none';
+
+        if (this.crashLoop) this.endCrash(false);
+
+        if (mode === 'slots') {
+          document.getElementById('casino-slots').style.display = 'block';
+        } else if (mode === 'crash') {
+          document.getElementById('casino-crash').style.display = 'flex';
+          document.getElementById('casino-crash').classList.add('active');
+        } else if (mode === 'snake') {
+          document.getElementById('games-snake').style.display = 'flex';
+        } else if (mode === 'wheel') {
+          if (document.getElementById('casino-wheel')) document.getElementById('casino-wheel').style.display = 'block';
+        }
       },
-      drawInitial() {
-        if (!this.ctx) return;
-        this.ctx.fillStyle = '#0f172a'; this.ctx.fillRect(0, 0, 280, 280);
-        this.ctx.fillStyle = '#94a3b8'; this.ctx.font = '20px Arial';
-        this.ctx.fillText('Нажми ИГРАТЬ', 70, 140);
-      },
-      start() {
-        clearInterval(this.loop);
-        this.snake = [{x: 7, y: 7}];
-        this.dx = 1; this.dy = 0; this.score = 0;
-        this.placeFood();
-        this.loop = setInterval(() => this.update(), 150);
-      },
-      setDir(x, y) {
-        if (this.dx === -x || this.dy === -y) return;
-        this.dx = x; this.dy = y;
-      },
-      placeFood() {
-        this.food = {x: Math.floor(Math.random()*14), y: Math.floor(Math.random()*14)};
-      },
-      update() {
-        let head = {x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy};
-        if (head.x < 0 || head.x >= 14 || head.y < 0 || head.y >= 14 || this.snake.some(s => s.x===head.x && s.y===head.y)) {
-          clearInterval(this.loop);
-          alert('Игра окончена! Заработано: ' + this.score + ' ⭐');
-          if (state.stars !== Infinity) { state.stars += this.score; state.updateBalance(); state.save(); }
-          this.drawInitial();
+
+      /* --- 🎰 СЛОТЫ --- */
+      spinSlots() {
+        const betInput = document.getElementById('slots-bet');
+        const bet = parseInt(betInput ? betInput.value : 10) || 10;
+        const msg = document.getElementById('slots-msg');
+
+        if (state.stars < bet && state.stars !== Infinity) {
+          msg.innerText = "Недостаточно звёзд!";
+          msg.style.color = "#ef4444";
           return;
         }
+
+        if (state.stars !== Infinity) {
+          state.stars -= bet;
+          state.updateBalance();
+          state.save();
+        }
+
+        const symbols = ['🍒', '⭐', '🎰', '🍋', '7️⃣', '💎'];
+        const reel1 = document.getElementById('reel1');
+        const reel2 = document.getElementById('reel2');
+        const reel3 = document.getElementById('reel3');
+
+        msg.style.color = "#fbbf24";
+        msg.innerText = "Вращаем...";
+
+        let count = 0;
+        const interval = setInterval(() => {
+          reel1.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+          reel2.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+          reel3.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+          count++;
+
+          if (count > 15) {
+            clearInterval(interval);
+            const s1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const s2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const s3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+            reel1.innerText = s1;
+            reel2.innerText = s2;
+            reel3.innerText = s3;
+
+            let win = 0;
+            if (s1 === s2 && s2 === s3) {
+              if (s1 === '⭐') win = bet * 10;
+              else if (s1 === '7️⃣' || s1 === '💎') win = bet * 7;
+              else win = bet * 5;
+            } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+              win = Math.floor(bet * 1.5);
+            }
+
+            if (win > 0) {
+              msg.innerText = `🎉 ВЫИГРЫШ: +${win} ⭐!`;
+              msg.style.color = "#10b981";
+              if (state.stars !== Infinity) {
+                state.stars += win;
+                state.updateBalance();
+                state.save();
+              }
+            } else {
+              msg.innerText = "Увы, попробуйте еще раз!";
+              msg.style.color = "#ef4444";
+            }
+          }
+        }, 80);
+      },
+
+      /* --- 🚀 КРАШ --- */
+      startCrash() {
+        if (this.isCrashRunning) return;
+        const betInput = document.getElementById('crash-bet');
+        this.crashBet = parseInt(betInput ? betInput.value : 10) || 10;
+
+        if (state.stars < this.crashBet && state.stars !== Infinity) {
+          document.getElementById('crash-msg').innerText = "Недостаточно звёзд!";
+          document.getElementById('crash-msg').style.color = "#ef4444";
+          return;
+        }
+
+        if (state.stars !== Infinity) {
+          state.stars -= this.crashBet;
+          state.updateBalance();
+          state.save();
+        }
+
+        this.isCrashRunning = true;
+        this.isCashedOut = false;
+        this.crashMult = 1.00;
+
+        const multUi = document.getElementById('crash-mult-ui');
+        const lineUi = document.getElementById('crash-line-ui');
+        const msg = document.getElementById('crash-msg');
+        const startBtn = document.getElementById('crash-start-btn');
+        const cashoutBtn = document.getElementById('crash-cashout-btn');
+
+        multUi.innerText = "1.00x";
+        multUi.classList.remove('crashed');
+        lineUi.style.width = "0%";
+        lineUi.style.bottom = "0%";
+        msg.innerText = "";
+
+        startBtn.style.display = "none";
+        cashoutBtn.style.display = "block";
+
+        const crashPoint = (1.05 + Math.random() * Math.random() * 8.5).toFixed(2);
+
+        this.crashLoop = setInterval(() => {
+          this.crashMult += 0.02 + (this.crashMult * 0.01);
+          multUi.innerText = this.crashMult.toFixed(2) + "x";
+
+          const progress = Math.min(100, ((this.crashMult - 1) / 5) * 100);
+          lineUi.style.width = progress + "%";
+          lineUi.style.bottom = (progress * 0.8) + "%";
+
+          if (this.crashMult >= parseFloat(crashPoint)) {
+            this.endCrash(true, crashPoint);
+          }
+        }, 80);
+      },
+
+      cashoutCrash() {
+        if (!this.isCrashRunning || this.isCashedOut) return;
+        this.isCashedOut = true;
+        const win = Math.floor(this.crashBet * this.crashMult);
+
+        if (state.stars !== Infinity) {
+          state.stars += win;
+          state.updateBalance();
+          state.save();
+        }
+
+        document.getElementById('crash-cashout-btn').style.display = "none";
+        document.getElementById('crash-start-btn').style.display = "block";
+
+        const msg = document.getElementById('crash-msg');
+        msg.innerText = `🎉 Вы забрали ${win} ⭐ (${this.crashMult.toFixed(2)}x)!`;
+        msg.style.color = "#10b981";
+
+        this.endCrash(false);
+      },
+
+      endCrash(isCrashed, point = 1.00) {
+        if (this.crashLoop) clearInterval(this.crashLoop);
+        this.isCrashRunning = false;
+
+        document.getElementById('crash-cashout-btn').style.display = "none";
+        document.getElementById('crash-start-btn').style.display = "block";
+
+        if (isCrashed && !this.isCashedOut) {
+          const multUi = document.getElementById('crash-mult-ui');
+          multUi.innerText = `CRASHED @ ${point}x`;
+          multUi.classList.add('crashed');
+
+          const msg = document.getElementById('crash-msg');
+          msg.innerText = "💥 Взрыв! Ставка сгорела.";
+          msg.style.color = "#ef4444";
+        }
+      }
+    };
+
+    /* ================= 🐍 ЗМЕЙКА ================= */
+    const snakeGame = {
+      canvas: null,
+      ctx: null,
+      grid: 14,
+      snake: [{x: 10, y: 10}],
+      dir: {x: 0, y: -1},
+      nextDir: {x: 0, y: -1},
+      food: {x: 5, y: 5},
+      score: 0,
+      interval: null,
+      isRunning: false,
+
+      init() {
+        this.canvas = document.getElementById('snakeCanvas');
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.reset();
+      },
+      reset() {
+        this.snake = [{x: 10, y: 10}, {x: 10, y: 11}, {x: 10, y: 12}];
+        this.dir = {x: 0, y: -1};
+        this.nextDir = {x: 0, y: -1};
+        this.score = 0;
+        this.spawnFood();
+        this.draw();
+      },
+      spawnFood() {
+        const cols = Math.floor(this.canvas.width / this.grid);
+        const rows = Math.floor(this.canvas.height / this.grid);
+        this.food = {
+          x: Math.floor(Math.random() * cols),
+          y: Math.floor(Math.random() * rows)
+        };
+      },
+      setDir(dx, dy) {
+        if (this.dir.x + dx !== 0 || this.dir.y + dy !== 0) {
+          this.nextDir = {x: dx, y: dy};
+        }
+      },
+      start() {
+        if (this.isRunning) return;
+        if (state.stars < 5 && state.stars !== Infinity) {
+          return alert('Нужно минимум 5 ⭐ для старта игры в Змейку!');
+        }
+        if (state.stars !== Infinity) {
+          state.stars -= 5;
+          state.updateBalance();
+          state.save();
+        }
+        this.reset();
+        this.isRunning = true;
+        this.interval = setInterval(() => this.update(), 130);
+      },
+      stop() {
+        if (this.interval) clearInterval(this.interval);
+        this.isRunning = false;
+      },
+      update() {
+        this.dir = this.nextDir;
+        const head = {x: this.snake[0].x + this.dir.x, y: this.snake[0].y + this.dir.y};
+        const cols = Math.floor(this.canvas.width / this.grid);
+        const rows = Math.floor(this.canvas.height / this.grid);
+
+        if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows) {
+          this.gameOver();
+          return;
+        }
+
+        for (let seg of this.snake) {
+          if (seg.x === head.x && seg.y === head.y) {
+            this.gameOver();
+            return;
+          }
+        }
+
         this.snake.unshift(head);
+
         if (head.x === this.food.x && head.y === this.food.y) {
-          this.score += 5; this.placeFood();
-        } else { this.snake.pop(); }
+          this.score += 1;
+          this.spawnFood();
+        } else {
+          this.snake.pop();
+        }
+
+        this.draw();
+      },
+      gameOver() {
+        this.stop();
+        const winStars = this.score * 3;
+        if (winStars > 0 && state.stars !== Infinity) {
+          state.stars += winStars;
+          state.updateBalance();
+          state.save();
+        }
+        alert(`💥 Игра окончена!\nСчёт: ${this.score}\nВыигрыш: ${winStars} ⭐`);
+      },
+      draw() {
+        if (!this.ctx) return;
+        this.ctx.fillStyle = '#0f172a';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Еда
+        this.ctx.fillStyle = '#fbbf24';
+        this.ctx.beginPath();
+        this.ctx.arc(this.food.x * this.grid + this.grid/2, this.food.y * this.grid + this.grid/2, this.grid/2 - 1, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Змейка
+        this.snake.forEach((seg, i) => {
+          this.ctx.fillStyle = i === 0 ? '#10b981' : '#059669';
+          this.ctx.fillRect(seg.x * this.grid + 1, seg.y * this.grid + 1, this.grid - 2, this.grid - 2);
+        });
+
+        // Счёт
+        this.ctx.fillStyle = '#94a3b8';
+        this.ctx.font = '12px sans-serif';
+        this.ctx.fillText(`Счёт: ${this.score}`, 8, 18);
+      }
+    };
+
+    /* ================= 🎡 НОВАЯ ИГРА: КОЛЕСО ФОРТУНЫ ================= */
+    const wheelGame = {
+      canvas: null,
+      ctx: null,
+      isSpinning: false,
+      angle: 0,
+      sectors: [
+        { label: "0x", mult: 0, color: "#ef4444" },
+        { label: "1.5x", mult: 1.5, color: "#3b82f6" },
+        { label: "0.5x", mult: 0.5, color: "#64748b" },
+        { label: "2x", mult: 2, color: "#10b981" },
+        { label: "+25⭐", bonus: 25, color: "#fbbf24" },
+        { label: "3x", mult: 3, color: "#8b5cf6" },
+        { label: "0x", mult: 0, color: "#ef4444" },
+        { label: "5x", mult: 5, color: "#f59e0b" }
+      ],
+      init() {
+        this.canvas = document.getElementById('wheelCanvas');
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
         this.draw();
       },
       draw() {
         if (!this.ctx) return;
-        this.ctx.fillStyle = '#0f172a'; this.ctx.fillRect(0,0,280,280);
-        this.ctx.fillStyle = '#ef4444'; this.ctx.beginPath(); this.ctx.arc(this.food.x*20+10, this.food.y*20+10, 8, 0, Math.PI*2); this.ctx.fill();
-        this.ctx.fillStyle = '#10b981';
-        this.snake.forEach((s, idx) => {
-          if(idx===0) this.ctx.fillStyle = '#059669'; else this.ctx.fillStyle = '#10b981';
-          this.ctx.fillRect(s.x*20+1, s.y*20+1, 18, 18);
-        });
+        const numSectors = this.sectors.length;
+        const arc = (Math.PI * 2) / numSectors;
+        const radius = this.canvas.width / 2;
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        for (let i = 0; i < numSectors; i++) {
+          const angle = this.angle + i * arc;
+          this.ctx.beginPath();
+          this.ctx.fillStyle = this.sectors[i].color;
+          this.ctx.moveTo(radius, radius);
+          this.ctx.arc(radius, radius, radius, angle, angle + arc);
+          this.ctx.lineTo(radius, radius);
+          this.ctx.fill();
+
+          // Текст
+          this.ctx.save();
+          this.ctx.translate(radius, radius);
+          this.ctx.rotate(angle + arc / 2);
+          this.ctx.textAlign = "right";
+          this.ctx.fillStyle = "#ffffff";
+          this.ctx.font = "bold 14px sans-serif";
+          this.ctx.fillText(this.sectors[i].label, radius - 15, 5);
+          this.ctx.restore();
+        }
+
+        // Центр колеса
+        this.ctx.beginPath();
+        this.ctx.fillStyle = "#1e293b";
+        this.ctx.arc(radius, radius, 25, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.strokeStyle = "#334155";
+        this.ctx.lineWidth = 3;
+        this.ctx.stroke();
+
+        this.ctx.fillStyle = "#3b82f6";
+        this.ctx.font = "bold 12px sans-serif";
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+        this.ctx.fillText("TG", radius, radius);
+      },
+      spin() {
+        if (this.isSpinning) return;
+        const betInput = document.getElementById('wheel-bet');
+        const bet = parseInt(betInput ? betInput.value : 10) || 10;
+        const msg = document.getElementById('wheel-msg');
+
+        if (state.stars < bet && state.stars !== Infinity) {
+          msg.innerText = "Недостаточно звёзд!";
+          msg.style.color = "#ef4444";
+          return;
+        }
+
+        if (state.stars !== Infinity) {
+          state.stars -= bet;
+          state.updateBalance();
+          state.save();
+        }
+
+        this.isSpinning = true;
+        msg.innerText = "Колесо крутится...";
+        msg.style.color = "#fbbf24";
+
+        const numSectors = this.sectors.length;
+        const arc = (Math.PI * 2) / numSectors;
+        
+        const targetSector = Math.floor(Math.random() * numSectors);
+        const extraRounds = 5 + Math.floor(Math.random() * 3);
+        const targetAngle = (1.5 * Math.PI) - ((targetSector + 0.5) * arc) + (extraRounds * Math.PI * 2);
+
+        const startAngle = this.angle % (Math.PI * 2);
+        const totalChange = targetAngle - startAngle;
+        const duration = 3000;
+        const startTime = performance.now();
+
+        const animate = (now) => {
+          const elapsed = now - startTime;
+          if (elapsed < duration) {
+            const progress = elapsed / duration;
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            this.angle = startAngle + totalChange * easeOut;
+            this.draw();
+            requestAnimationFrame(animate);
+          } else {
+            this.angle = targetAngle;
+            this.draw();
+            this.isSpinning = false;
+            
+            const winSec = this.sectors[targetSector];
+            let winAmount = 0;
+            if (winSec.bonus) {
+              winAmount = winSec.bonus;
+              msg.innerText = `🎉 Выигран бонус: +${winSec.bonus} ⭐!`;
+              msg.style.color = "#fbbf24";
+            } else {
+              winAmount = Math.floor(bet * winSec.mult);
+              if (winAmount > 0) {
+                msg.innerText = `🎉 Выиграно: ${winAmount} ⭐ (${winSec.label})!`;
+                msg.style.color = "#10b981";
+              } else {
+                msg.innerText = "💥 Увы! 0x — Попробуйте еще раз!";
+                msg.style.color = "#ef4444";
+              }
+            }
+
+            if (winAmount > 0 && state.stars !== Infinity) {
+              state.stars += winAmount;
+              state.updateBalance();
+              state.save();
+            }
+          }
+        };
+
+        requestAnimationFrame(animate);
       }
     };
 
-    /* ================= ФАРМ ================= */
+    /* ================= ⛏️ МАЙНЕР ================= */
     const miner = {
       tap(e) {
-        if (state.stars !== Infinity) { state.stars += 1; state.updateBalance(); state.save(); }
-        const f = document.createElement('div'); f.className = 'floating-text'; f.innerText = '+1 ⭐';
+        if (state.stars !== Infinity) {
+          state.stars += 1;
+          state.updateBalance();
+          state.save();
+        }
+
+        utils.playSound('send');
+
         const area = document.getElementById('tap-area');
         if (!area) return;
+
+        const floatText = document.createElement('div');
+        floatText.className = 'floating-text';
+        floatText.innerText = '+1 ⭐';
+
         const rect = area.getBoundingClientRect();
-        f.style.left = `${(e.touches?e.touches[0].clientX:e.clientX) - rect.left - 20}px`; f.style.top = `${(e.touches?e.touches[0].clientY:e.clientY) - rect.top - 20}px`;
-        area.appendChild(f);
-        setTimeout(() => f.remove(), 800);
+        const x = (e.clientX || (e.touches && e.touches[0].clientX) || (rect.left + rect.width / 2)) - rect.left;
+        const y = (e.clientY || (e.touches && e.touches[0].clientY) || (rect.top + rect.height / 2)) - rect.top;
+
+        floatText.style.left = `${x}px`;
+        floatText.style.top = `${y}px`;
+
+        area.appendChild(floatText);
+        setTimeout(() => {
+          if (floatText.parentNode) floatText.remove();
+        }, 800);
       }
     };
   </script>
