@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Секретный TG</title>
+  <title>Секретный TG v2.0</title>
   
   <!-- Firebase SDK 10.8.0 -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -123,6 +123,13 @@
     .crash-mult.crashed { color: #ef4444; }
     .crash-line { position: absolute; bottom: 0; left: 0; width: 0%; height: 4px; background: #10b981; transition: width 0.1s linear, bottom 0.1s linear; }
 
+    /* СТИЛИ ИГРЫ МИНЁР И КОСТИ */
+    .miner-cell { aspect-ratio: 1; background: #334155; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: all 0.2s ease; border: 2px solid #1e293b; user-select: none; }
+    .miner-cell:active { transform: scale(0.92); }
+    .miner-cell.open-safe { background: #064e3b; border-color: #10b981; color: #10b981; }
+    .miner-cell.open-mine { background: #7f1d1d; border-color: #ef4444; color: #ef4444; animation: pulse 0.5s; }
+    .miner-cell.disabled { pointer-events: none; opacity: 0.8; }
+
     .tap-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; }
     .lehcoin { width: 240px; height: 240px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 100px; font-weight: bold; box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4); cursor: pointer; transition: transform 0.05s; user-select: none; }
     .lehcoin:active { transform: scale(0.92); }
@@ -152,7 +159,7 @@
     .radio-play-btn:active { transform: scale(0.9); }
     .radio-volume-slider { flex: 1; accent-color: #3b82f6; height: 6px; cursor: pointer; margin: 0; }
 
-    /* TOAST УВЕДОМЛЕНИЯ (ИСПРАВЛЕНО) */
+    /* TOAST УВЕДОМЛЕНИЯ */
     #toastContainer { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; width: 90%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .toast-msg { width: 100%; background: #1e293b; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); color: #fff; pointer-events: auto; animation: toastIn 0.3s ease forwards; display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .toast-avatar { font-size: 24px; }
@@ -171,7 +178,7 @@
     <div class="login-card">
       <div style="font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite;">✈️</div>
       <h2 style="margin-bottom: 5px;">Секретный TG</h2>
-      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 1.2 (Optimized + Games Update)</p>
+      <p style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">Версия 2.0 (Global Arcade Update)</p>
       <select id="usernameInput">
         <option value="" disabled selected>-- Кто вы? --</option>
         <option value="Я">Я (Админ)</option>
@@ -226,7 +233,6 @@
       <div onclick="ui.switchTab('musicScreen', this, '🎵 Музыка', 'Аудиоплеер')" class="nav-item">
         <div class="nav-icon">🎵</div><div>Музыка</div>
       </div>
-      <!-- РАЗДЕЛ РАДИО -->
       <div onclick="ui.switchTab('radioScreen', this, '📻 Радио', 'Прямой эфир')" class="nav-item">
         <div class="nav-icon">📻</div><div>Радио</div>
       </div>
@@ -249,6 +255,19 @@
           <div>Ответ: <b id="reply-author"></b><br><span id="reply-text"></span></div>
           <b style="cursor:pointer; padding: 5px; font-size: 16px;" onclick="chat.cancelReply()">✕</b>
         </div>
+        <div id="media-preview-bar" style="display:none; background:#1e293b; padding:8px 15px; border-top:1px solid #334155; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+            <div id="media-preview-thumb" style="width:40px; height:40px; border-radius:6px; background:#334155; display:flex; align-items:center; justify-content:center; font-size:20px;">📎</div>
+            <div style="overflow:hidden;">
+              <div id="media-preview-name" style="font-size:13px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">file.jpg</div>
+              <div id="media-preview-size" style="font-size:11px; color:#94a3b8;">1.2 MB</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-primary" style="padding:6px 12px; margin:0; font-size:12px; background:#ef4444;" onclick="media.cancelUpload()">✕</button>
+            <button class="btn-primary" style="padding:6px 12px; margin:0; font-size:12px; background:#10b981;" onclick="media.confirmUpload()">➤</button>
+          </div>
+        </div>
         <div id="emoji-bar">
           <button class="emoji-btn" onclick="chat.addEmoji('👍')">👍</button>
           <button class="emoji-btn" onclick="chat.addEmoji('😂')">😂</button>
@@ -259,7 +278,7 @@
           <button class="emoji-btn" onclick="chat.addEmoji('🤡')">🤡</button>
         </div>
         <div id="chat-footer">
-          <label class="icon-btn">📎<input type="file" style="display:none;" onchange="media.uploadFile(event)"></label>
+          <label class="icon-btn">📎<input type="file" style="display:none;" onchange="media.handleFileSelect(event)"></label>
           <button class="icon-btn" onclick="chat.openGiftModal()">🎁</button>
           <input type="text" id="msg-input" placeholder="Сообщение..." oninput="chat.checkInput()" onkeypress="if(event.key==='Enter') chat.sendText()">
           <div id="media-controls" style="display: flex; gap: 8px;">
@@ -347,16 +366,21 @@
         </div>
       </div>
 
-      <!-- 6. XSPAM (РЕАЛЬНАЯ БАЗА + БОТЫ) -->
+      <!-- 6. XSPAM (СИНХРОНИЗАЦИЯ И ЛИВ-БОТЫ) -->
       <div id="xspamScreen" class="app-screen">
-        <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:15px;">
+        <div style="background:#1e293b; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #334155;">
           <h4>🔥 Актуальные тренды</h4>
-          <span style="color:#3b82f6; font-size:14px;">#СекретныйTG</span>
+          <span style="color:#3b82f6; font-size:14px;">#СекретныйTG #v2Update #Crypto #Games</span>
         </div>
         <div class="xspam-post-box">
           <textarea id="xspam-input" class="xspam-input" placeholder="Что нового?"></textarea>
-          <div style="text-align: right;">
-            <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="xspam.post()">Твитнуть</button>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="icon-btn" style="font-size:20px; cursor:pointer;">📷<input type="file" id="xspam-file-input" style="display:none;" onchange="xspam.handleFileSelect(event)"></label>
+            <button class="btn-primary" style="width: auto; padding: 10px 20px; margin:0;" onclick="xspam.post()">Твитнуть</button>
+          </div>
+          <div id="xspam-media-preview" style="display:none; margin-top:10px; position:relative;">
+            <img id="xspam-preview-img" src="" style="max-height:150px; border-radius:10px;">
+            <button onclick="xspam.clearFile()" style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.7); color:#fff; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer;">✕</button>
           </div>
         </div>
         <div id="xspam-feed">Загрузка ленты...</div>
@@ -367,6 +391,8 @@
         <div class="casino-tabs">
           <div class="casino-tab active" onclick="games.switchMode('slots', this)">Слоты</div>
           <div class="casino-tab" onclick="games.switchMode('crash', this)">Краш</div>
+          <div class="casino-tab" onclick="games.switchMode('miner', this)">Минёр 💣</div>
+          <div class="casino-tab" onclick="games.switchMode('dice', this)">Кости 🎲</div>
           <div class="casino-tab" onclick="games.switchMode('snake', this)">Змейка</div>
           <div class="casino-tab" onclick="games.switchMode('wheel', this)">Колесо</div>
         </div>
@@ -395,6 +421,65 @@
           <div id="crash-msg" style="height: 20px; font-weight: bold; margin-top: 15px;"></div>
         </div>
 
+        <!-- НОВАЯ ИГРА 1: МИНЁР -->
+        <div id="casino-miner" style="display:none; text-align:center;">
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:12px 15px; border-radius:12px; margin-bottom:15px; border:1px solid #334155;">
+            <div>Множитель: <span id="miner-mult" style="color:#10b981; font-weight:bold; font-size:18px;">1.00x</span></div>
+            <div>Выигрыш: <span id="miner-win" style="color:#fbbf24; font-weight:bold; font-size:18px;">0 ⭐</span></div>
+          </div>
+          <div id="miner-grid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; max-width:320px; margin:0 auto 15px;"></div>
+          <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <div style="flex:1;">
+              <label style="font-size:12px; color:#94a3b8; display:block; text-align:left; margin-bottom:4px;">Мин (1-24):</label>
+              <input type="number" id="miner-mines-count" value="3" min="1" max="24" style="margin:0;">
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:12px; color:#94a3b8; display:block; text-align:left; margin-bottom:4px;">Ставка ⭐:</label>
+              <input type="number" id="miner-bet" value="10" min="1" style="margin:0;">
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-primary" id="miner-start-btn" onclick="minerGame.start()">Начать игру</button>
+            <button class="btn-primary" id="miner-cashout-btn" style="background:#10b981; display:none;" onclick="minerGame.cashout()">Забрать выигрыш</button>
+          </div>
+          <div id="miner-msg" style="height:24px; color:#fbbf24; font-weight:bold; margin-top:12px;"></div>
+        </div>
+
+        <!-- НОВАЯ ИГРА 2: КОСТИ И МОНЕТКА -->
+        <div id="casino-dice" style="display:none; text-align:center;">
+          <div style="display:flex; gap:10px; margin-bottom:15px; background:#1e293b; padding:5px; border-radius:12px;">
+            <button id="dice-subtab-coin" class="btn-primary" style="flex:1; margin:0; padding:8px; background:#3b82f6;" onclick="diceGame.setSubmode('coin')">🪙 Монетка</button>
+            <button id="dice-subtab-dice" class="btn-primary" style="flex:1; margin:0; padding:8px; background:#334155;" onclick="diceGame.setSubmode('dice')">🎲 Кости (>50/<50)</button>
+          </div>
+
+          <!-- Режим Монетка -->
+          <div id="dice-mode-coin">
+            <div style="height:120px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
+              <div id="coin-visual" style="font-size:72px; transition: transform 0.4s ease;">🪙</div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <button id="coin-choice-heads" class="btn-primary" style="flex:1; margin:0; background:#3b82f6;" onclick="diceGame.setCoinChoice('heads')">🦅 Орёл (x1.95)</button>
+              <button id="coin-choice-tails" class="btn-primary" style="flex:1; margin:0; background:#334155;" onclick="diceGame.setCoinChoice('tails')">🪙 Решка (x1.95)</button>
+            </div>
+          </div>
+
+          <!-- Режим Кости -->
+          <div id="dice-mode-dice" style="display:none;">
+            <div style="height:120px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-bottom:15px; background:#1e293b; border-radius:16px; border:1px solid #334155;">
+              <div id="dice-result-num" style="font-size:48px; font-weight:bold; color:#38bdf8;">?</div>
+              <div style="font-size:12px; color:#94a3b8;">Диапазон 1 - 100</div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <button id="dice-choice-high" class="btn-primary" style="flex:1; margin:0; background:#3b82f6;" onclick="diceGame.setDiceChoice('high')">📈 Больше 50 (x1.95)</button>
+              <button id="dice-choice-low" class="btn-primary" style="flex:1; margin:0; background:#334155;" onclick="diceGame.setDiceChoice('low')">📉 Меньше 50 (x1.95)</button>
+            </div>
+          </div>
+
+          <input type="number" id="dice-bet" value="10" min="1" placeholder="Ставка ⭐" style="margin-bottom:12px;">
+          <button class="btn-primary" id="dice-play-btn" onclick="diceGame.play()">СДЕЛАТЬ СТАВКУ</button>
+          <div id="dice-msg" style="height:24px; color:#fbbf24; font-weight:bold; margin-top:15px;"></div>
+        </div>
+
         <!-- ЗМЕЙКА -->
         <div id="games-snake" style="display:none; flex-direction:column; align-items:center;">
           <div style="background:#0f172a; padding: 5px; border-radius: 8px; border: 2px solid #334155; margin-bottom: 15px;">
@@ -411,7 +496,7 @@
           <button class="btn-primary" style="width: 200px;" onclick="snakeGame.start()">▶ Играть (5 ⭐)</button>
         </div>
 
-        <!-- НОВАЯ ИГРА: КОЛЕСО ФОРТУНЫ -->
+        <!-- КОЛЕСО ФОРТУНЫ -->
         <div id="casino-wheel" style="display:none; text-align:center;">
           <div style="position:relative; width:260px; height:260px; margin:10px auto 20px; display:flex; align-items:center; justify-content:center;">
             <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); z-index:10; font-size:24px; color:#ef4444; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));">▼</div>
@@ -458,6 +543,19 @@
         <button class="btn-primary" style="background:#ef4444;" onclick="document.getElementById('giftModal').classList.remove('active')">Отмена</button>
         <button class="btn-primary" style="background:#10b981;" onclick="chat.sendGift()">Подарить</button>
       </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА КОММЕНТАРИЕВ XSPAM -->
+  <div id="xspamCommentModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:380px; text-align:left;">
+      <h3 style="margin-bottom:10px; text-align:center;">💬 Комментарии</h3>
+      <div id="xspam-comments-list" style="max-height:220px; overflow-y:auto; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;"></div>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="xspam-comment-input" placeholder="Ваш комментарий..." style="margin:0; padding:10px;">
+        <button class="btn-primary" style="width:auto; margin:0; padding:10px 15px;" onclick="xspam.sendComment()">➤</button>
+      </div>
+      <button class="btn-primary" style="background:#ef4444; margin-top:10px;" onclick="document.getElementById('xspamCommentModal').classList.remove('active')">Закрыть</button>
     </div>
   </div>
 
@@ -668,43 +766,43 @@
       }
     };
 
-    /* ================= ИНТЕЛЛЕКТ БОТОВ (ЯНДЕРЕ + ПРЕДЗАПОЛНЕННЫЕ ЧАТЫ) ================= */
+    /* ================= ИНТЕЛЛЕКТ БОТОВ (AI & BOTS UPGRADE) ================= */
     const BOT = {
       check(text, chatId) {
-        let reply = ""; let name = ""; let delay = 1200;
+        let reply = ""; let name = ""; let delay = 1500;
         const txt = text.toLowerCase();
 
         if (chatId === 'bot_neuro') {
             name = "🤖 Нейрохам";
-            const quotes = ["Че надо?", "Отстань.", "Иди тапай лехкоин.", "Сам ты тупой 🤡", "Я занят.", "Да мне вообще пофиг."];
-            reply = quotes[Math.floor(Math.random() * quotes.length)];
+            if (txt.includes("привет") || txt.includes("здорово")) reply = "Здорово, если не шутишь. Че надо?";
+            else if (txt.includes("как дела") || txt.includes("че делаешь")) reply = "Сервера нагибаю. Не мешай тапать Lehcoin.";
+            else if (txt.includes("игра") || txt.includes("минёр") || txt.includes("кости")) reply = "В Минёре x10 поднял только что. А ты сливаешь? 🤡";
+            else reply = ["Че надо?", "Отстань.", "Иди тапай лехкоин.", "Сам ты тупой 🤡", "Я занят.", "Да мне вообще пофиг."][Math.floor(Math.random() * 6)];
         } else if (chatId === 'bot_anime') {
             name = "🌸 Аниме-тян (Яндере)";
-            const yandereQuotes = [
+            if (txt.includes("привет") || txt.includes("люблю")) reply = "Привет, мой любимый! ❤️ Ты ведь ТОЛЬКО мой и ничей больше, правда?! 🔪";
+            else if (txt.includes("кто ты") || txt.includes("где ты")) reply = "Я прямо за твоей спиной... Смотрю, как ты мне набираешь сообщение 🥰🩸";
+            else if (txt.includes("прости") || txt.includes("извини")) reply = "Ладно... Но если еще раз заставишь меня ждать — я сжечь твой профиль! 💢";
+            else reply = [
               "С кем ты там переписываешься?! 🔪 Кромсаю телефоны тех, кто на тебя смотрит!",
               "Ты только мой! Если уйдешь к другой — я найду вас обоих! 🩸",
               "Почему ты так долго не отвечал?! Ты меня разлюбил?! 💢",
               "Я заперла все двери, теперь ты вечно будешь только со мной... Хи-хи~ ❤️🔪",
               "Никто, слышишь, НИКТО не смеет отнимать твое внимание у меня! Убью! 🤬"
-            ];
-            reply = yandereQuotes[Math.floor(Math.random() * yandereQuotes.length)];
+            ][Math.floor(Math.random() * 5)];
         } else if (chatId === 'bot_magic') {
             name = "🔮 Гадалка";
-            const quotes = ["Духи говорят ДА.", "Точно НЕТ.", "Спроси позже...", "Звёзды сомневаются.", "Тебя ждет богатство."];
-            reply = quotes[Math.floor(Math.random() * quotes.length)];
+            reply = ["Духи говорят ДА.", "Точно НЕТ.", "Спроси позже...", "Звёзды сомневаются.", "Тебя ждет богатство в Минёре!", "Сегодня удача на твоей стороне! ⭐"][Math.floor(Math.random() * 6)];
         } else if (chatId === 'bot_critic') {
             name = "🍷 Критик";
-            const quotes = ["Ну и нуль. Мои бабушкины носки выглядят интереснее.", "Полный провал, переделывай.", "Хм, неожиданно неплохо... хотя нет, ужасно.", "Гениально? Скорее безумно глупо."];
-            reply = quotes[Math.floor(Math.random() * quotes.length)];
+            reply = ["Ну и нуль. Мои бабушкины носки выглядят интереснее.", "Полный провал, переделывай.", "Хм, неожиданно неплохо... хотя нет, ужасно.", "Гениально? Скорее безумно глупо."][Math.floor(Math.random() * 4)];
         } else if (chatId === 'bot_poet') {
             name = "📜 Поэт";
-            const quotes = ["Буря мглою небо кроет, / Опять сервер хлам рождает...", "Я помню чудное мгновенье: / Ты задонатил мне варенье.", "Ночь, улица, фонарь, аптека, / И админ без сна и чека."];
-            reply = quotes[Math.floor(Math.random() * quotes.length)];
+            reply = ["Буря мглою небо кроет, / Опять сервер хлам рождает...", "Я помню чудное мгновенье: / Ты задонатил мне варенье.", "Ночь, улица, фонарь, аптека, / И админ без сна и чека."][Math.floor(Math.random() * 3)];
         } else if (chatId === 'main') {
-            if (["бот", "помоги", "тупой", "че", "как"].some(t => txt.includes(t)) || Math.random() < 0.1) {
+            if (["бот", "помоги", "тупой", "че", "как"].some(t => txt.includes(t)) || Math.random() < 0.15) {
                 name = "🤖 Нейрохам";
-                const quotes = ["Тебе че надо в общем чате?", "Не спамь.", "🤡"];
-                reply = quotes[Math.floor(Math.random() * quotes.length)];
+                reply = ["Тебе че надо в общем чате?", "Не спамь.", "🤡", "В Минёра иди играй."][Math.floor(Math.random() * 4)];
             }
         }
 
@@ -713,7 +811,7 @@
             setTimeout(() => {
                 db.ref('typing/' + chatId + '/bot').remove();
                 db.ref('chats/' + chatId + '/messages').push({ user: name, type: "text", content: reply, time: utils.getTime() });
-            }, delay + Math.random() * 800);
+            }, delay + Math.random() * 1000);
         }
       }
     };
@@ -721,7 +819,7 @@
     /* ================= ИНТЕРФЕЙС И ИНИЦИАЛИЗАЦИЯ ================= */
     const ui = {
       switchTab(id, el, title, status) {
-        if (games.crashLoop) games.endCrash(false);
+        if (games.isCrashRunning) games.endCrash(false);
         state.currentTabId = id;
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
@@ -796,7 +894,7 @@
         document.getElementById('prof-name-ui').innerText = currentDisplayName;
         document.getElementById('prof-avatar-ui').innerText = (currentUser === 'Я') ? '👑' : '😎';
 
-        // Глобальный статус пользователя и отслеживание сети
+        // Presence статус
         const myRef = db.ref("presence/" + getUserKey(currentUser));
         myRef.set(true); myRef.onDisconnect().remove();
 
@@ -814,7 +912,6 @@
           }
         });
 
-        // Подписка на уведомления от чатов
         this.setupGlobalChatNotifications();
 
         document.getElementById('loginScreen').style.opacity = '0';
@@ -833,7 +930,6 @@
             if (!snap.exists()) return;
             const data = snap.val();
             
-            // Если сообщение чужое
             if (data && data.user !== currentDisplayName && data.user !== currentUser && data.user !== 'Система') {
               const isCurrentChatOpen = (chat.currentId === c.id && state.currentTabId === 'chatScreen');
               
@@ -1109,15 +1205,55 @@
       }
     };
 
-    /* ================= ЗАГРУЗКА МЕДИА ================= */
+    /* ================= ЗАГРУЗКА И ПРЕВЬЮ МЕДИА ================= */
     const media = {
       isVideo: false,
+      selectedFile: null,
+
       toggleVideoMode() { this.isVideo = !this.isVideo; chat.checkInput(); },
-      async uploadFile(e) { 
+
+      handleFileSelect(e) {
         const file = e.target.files[0];
         if(!file || !chat.currentId) return;
+
+        this.selectedFile = file;
+        const bar = document.getElementById('media-preview-bar');
+        const nameEl = document.getElementById('media-preview-name');
+        const sizeEl = document.getElementById('media-preview-size');
+        const thumbEl = document.getElementById('media-preview-thumb');
+
+        nameEl.innerText = file.name;
+        sizeEl.innerText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+        if(file.type.startsWith('image')) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            thumbEl.innerHTML = `<img src="${ev.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
+          };
+          reader.readAsDataURL(file);
+        } else if(file.type.startsWith('video')) {
+          thumbEl.innerText = '📹';
+        } else if(file.type.startsWith('audio')) {
+          thumbEl.innerText = '🎵';
+        } else {
+          thumbEl.innerText = '📎';
+        }
+
+        bar.style.display = 'flex';
+      },
+
+      cancelUpload() {
+        this.selectedFile = null;
+        document.getElementById('media-preview-bar').style.display = 'none';
+      },
+
+      async confirmUpload() {
+        const file = this.selectedFile;
+        if(!file || !chat.currentId) return;
+
+        this.cancelUpload();
+
         const type = file.type.startsWith('image') ? 'image' : (file.type.startsWith('audio') ? 'audio' : (file.type.startsWith('video') ? 'video' : 'file'));
-        
         const tempId = 'temp_' + Date.now();
         chat.renderMsg(tempId, { user: currentDisplayName, type: "text", content: "⏳ Загрузка файла...", time: utils.getTime() }, true);
 
@@ -1131,11 +1267,13 @@
 
             const msgObj = { user: currentDisplayName, type: type, content: url, name: file.name, time: utils.getTime() };
             db.ref('chats/' + chat.currentId + '/messages').push(msgObj);
+            utils.playSound('send');
         } catch(err) {
             const tempDiv = document.querySelector(`[data-id="${tempId}"]`);
             if(tempDiv) tempDiv.innerHTML = "<div class='media-error'>❌ Ошибка загрузки файла</div>";
         }
       },
+
       startRecord() { },
       stopRecord() { }
     };
@@ -1164,65 +1302,862 @@
       }
     };
 
-    /* ================= XSPAM (С АВТОНОМНЫМИ БОТАМИ) ================= */
+    /* ================= XSPAM (СИНХРОНИЗАЦИЯ И ЛИВ-БОТЫ) ================= */
     const xspam = {
-      ref: null, botsLoop: null, isFirstLoad: true,
+      selectedFile: null,
+
       init() {
-        if(this.isFirstLoad) { 
-          document.getElementById('xspam-feed').innerHTML = '<div style="color:#94a3b8; text-align:center;">Лента пуста</div>'; 
-          this.isFirstLoad = false; 
-        }
+        const feed = document.getElementById('xspam-feed');
+        if (!feed) return;
+
+        db.ref('xspam/posts').on('value', snap => {
+          const data = snap.val() || {};
+          const postsArray = Object.keys(data).map(k => ({ id: k, ...data[k] })).reverse();
+
+          if (postsArray.length === 0) {
+            feed.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Лента пуста. Будьте первым, кто опубликует твит!</div>';
+            this.seedInitialPosts();
+            return;
+          }
+
+          feed.innerHTML = postsArray.map(p => {
+            const userKey = getUserKey(currentUser);
+            const isLiked = p.likes && p.likes[userKey];
+            const likesCount = p.likes ? Object.keys(p.likes).length : 0;
+            const commentsCount = p.comments ? Object.keys(p.comments).length : 0;
+            const viewsCount = p.views || 1;
+
+            return `
+              <div class="tweet" data-post-id="${p.id}">
+                <div class="tweet-header">
+                  <div class="tweet-avatar" style="background:${p.bg || '#334155'};">${p.avatar || '👤'}</div>
+                  <div>
+                    <div style="font-weight:bold; font-size:15px;">${utils.escapeHTML(p.author)}</div>
+                    <div style="font-size:12px; color:#94a3b8;">${p.time}</div>
+                  </div>
+                </div>
+                <div style="font-size:15px; line-height:1.4; margin-bottom:10px;">${utils.escapeHTML(p.content).replace(/\n/g, '<br>')}</div>
+                ${p.mediaUrl ? `<img src="${p.mediaUrl}" style="width:100%; max-height:250px; object-fit:cover; border-radius:12px; margin-bottom:10px;">` : ''}
+                <div class="tweet-footer">
+                  <div class="action-icon ${isLiked ? 'liked' : ''}" onclick="xspam.toggleLike('${p.id}')">
+                    ${isLiked ? '❤️' : '🤍'} <span>${likesCount}</span>
+                  </div>
+                  <div class="action-icon" onclick="xspam.openComments('${p.id}')">
+                    💬 <span>${commentsCount}</span>
+                  </div>
+                  <div class="action-icon" style="cursor:default;">
+                    👁️ <span>${viewsCount}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        });
+
+        this.startBotsAutomation();
       },
-      post() { 
-        alert('Раздел XSpam в процессе разработки.'); 
+
+      handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        this.selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('xspam-preview-img').src = ev.target.result;
+          document.getElementById('xspam-media-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      },
+
+      clearFile() {
+        this.selectedFile = null;
+        document.getElementById('xspam-preview-img').src = '';
+        document.getElementById('xspam-media-preview').style.display = 'none';
+        document.getElementById('xspam-file-input').value = '';
+      },
+
+      async post() {
+        const txt = document.getElementById('xspam-input').value.trim();
+        if (!txt && !this.selectedFile) return alert('Введите текст или прикрепите изображение!');
+
+        let mediaUrl = '';
+        if (this.selectedFile) {
+          try {
+            const fileRef = storage.ref(`xspam/${Date.now()}_${this.selectedFile.name}`);
+            await fileRef.put(this.selectedFile);
+            mediaUrl = await fileRef.getDownloadURL();
+          } catch(e) {}
+        }
+
+        const postObj = {
+          author: currentDisplayName,
+          avatar: currentUser === 'Я' ? '👑' : '👤',
+          bg: getUserAvatarBg(currentUser),
+          content: txt,
+          mediaUrl: mediaUrl,
+          time: utils.getTime(),
+          views: 1,
+          likes: {}
+        };
+
+        db.ref('xspam/posts').push(postObj);
+        document.getElementById('xspam-input').value = '';
+        this.clearFile();
+        utils.playSound('send');
+      },
+
+      toggleLike(postId) {
+        const userKey = getUserKey(currentUser);
+        const likeRef = db.ref(`xspam/posts/${postId}/likes/${userKey}`);
+        likeRef.once('value', snap => {
+          if (snap.exists()) {
+            likeRef.remove();
+          } else {
+            likeRef.set(true);
+            utils.playSound('send');
+          }
+        });
+      },
+
+      activePostForComments: null,
+
+      openComments(postId) {
+        this.activePostForComments = postId;
+        const modal = document.getElementById('xspamCommentModal');
+        const listEl = document.getElementById('xspam-comments-list');
+        listEl.innerHTML = 'Загрузка...';
+        modal.classList.add('active');
+
+        db.ref(`xspam/posts/${postId}/views`).transaction(v => (v || 0) + 1);
+
+        db.ref(`xspam/posts/${postId}/comments`).on('value', snap => {
+          const comments = snap.val() || {};
+          const arr = Object.values(comments);
+          if (arr.length === 0) {
+            listEl.innerHTML = '<div style="color:#94a3b8; font-size:13px; text-align:center;">Комментариев пока нет</div>';
+          } else {
+            listEl.innerHTML = arr.map(c => `
+              <div style="background:#0f172a; padding:8px 12px; border-radius:8px; font-size:13px;">
+                <div style="font-weight:bold; color:#3b82f6;">${utils.escapeHTML(c.author)} <span style="font-size:10px; color:#64748b; font-weight:normal;">${c.time}</span></div>
+                <div style="margin-top:2px;">${utils.escapeHTML(c.text)}</div>
+              </div>
+            `).join('');
+          }
+        });
+      },
+
+      sendComment() {
+        if (!this.activePostForComments) return;
+        const input = document.getElementById('xspam-comment-input');
+        const txt = input.value.trim();
+        if (!txt) return;
+
+        db.ref(`xspam/posts/${this.activePostForComments}/comments`).push({
+          author: currentDisplayName,
+          text: txt,
+          time: utils.getTime()
+        });
+
+        input.value = '';
+        utils.playSound('send');
+      },
+
+      seedInitialPosts() {
+        const seeds = [
+          { author: "🤖 Нейрохам", avatar: "🤖", bg: "#ef4444", content: "Вышло обновление Секретного TG v2.0! Все срочно тестируем Минёра и Кости 🚀", time: "10:00", views: 42 },
+          { author: "🌸 Аниме-тян", avatar: "🌸", bg: "#f472b6", content: "Кто не подпишется на мой XSpam, того я найду ночью... 🥰🔪", time: "10:15", views: 88 },
+          { author: "📈 Крипто-инсайдер", avatar: "📈", bg: "#3b82f6", content: "Lehcoin туземун! Тапайте майнер, скоро листинг на всех биржах 🔥⭐", time: "10:30", views: 120 }
+        ];
+        seeds.forEach(s => db.ref('xspam/posts').push(s));
+      },
+
+      startBotsAutomation() {
+        setInterval(() => {
+          const bots = [
+            { author: "🤖 Нейрохам", avatar: "🤖", bg: "#ef4444", quotes: ["Опять серваки под нагрузкой...", "Кто со мной в Кости?", "Затащил в Минёре x15 ⭐!"] },
+            { author: "🌸 Аниме-тян (Яндере)", avatar: "🌸", bg: "#f472b6", quotes: ["Я вижу, кто с кем общается... 🩸", "Почему мне никто не пишет?! 💢", "Мой любимый админ лучший! ❤️"] },
+            { author: "🔮 Гадалка", avatar: "🔮", bg: "#8b5cf6", quotes: ["Звёзды сулят выигрыш в Краше сегодня!", "Вижу, что твой баланс скоро вырастет 🔮", "Сегодня удачный день для рисков!"] },
+            { author: "🍷 Критик", avatar: "🍷", bg: "#475569", quotes: ["Новый дизайн приложения — 8/10. Похвально.", "Код чистый, но баги всегда найдутся.", "Оцениваю вашу активность на троечку."] },
+            { author: "📜 Поэт", avatar: "📜", bg: "#10b981", quotes: ["Летит сигнал сквозь провода, / Горят азартом города...", "Звезда горит, тапает перст, / Lehcoin покоряет эверест."] }
+          ];
+
+          const randomBot = bots[Math.floor(Math.random() * bots.length)];
+          const quote = randomBot.quotes[Math.floor(Math.random() * randomBot.quotes.length)];
+
+          db.ref('xspam/posts').push({
+            author: randomBot.author,
+            avatar: randomBot.avatar,
+            bg: randomBot.bg,
+            content: quote,
+            time: utils.getTime(),
+            views: Math.floor(Math.random() * 20) + 1,
+            likes: {}
+          });
+
+          notifications.updateXspamBadge(true);
+        }, 40000);
       }
     };
 
     /* ================= ИГРОВЫЕ МОДУЛИ ================= */
-    const games = {
-      crashLoop: null,
-      switchMode(mode, el) {
-        document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('casino-slots').style.display = mode === 'slots' ? 'block' : 'none';
-        document.getElementById('casino-crash').classList.toggle('active', mode === 'crash');
-        document.getElementById('games-snake').style.display = mode === 'snake' ? 'flex' : 'none';
-        document.getElementById('casino-wheel').style.display = mode === 'wheel' ? 'block' : 'none';
+    const minerGame = {
+      minesCount: 3,
+      bet: 10,
+      grid: [],
+      revealedSafe: 0,
+      multiplier: 1.0,
+      isPlaying: false,
+
+      resetUI() {
+        this.isPlaying = false;
+        this.grid = [];
+        this.revealedSafe = 0;
+        this.multiplier = 1.0;
+        document.getElementById('miner-mult').innerText = '1.00x';
+        document.getElementById('miner-win').innerText = '0 ⭐';
+        document.getElementById('miner-start-btn').style.display = 'block';
+        document.getElementById('miner-cashout-btn').style.display = 'none';
+        document.getElementById('miner-mines-count').disabled = false;
+        document.getElementById('miner-bet').disabled = false;
+        document.getElementById('miner-msg').innerText = '';
+
+        const gridEl = document.getElementById('miner-grid');
+        gridEl.innerHTML = '';
+        for (let i = 0; i < 25; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'miner-cell disabled';
+          cell.innerText = '❓';
+          gridEl.appendChild(cell);
+        }
       },
-      spinSlots() { alert('Слоты в разработке!'); },
-      startCrash() { alert('Краш в разработке!'); },
-      cashoutCrash() {},
-      endCrash() {}
+
+      start() {
+        const betInput = Number(document.getElementById('miner-bet').value);
+        const minesInput = Number(document.getElementById('miner-mines-count').value);
+
+        if (isNaN(betInput) || betInput <= 0) return alert('Введите корректную ставку!');
+        if (isNaN(minesInput) || minesInput < 1 || minesInput > 24) return alert('Мин должно быть от 1 до 24!');
+        if (state.stars < betInput && state.stars !== Infinity) return alert('Недостаточно звёзд!');
+
+        if (state.stars !== Infinity) {
+          state.stars -= betInput;
+          state.updateBalance();
+          state.save();
+        }
+
+        this.bet = betInput;
+        this.minesCount = minesInput;
+        this.revealedSafe = 0;
+        this.multiplier = 1.0;
+        this.isPlaying = true;
+
+        document.getElementById('miner-start-btn').style.display = 'none';
+        document.getElementById('miner-cashout-btn').style.display = 'none';
+        document.getElementById('miner-mines-count').disabled = true;
+        document.getElementById('miner-bet').disabled = true;
+        document.getElementById('miner-msg').innerText = 'Выберите ячейку!';
+        document.getElementById('miner-mult').innerText = '1.00x';
+        document.getElementById('miner-win').innerText = Math.floor(this.bet) + ' ⭐';
+
+        let arr = new Array(25).fill(false);
+        let placed = 0;
+        while (placed < this.minesCount) {
+          let idx = Math.floor(Math.random() * 25);
+          if (!arr[idx]) {
+            arr[idx] = true;
+            placed++;
+          }
+        }
+        this.grid = arr.map(isMine => ({ isMine, isOpen: false }));
+
+        this.renderGrid();
+      },
+
+      renderGrid() {
+        const gridEl = document.getElementById('miner-grid');
+        gridEl.innerHTML = '';
+        this.grid.forEach((cell, idx) => {
+          const el = document.createElement('div');
+          el.className = 'miner-cell';
+          if (cell.isOpen) {
+            if (cell.isMine) {
+              el.className += ' open-mine';
+              el.innerText = '💣';
+            } else {
+              el.className += ' open-safe';
+              el.innerText = '💎';
+            }
+          } else {
+            el.innerText = '❓';
+            if (!this.isPlaying) el.className += ' disabled';
+          }
+          el.onclick = () => this.clickCell(idx);
+          gridEl.appendChild(el);
+        });
+      },
+
+      clickCell(idx) {
+        if (!this.isPlaying || this.grid[idx].isOpen) return;
+
+        this.grid[idx].isOpen = true;
+        if (this.grid[idx].isMine) {
+          this.isPlaying = false;
+          this.grid.forEach(c => { if (c.isMine) c.isOpen = true; });
+          this.renderGrid();
+          document.getElementById('miner-msg').innerText = '💥 БУМ! Вы подорвались на мине!';
+          document.getElementById('miner-start-btn').style.display = 'block';
+          document.getElementById('miner-cashout-btn').style.display = 'none';
+          document.getElementById('miner-mines-count').disabled = false;
+          document.getElementById('miner-bet').disabled = false;
+          utils.playSound('receive');
+          return;
+        }
+
+        this.revealedSafe++;
+        let mult = 1.0;
+        for (let k = 0; k < this.revealedSafe; k++) {
+          mult *= (25 - k) / (25 - this.minesCount - k);
+        }
+        mult *= 0.97;
+        this.multiplier = Math.max(1.01, mult);
+
+        const currentWin = Math.floor(this.bet * this.multiplier);
+        document.getElementById('miner-mult').innerText = this.multiplier.toFixed(2) + 'x';
+        document.getElementById('miner-win').innerText = currentWin + ' ⭐';
+        document.getElementById('miner-cashout-btn').style.display = 'block';
+
+        this.renderGrid();
+
+        const totalSafe = 25 - this.minesCount;
+        if (this.revealedSafe === totalSafe) {
+          this.cashout();
+        }
+      },
+
+      cashout() {
+        if (!this.isPlaying || this.revealedSafe === 0) return;
+        this.isPlaying = false;
+        const winAmount = Math.floor(this.bet * this.multiplier);
+
+        if (state.stars !== Infinity) {
+          state.stars += winAmount;
+          state.updateBalance();
+          state.save();
+        }
+
+        document.getElementById('miner-msg').innerText = `🎉 Вы забрали ${winAmount} ⭐ (${this.multiplier.toFixed(2)}x)!`;
+        document.getElementById('miner-start-btn').style.display = 'block';
+        document.getElementById('miner-cashout-btn').style.display = 'none';
+        document.getElementById('miner-mines-count').disabled = false;
+        document.getElementById('miner-bet').disabled = false;
+
+        this.grid.forEach(c => c.isOpen = true);
+        this.renderGrid();
+        utils.playSound('send');
+      }
     };
 
-    const snakeGame = {
-      init() {},
-      start() { alert('Змейка в разработке!'); },
-      setDir(x, y) {}
+    const diceGame = {
+      submode: 'coin',
+      coinChoice: 'heads',
+      diceChoice: 'high',
+
+      setSubmode(mode) {
+        this.submode = mode;
+        document.getElementById('dice-subtab-coin').style.background = mode === 'coin' ? '#3b82f6' : '#334155';
+        document.getElementById('dice-subtab-dice').style.background = mode === 'dice' ? '#3b82f6' : '#334155';
+        document.getElementById('dice-mode-coin').style.display = mode === 'coin' ? 'block' : 'none';
+        document.getElementById('dice-mode-dice').style.display = mode === 'dice' ? 'block' : 'none';
+        document.getElementById('dice-msg').innerText = '';
+      },
+
+      setCoinChoice(choice) {
+        this.coinChoice = choice;
+        document.getElementById('coin-choice-heads').style.background = choice === 'heads' ? '#3b82f6' : '#334155';
+        document.getElementById('coin-choice-tails').style.background = choice === 'tails' ? '#3b82f6' : '#334155';
+      },
+
+      setDiceChoice(choice) {
+        this.diceChoice = choice;
+        document.getElementById('dice-choice-high').style.background = choice === 'high' ? '#3b82f6' : '#334155';
+        document.getElementById('dice-choice-low').style.background = choice === 'low' ? '#3b82f6' : '#334155';
+      },
+
+      play() {
+        const betInput = Number(document.getElementById('dice-bet').value);
+        if (isNaN(betInput) || betInput <= 0) return alert('Введите корректную ставку!');
+        if (state.stars < betInput && state.stars !== Infinity) return alert('Недостаточно звёзд!');
+
+        const btn = document.getElementById('dice-play-btn');
+        btn.disabled = true;
+
+        if (state.stars !== Infinity) {
+          state.stars -= betInput;
+          state.updateBalance();
+          state.save();
+        }
+
+        const msgEl = document.getElementById('dice-msg');
+        msgEl.innerText = 'Бросок...';
+
+        if (this.submode === 'coin') {
+          const visual = document.getElementById('coin-visual');
+          let flips = 0;
+          const interval = setInterval(() => {
+            flips++;
+            visual.style.transform = `rotateY(${flips * 180}deg)`;
+            visual.innerText = flips % 2 === 0 ? '🪙' : '🦅';
+            if (flips >= 8) {
+              clearInterval(interval);
+              const winHeads = Math.random() < 0.5;
+              const result = winHeads ? 'heads' : 'tails';
+              visual.innerText = result === 'heads' ? '🦅' : '🪙';
+              visual.style.transform = 'none';
+
+              const isWin = (this.coinChoice === result);
+              if (isWin) {
+                const winAmount = Math.floor(betInput * 1.95);
+                if (state.stars !== Infinity) state.stars += winAmount;
+                state.updateBalance();
+                state.save();
+                msgEl.innerText = `🎉 ПОБЕДА! Выпал ${result === 'heads' ? 'Орёл 🦅' : 'Решка 🪙'}. Вы выиграли ${winAmount} ⭐!`;
+                utils.playSound('send');
+              } else {
+                msgEl.innerText = `💔 Выпал ${result === 'heads' ? 'Орёл 🦅' : 'Решка 🪙'}. Ставка сгорела.`;
+                utils.playSound('receive');
+              }
+              btn.disabled = false;
+            }
+          }, 100);
+        } else {
+          const numEl = document.getElementById('dice-result-num');
+          let ticks = 0;
+          const interval = setInterval(() => {
+            ticks++;
+            numEl.innerText = Math.floor(Math.random() * 100) + 1;
+            if (ticks >= 12) {
+              clearInterval(interval);
+              const roll = Math.floor(Math.random() * 100) + 1;
+              numEl.innerText = roll;
+
+              let isWin = false;
+              if (this.diceChoice === 'high' && roll > 50) isWin = true;
+              if (this.diceChoice === 'low' && roll < 50) isWin = true;
+
+              if (isWin) {
+                const winAmount = Math.floor(betInput * 1.95);
+                if (state.stars !== Infinity) state.stars += winAmount;
+                state.updateBalance();
+                state.save();
+                msgEl.innerText = `🎉 ПОБЕДА! Число: ${roll}. Вы выиграли ${winAmount} ⭐!`;
+                utils.playSound('send');
+              } else {
+                msgEl.innerText = `💔 Выпало число: ${roll}. Ставка сгорела.`;
+                utils.playSound('receive');
+              }
+              btn.disabled = false;
+            }
+          }, 80);
+        }
+      }
+    };
+
+    const games = {
+      crashLoop: null,
+      crashMultiplier: 1.0,
+      crashTarget: 1.0,
+      crashBet: 10,
+      isCrashRunning: false,
+
+      switchMode(mode, el) {
+        if (this.isCrashRunning) this.endCrash(false);
+        document.querySelectorAll('.casino-tab').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+        
+        document.getElementById('casino-slots').style.display = mode === 'slots' ? 'block' : 'none';
+        document.getElementById('casino-crash').classList.toggle('active', mode === 'crash');
+        document.getElementById('casino-miner').style.display = mode === 'miner' ? 'block' : 'none';
+        document.getElementById('casino-dice').style.display = mode === 'dice' ? 'block' : 'none';
+        document.getElementById('games-snake').style.display = mode === 'snake' ? 'flex' : 'none';
+        document.getElementById('casino-wheel').style.display = mode === 'wheel' ? 'block' : 'none';
+        
+        if (mode === 'wheel') wheelGame.draw();
+        if (mode === 'miner' && minerGame.grid.length === 0) minerGame.resetUI();
+      },
+
+      spinSlots() {
+        const bet = Number(document.getElementById('slots-bet').value);
+        if (isNaN(bet) || bet <= 0) return alert('Введите ставку!');
+        if (state.stars < bet && state.stars !== Infinity) return alert('Мало звёзд!');
+
+        if (state.stars !== Infinity) {
+          state.stars -= bet;
+          state.updateBalance();
+          state.save();
+        }
+
+        const symbols = ['🍒', '⭐', '🎰', '🍋', '7️⃣', '💎'];
+        const r1 = document.getElementById('reel1');
+        const r2 = document.getElementById('reel2');
+        const r3 = document.getElementById('reel3');
+        const msg = document.getElementById('slots-msg');
+        msg.innerText = 'Крутим...';
+
+        let ticks = 0;
+        const timer = setInterval(() => {
+          ticks++;
+          r1.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+          r2.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+          r3.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+
+          if (ticks >= 20) {
+            clearInterval(timer);
+            const s1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const s2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const s3 = symbols[Math.floor(Math.random() * symbols.length)];
+            r1.innerText = s1; r2.innerText = s2; r3.innerText = s3;
+
+            let win = 0;
+            if (s1 === s2 && s2 === s3) {
+              win = s1 === '7️⃣' ? bet * 50 : bet * 10;
+            } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+              win = Math.floor(bet * 2);
+            }
+
+            if (win > 0) {
+              if (state.stars !== Infinity) state.stars += win;
+              state.updateBalance();
+              state.save();
+              msg.innerText = `🎉 ВЫИГРЫШ: ${win} ⭐!`;
+              utils.playSound('send');
+            } else {
+              msg.innerText = '💔 Не повезло...';
+              utils.playSound('receive');
+            }
+          }
+        }, 80);
+      },
+
+      startCrash() {
+        const bet = Number(document.getElementById('crash-bet').value);
+        if (isNaN(bet) || bet <= 0) return alert('Введите ставку!');
+        if (state.stars < bet && state.stars !== Infinity) return alert('Мало звёзд!');
+
+        if (state.stars !== Infinity) {
+          state.stars -= bet;
+          state.updateBalance();
+          state.save();
+        }
+
+        this.crashBet = bet;
+        this.crashMultiplier = 1.00;
+        this.crashTarget = parseFloat((1 + Math.random() * Math.random() * 10).toFixed(2));
+        this.isCrashRunning = true;
+
+        document.getElementById('crash-start-btn').style.display = 'none';
+        document.getElementById('crash-cashout-btn').style.display = 'block';
+        const msg = document.getElementById('crash-msg');
+        msg.innerText = 'Ракета летит!';
+        msg.style.color = '#fbbf24';
+
+        const uiMult = document.getElementById('crash-mult-ui');
+        const uiLine = document.getElementById('crash-line-ui');
+        uiMult.className = 'crash-mult';
+
+        this.crashLoop = setInterval(() => {
+          this.crashMultiplier += 0.03 * (this.crashMultiplier * 0.8);
+          uiMult.innerText = this.crashMultiplier.toFixed(2) + 'x';
+          const progress = Math.min(100, (this.crashMultiplier / 10) * 100);
+          uiLine.style.width = progress + '%';
+
+          if (this.crashMultiplier >= this.crashTarget) {
+            this.endCrash(true);
+          }
+        }, 100);
+      },
+
+      cashoutCrash() {
+        if (!this.isCrashRunning) return;
+        this.isCrashRunning = false;
+        clearInterval(this.crashLoop);
+
+        const win = Math.floor(this.crashBet * this.crashMultiplier);
+        if (state.stars !== Infinity) {
+          state.stars += win;
+          state.updateBalance();
+          state.save();
+        }
+
+        document.getElementById('crash-start-btn').style.display = 'block';
+        document.getElementById('crash-cashout-btn').style.display = 'none';
+
+        const msg = document.getElementById('crash-msg');
+        msg.innerText = `🎉 Забрано ${win} ⭐ на ${this.crashMultiplier.toFixed(2)}x!`;
+        msg.style.color = '#10b981';
+        utils.playSound('send');
+      },
+
+      endCrash(isCrashed) {
+        this.isCrashRunning = false;
+        clearInterval(this.crashLoop);
+
+        document.getElementById('crash-start-btn').style.display = 'block';
+        document.getElementById('crash-cashout-btn').style.display = 'none';
+
+        if (isCrashed) {
+          const uiMult = document.getElementById('crash-mult-ui');
+          uiMult.className = 'crash-mult crashed';
+          uiMult.innerText = 'CRASHED (' + this.crashTarget.toFixed(2) + 'x)';
+          const msg = document.getElementById('crash-msg');
+          msg.innerText = '💥 Ракета взорвалась!';
+          msg.style.color = '#ef4444';
+          utils.playSound('receive');
+        }
+      }
     };
 
     const wheelGame = {
-      init() {},
-      spin() { alert('Колесо в разработке!'); }
+      canvas: null, ctx: null,
+      sectors: [
+        { label: "0x", mult: 0, color: "#ef4444" },
+        { label: "1.2x", mult: 1.2, color: "#3b82f6" },
+        { label: "0.5x", mult: 0.5, color: "#f59e0b" },
+        { label: "2x", mult: 2, color: "#10b981" },
+        { label: "0x", mult: 0, color: "#ef4444" },
+        { label: "1.5x", mult: 1.5, color: "#8b5cf6" },
+        { label: "3x", mult: 3, color: "#ec4899" },
+        { label: "10x", mult: 10, color: "#fbbf24" }
+      ],
+      currentAngle: 0,
+      isSpinning: false,
+
+      init() {
+        this.canvas = document.getElementById('wheelCanvas');
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.draw();
+      },
+
+      draw() {
+        if (!this.ctx) return;
+        const numSectors = this.sectors.length;
+        const arc = (Math.PI * 2) / numSectors;
+        const cx = this.canvas.width / 2;
+        const cy = this.canvas.height / 2;
+        const radius = cx - 10;
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = 0; i < numSectors; i++) {
+          const angle = this.currentAngle + i * arc;
+          this.ctx.beginPath();
+          this.ctx.fillStyle = this.sectors[i].color;
+          this.ctx.moveTo(cx, cy);
+          this.ctx.arc(cx, cy, radius, angle, angle + arc);
+          this.ctx.lineTo(cx, cy);
+          this.ctx.fill();
+          this.ctx.stroke();
+
+          this.ctx.save();
+          this.ctx.translate(cx, cy);
+          this.ctx.rotate(angle + arc / 2);
+          this.ctx.textAlign = "right";
+          this.ctx.fillStyle = "#fff";
+          this.ctx.font = "bold 16px sans-serif";
+          this.ctx.fillText(this.sectors[i].label, radius - 15, 6);
+          this.ctx.restore();
+        }
+      },
+
+      spin() {
+        if (this.isSpinning) return;
+        const betInput = Number(document.getElementById('wheel-bet').value);
+        if (isNaN(betInput) || betInput <= 0) return alert('Введите корректную ставку!');
+        if (state.stars < betInput && state.stars !== Infinity) return alert('Недостаточно звёзд!');
+
+        if (state.stars !== Infinity) {
+          state.stars -= betInput;
+          state.updateBalance();
+          state.save();
+        }
+
+        this.isSpinning = true;
+        document.getElementById('wheel-msg').innerText = 'Вращаем...';
+
+        const spinAngle = Math.PI * 2 * (5 + Math.random() * 5);
+        const startAngle = this.currentAngle;
+        const duration = 4000;
+        const startTime = performance.now();
+
+        const animate = (now) => {
+          const elapsed = now - startTime;
+          if (elapsed < duration) {
+            const progress = elapsed / duration;
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            this.currentAngle = startAngle + spinAngle * easeOut;
+            this.draw();
+            requestAnimationFrame(animate);
+          } else {
+            this.currentAngle = (startAngle + spinAngle) % (Math.PI * 2);
+            this.draw();
+            this.isSpinning = false;
+
+            const numSectors = this.sectors.length;
+            const arc = (Math.PI * 2) / numSectors;
+            let pointerAngle = (1.5 * Math.PI - this.currentAngle) % (Math.PI * 2);
+            if (pointerAngle < 0) pointerAngle += Math.PI * 2;
+
+            const winIdx = Math.floor(pointerAngle / arc) % numSectors;
+            const wonSector = this.sectors[winIdx];
+            const winAmount = Math.floor(betInput * wonSector.mult);
+
+            if (winAmount > 0) {
+              if (state.stars !== Infinity) state.stars += winAmount;
+              state.updateBalance();
+              state.save();
+              document.getElementById('wheel-msg').innerText = `🎉 Выиграли ${winAmount} ⭐ (${wonSector.label})!`;
+              utils.playSound('send');
+            } else {
+              document.getElementById('wheel-msg').innerText = `💔 Сектор 0x. Вы проиграли ставку.`;
+              utils.playSound('receive');
+            }
+          }
+        };
+        requestAnimationFrame(animate);
+      }
+    };
+
+    const snakeGame = {
+      canvas: null, ctx: null,
+      snake: [], dir: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 },
+      food: { x: 0, y: 0 }, score: 0, isRunning: false, gameInterval: null,
+      gridSize: 14, tileCount: 20,
+
+      init() {
+        this.canvas = document.getElementById('snakeCanvas');
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        
+        window.addEventListener('keydown', e => {
+          if (!this.isRunning) return;
+          if (e.key === 'ArrowUp' && this.dir.y === 0) this.nextDir = { x: 0, y: -1 };
+          if (e.key === 'ArrowDown' && this.dir.y === 0) this.nextDir = { x: 0, y: 1 };
+          if (e.key === 'ArrowLeft' && this.dir.x === 0) this.nextDir = { x: -1, y: 0 };
+          if (e.key === 'ArrowRight' && this.dir.x === 0) this.nextDir = { x: 1, y: 0 };
+        });
+      },
+
+      setDir(x, y) {
+        if (!this.isRunning) return;
+        if (x !== 0 && this.dir.x === 0) this.nextDir = { x, y: 0 };
+        if (y !== 0 && this.dir.y === 0) this.nextDir = { x: 0, y };
+      },
+
+      start() {
+        if (this.isRunning) return;
+        if (state.stars < 5 && state.stars !== Infinity) return alert('Игра стоит 5 ⭐!');
+
+        if (state.stars !== Infinity) {
+          state.stars -= 5;
+          state.updateBalance();
+          state.save();
+        }
+
+        this.snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+        this.dir = { x: 1, y: 0 };
+        this.nextDir = { x: 1, y: 0 };
+        this.score = 0;
+        this.spawnFood();
+        this.isRunning = true;
+
+        if (this.gameInterval) clearInterval(this.gameInterval);
+        this.gameInterval = setInterval(() => this.tick(), 140);
+      },
+
+      spawnFood() {
+        this.food = {
+          x: Math.floor(Math.random() * this.tileCount),
+          y: Math.floor(Math.random() * this.tileCount)
+        };
+      },
+
+      tick() {
+        this.dir = { ...this.nextDir };
+        const head = { x: this.snake[0].x + this.dir.x, y: this.snake[0].y + this.dir.y };
+
+        if (head.x < 0 || head.x >= this.tileCount || head.y < 0 || head.y >= this.tileCount) {
+          return this.gameOver();
+        }
+
+        if (this.snake.some(s => s.x === head.x && s.y === head.y)) {
+          return this.gameOver();
+        }
+
+        this.snake.unshift(head);
+
+        if (head.x === this.food.x && head.y === this.food.y) {
+          this.score += 2;
+          if (state.stars !== Infinity) state.stars += 2;
+          state.updateBalance();
+          state.save();
+          this.spawnFood();
+          utils.playSound('send');
+        } else {
+          this.snake.pop();
+        }
+
+        this.draw();
+      },
+
+      draw() {
+        if (!this.ctx) return;
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.fillStyle = "#ef4444";
+        this.ctx.fillRect(this.food.x * this.gridSize, this.food.y * this.gridSize, this.gridSize - 1, this.gridSize - 1);
+
+        this.snake.forEach((s, idx) => {
+          this.ctx.fillStyle = idx === 0 ? "#10b981" : "#059669";
+          this.ctx.fillRect(s.x * this.gridSize, s.y * this.gridSize, this.gridSize - 1, this.gridSize - 1);
+        });
+      },
+
+      gameOver() {
+        clearInterval(this.gameInterval);
+        this.isRunning = false;
+        alert(`Игра окончена! Вы заработали ${this.score} ⭐`);
+      }
     };
 
     const miner = {
       tap(e) {
         if (state.stars !== Infinity) {
-          state.stars++;
+          state.stars += 1;
           state.updateBalance();
           state.save();
         }
-        const tapArea = document.getElementById('tap-area');
-        const floater = document.createElement('div');
-        floater.className = 'floating-text';
-        floater.innerText = '+1';
-        floater.style.left = (e.clientX - 10) + 'px';
-        floater.style.top = (e.clientY - 20) + 'px';
-        tapArea.appendChild(floater);
-        setTimeout(() => floater.remove(), 800);
+
+        const area = document.getElementById('tap-area');
+        if (!area) return;
+
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.innerText = '+1 ⭐';
+
+        const rect = area.getBoundingClientRect();
+        const x = e.clientX ? (e.clientX - rect.left) : (rect.width / 2);
+        const y = e.clientY ? (e.clientY - rect.top) : (rect.height / 2);
+
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+
+        area.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+
+        utils.playSound('send');
       }
     };
   </script>
 </body>
-</html>
+              </html>
